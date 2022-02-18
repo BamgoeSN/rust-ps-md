@@ -1,0 +1,1674 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust Snippets for Competitive Programming</title>
+                <meta name="robots" content="noindex" />
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">How to use</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Primality Test</a></li><li class="chapter-item expanded "><a href="algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Prime Factorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="datastructure/bitarray.html"><strong aria-hidden="true">6.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/intro.html"><strong aria-hidden="true">7.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="datastructure/segtree/segtree.html"><strong aria-hidden="true">7.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/fenwick.html"><strong aria-hidden="true">7.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/lazyseg.html"><strong aria-hidden="true">7.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="graphs/dsu.html"><strong aria-hidden="true">8.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="graphs/scc.html"><strong aria-hidden="true">9.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="graphs/2sat.html"><strong aria-hidden="true">10.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="unclass/lis.html"><strong aria-hidden="true">11.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="misc/psbase.html"><strong aria-hidden="true">12.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="misc/zero_one_trait.html"><strong aria-hidden="true">13.</strong> Zero/One Trait</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Rust Snippets for Competitive Programming</h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="how-to-use"><a class="header" href="#how-to-use">How to use</a></h1>
+<p>For any algorithm included here, simply copy its snippet and paste into your code, then it's done!</p>
+<p>Some snippets might require other snippets from another section. For such snippets, every required section will be linked on it, so that you can get the snippet right away. You simply copy all those and paste to your code before you paste the original snippet you were going to use.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gcd"><a class="header" href="#gcd">GCD</a></h1>
+<p>Returns the greatest common divisor of a and b.</p>
+<pre><code class="language-rust noplayground">pub fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    a
+}
+</code></pre>
+<h1 id="lcm"><a class="header" href="#lcm">LCM</a></h1>
+<p>Returns the least common multiplier of a and b. <br />
+Required snippets: <a href="algebra/gcd.html#gcd">GCD</a></p>
+<pre><code class="language-rust noplayground">pub fn lcm(a: i64, b: i64) -&gt; i64 {
+    a / gcd(a, b) * b
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extended-euclid-algorithm"><a class="header" href="#extended-euclid-algorithm">Extended Euclid Algorithm</a></h1>
+<p>Returns \(r, s, t\) such that \(r = \gcd(a, b)\) and \(as+bt=r\).</p>
+<pre><code class="language-rust noplayground">pub fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
+    let (mut s, mut old_s) = (0, 1);
+    let (mut r, mut old_r) = (b, a);
+    while r != 0 {
+        let q = old_r / r;
+
+        let new_r = old_r - q * r;
+        old_r = r;
+        r = new_r;
+
+        let new_s = old_s - q * s;
+        old_s = s;
+        s = new_s;
+    }
+
+    (
+        old_r,
+        old_s,
+        if b != 0 { (old_r - old_s * a) / b } else { 0 },
+    )
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="chinese-remainder-theorem"><a class="header" href="#chinese-remainder-theorem">Chinese Remainder Theorem</a></h1>
+<p>Reference: PyRival <a href="https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py">https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py</a></p>
+<p>Returns \(x\) such that \(x = r_i \mod m_i\) for all \(i\). </p>
+<h2 id="snippet"><a class="header" href="#snippet">Snippet</a></h2>
+<p>Required snippets: <a href="algebra/gcd.html#gcd">GCD</a>, <a href="algebra/extgcd.html#extended-euclid-algorithm">Extended Euclidean Algorithm</a></p>
+<pre><code class="language-rust noplayground">// Chinese remainder theorem
+//
+// Reference: PyRival &lt;https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py&gt;
+
+#[inline(always)]
+fn safe_mod(mut x: i64, m: i64) -&gt; i64 {
+    x %= m;
+    if x &lt; 0 {
+        x + m
+    } else {
+        x
+    }
+}
+
+/// Returns the greatest common divisor of a and b
+fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    a
+}
+
+/// Returns gcd(a, b), s, r s.t. a*s + b*r = gcd(a, b)
+fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
+    let (mut s, mut old_s) = (0, 1);
+    let (mut r, mut old_r) = (b, a);
+    while r != 0 {
+        let q = old_r / r;
+
+        let new_r = old_r - q * r;
+        old_r = r;
+        r = new_r;
+
+        let new_s = old_s - q * s;
+        old_s = s;
+        s = new_s;
+    }
+
+    (
+        old_r,
+        old_s,
+        if b != 0 { (old_r - old_s * a) / b } else { 0 },
+    )
+}
+
+/// Returns $x$ s.t. $x=r_i (mod m_i)$ for all $i$
+pub fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
+    let (mut x, mut m_prod) = (0, 1);
+    for (bi, mi) in r.iter().zip(m.iter()) {
+        let (g, s, _) = ext_gcd(m_prod, *mi);
+        if safe_mod((bi - x) % mi, g) != 0 {
+            return None;
+        }
+        x += m_prod * (s * safe_mod(bi - x, *mi) / g);
+        m_prod = (m_prod * mi) / gcd(m_prod, *mi);
+    }
+    Some(safe_mod(x, m_prod))
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="miller-rabin-primality-test"><a class="header" href="#miller-rabin-primality-test">Miller-Rabin Primality Test</a></h1>
+<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \(O(\log{n})\) time. This test only works for integers under \(2^{64}\).</p>
+<pre><code class="language-rust noplayground">pub trait Miller {
+    fn rem_mul(x: Self, y: Self, m: Self) -&gt; Self;
+    fn rem_pow(base: Self, exp: Self, m: Self) -&gt; Self;
+    fn naive_primality(self) -&gt; bool;
+    fn miller_rabin(self, a: Self) -&gt; bool;
+    fn miller_primality(self) -&gt; bool;
+    fn is_prime(self) -&gt; bool;
+}
+
+macro_rules! miller_rabin_impl {
+    ($t:ty, $u:ty, $limit:expr,  $($x:expr),*) =&gt; {
+        impl Miller for $t {
+            #[inline]
+            fn rem_mul(x: $t, y: $t, m: $t) -&gt; $t {
+                ((x as $u * y as $u) % m as $u) as $t
+            }
+            fn rem_pow(mut base: $t, mut exp: $t, m: $t) -&gt; $t {
+                exp %= m;
+                let mut r: $t = 1;
+                while exp != 0 {
+                    if exp &amp; 1 != 0 {
+                        r = Self::rem_mul(r, base, m);
+                    }
+                    exp &gt;&gt;= 1;
+                    base = Self::rem_mul(base, base, m);
+                }
+                r
+            }
+            fn naive_primality(self) -&gt; bool {
+                let mut i: $t = 2;
+                while i * i &lt;= self {
+                    if self % i == 0 {
+                        return false;
+                    }
+                    i += 1;
+                }
+                true
+            }
+            fn miller_rabin(self, a: $t) -&gt; bool {
+                let d = self - 1;
+                let mut p = d;
+                while p&amp;1==0 {
+                    p&gt;&gt;=1;
+                }
+                let mut t = Self::rem_pow(a, p, self);
+                let at_last = t == d || t == 1;
+
+                while p!=d {
+                    p &lt;&lt;= 1;
+                    t = Self::rem_mul(t, t, self);
+                    if t == self-1 {return true;}
+                }
+
+                at_last
+            }
+            fn miller_primality(self) -&gt; bool {
+                $(
+                    if !self.miller_rabin($x) {
+                        return false;
+                    }
+                )*
+                true
+            }
+            fn is_prime(self) -&gt; bool {
+                if self &lt;= 1 {
+                    false
+                } else if self &lt;= ($limit) {
+                    Self::naive_primality(self)
+                } else {
+                    Self::miller_primality(self)
+                }
+            }
+        }
+    };
+}
+
+miller_rabin_impl!(u8, u16, 254, 2);
+miller_rabin_impl!(u16, u32, 2000, 2, 3);
+miller_rabin_impl!(u32, u64, 10000, 2, 7, 61);
+miller_rabin_impl!(u64, u128, 1000000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+</code></pre>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><code class="language-rust noplayground">assert!(3284729387909u64.is_prime());
+assert!(!3284729387911u64.is_prime()); // 53×61976026187
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pollard-rho-algorithm"><a class="header" href="#pollard-rho-algorithm">Pollard Rho Algorithm</a></h1>
+<p>Pollard rho algorithm is a randomized algorithm which factorizes a number in an average of \(O(n^{1/4})\) time.</p>
+<pre><code class="language-rust noplayground">pub struct RNG {
+    val: u64,
+}
+
+impl RNG {
+    /// Returns a new RNG instance starting with a given seed.
+    pub fn new(seed: u64) -&gt; Self {
+        Self { val: seed }
+    }
+
+    /// Returns a random u64 number.
+    pub fn next(&amp;mut self) -&gt; u64 {
+        let mut x = self.val;
+        x ^= x &lt;&lt; 13;
+        x ^= x &gt;&gt; 7;
+        x ^= x &lt;&lt; 17;
+        self.val = x;
+        x
+    }
+
+    /// Returns a random f64 number within [0, 1].
+    pub fn next_f64(&amp;mut self) -&gt; f64 {
+        (self.next() as f64) / (u64::MAX as f64)
+    }
+
+    /// Returns a random u64 number within [l, r).
+    pub fn range_u64(&amp;mut self, l: u64, r: u64) -&gt; u64 {
+        l + self.next() % (r - l)
+    }
+
+    /// Returns a random i64 number within [l, r).
+    pub fn range_i64(&amp;mut self, l: i64, r: i64) -&gt; i64 {
+        l + (self.next() / 2) as i64 % (r - l)
+    }
+
+    /// Returns a random f64 number within [l, r].
+    pub fn range_f64(&amp;mut self, l: f64, r: f64) -&gt; f64 {
+        l + self.next_f64() * (r - l)
+    }
+}
+
+pub trait Miller {
+    fn rem_mul(x: Self, y: Self, m: Self) -&gt; Self;
+    fn rem_pow(base: Self, exp: Self, m: Self) -&gt; Self;
+    fn naive_primality(self) -&gt; bool;
+    fn miller_rabin(self, a: Self) -&gt; bool;
+    fn miller_primality(self) -&gt; bool;
+    fn is_prime(self) -&gt; bool;
+}
+
+macro_rules! miller_rabin_impl {
+    ($t:ty, $u:ty, $limit:expr,  $($x:expr),*) =&gt; {
+        impl Miller for $t {
+            #[inline]
+            fn rem_mul(x: $t, y: $t, m: $t) -&gt; $t {
+                ((x as $u * y as $u) % m as $u) as $t
+            }
+            fn rem_pow(mut base: $t, mut exp: $t, m: $t) -&gt; $t {
+                exp %= m;
+                let mut r: $t = 1;
+                while exp != 0 {
+                    if exp &amp; 1 != 0 {
+                        r = Self::rem_mul(r, base, m);
+                    }
+                    exp &gt;&gt;= 1;
+                    base = Self::rem_mul(base, base, m);
+                }
+                r
+            }
+            fn naive_primality(self) -&gt; bool {
+                let mut i: $t = 2;
+                while i * i &lt;= self {
+                    if self % i == 0 {
+                        return false;
+                    }
+                    i += 1;
+                }
+                true
+            }
+            fn miller_rabin(self, a: $t) -&gt; bool {
+                let d = self - 1;
+                let mut p = d;
+                while p&amp;1==0 {
+                    p&gt;&gt;=1;
+                }
+                let mut t = Self::rem_pow(a, p, self);
+                let at_last = t == d || t == 1;
+
+                while p!=d {
+                    p &lt;&lt;= 1;
+                    t = Self::rem_mul(t, t, self);
+                    if t == self-1 {return true;}
+                }
+
+                at_last
+            }
+            fn miller_primality(self) -&gt; bool {
+                $(
+                    if !self.miller_rabin($x) {
+                        return false;
+                    }
+                )*
+                true
+            }
+            fn is_prime(self) -&gt; bool {
+                if self &lt;= 1 {
+                    false
+                } else if self &lt;= ($limit) {
+                    Self::naive_primality(self)
+                } else {
+                    Self::miller_primality(self)
+                }
+            }
+        }
+    };
+}
+
+miller_rabin_impl!(u8, u16, 254, 2);
+miller_rabin_impl!(u16, u32, 2000, 2, 3);
+miller_rabin_impl!(u32, u64, 10000, 2, 7, 61);
+miller_rabin_impl!(u64, u128, 1000000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+
+fn gcd(mut a: u64, mut b: u64) -&gt; u64 {
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    a
+}
+
+#[inline]
+fn rem_add(a: u64, b: u64, m: u64) -&gt; u64 {
+    ((a as u128 + b as u128) % m as u128) as u64
+}
+
+#[inline]
+fn abs_diff(a: u64, b: u64) -&gt; u64 {
+    if a &gt; b {
+        a - b
+    } else {
+        b - a
+    }
+}
+
+pub fn factorize(mut n: u64, rng: &amp;mut RNG) -&gt; Vec&lt;u64&gt; {
+    if n &lt;= 1 {
+        return Vec::new();
+    }
+    let mut arr: Vec&lt;u64&gt; = Vec::new();
+    while n &amp; 1 == 0 {
+        n &gt;&gt;= 1;
+        arr.push(2);
+    }
+    rho(n, &amp;mut arr, rng);
+    arr
+}
+
+fn rho(n: u64, arr: &amp;mut Vec&lt;u64&gt;, rng: &amp;mut RNG) {
+    if n &lt;= 1 {
+        return;
+    } else if n.is_prime() {
+        arr.push(n);
+        return;
+    }
+
+    let mut i = 0u64;
+    let mut x = rng.next() % n;
+    let mut y = x;
+    let mut k = 2u64;
+    let mut d;
+    let mut reset_limit = 500000;
+
+    loop {
+        i += 1;
+        x = rem_add(Miller::rem_mul(x, x, n), n - 1, n);
+        d = gcd(abs_diff(y, x), n);
+        if d == n || i &gt;= reset_limit {
+            // Reset
+            reset_limit = reset_limit * 3 / 2;
+            i = 0;
+            x = rng.next();
+            y = x;
+        }
+        if d != 1 {
+            break;
+        }
+        if i == k {
+            y = x;
+            k &lt;&lt;= 1;
+        }
+    }
+
+    if d != n {
+        rho(d, arr, rng);
+        rho(n / d, arr, rng);
+        return;
+    }
+
+    i = 3;
+    while i * i &lt;= n {
+        if n % i == 0 {
+            rho(i, arr, rng);
+            rho(d / i, arr, rng);
+            return;
+        }
+        i += 2;
+    }
+}
+</code></pre>
+<h2 id="example-1"><a class="header" href="#example-1">Example</a></h2>
+<pre><code class="language-rust noplayground">let mut rng = RNG::new(12345);
+let a = 3284729387911u64;
+let mut factors = factorize(a, &amp;mut rng);
+factors.sort();
+assert_eq!(factors, [53, 61976026187]);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bit-array"><a class="header" href="#bit-array">Bit Array</a></h1>
+<h2 id="snippet-1"><a class="header" href="#snippet-1">Snippet</a></h2>
+<pre><code class="language-rust noplayground">pub struct BitArray {
+    bytes: Vec&lt;u8&gt;,
+}
+
+impl BitArray {
+    #[inline(always)]
+    pub fn new(size: usize) -&gt; Self {
+        Self {
+            bytes: vec![0; (size &gt;&gt; 3) + 1],
+        }
+    }
+
+    #[inline(always)]
+    pub fn get(&amp;self, idx: usize) -&gt; bool {
+        (self.bytes[idx &gt;&gt; 3] &gt;&gt; (idx &amp; 0b111)) &amp; 1 == 1
+    }
+
+    #[inline(always)]
+    pub fn set_true(&amp;mut self, idx: usize) {
+        self.bytes[idx &gt;&gt; 3] |= 1 &lt;&lt; (idx &amp; 0b111);
+    }
+
+    #[inline(always)]
+    pub fn set_false(&amp;mut self, idx: usize) {
+        self.bytes[idx &gt;&gt; 3] &amp;= !(1 &lt;&lt; (idx &amp; 0b111));
+    }
+
+    #[inline(always)]
+    pub fn set(&amp;mut self, idx: usize, to: bool) {
+        if to {
+            self.set_true(idx);
+        } else {
+            self.set_false(idx);
+        }
+    }
+
+    #[inline(always)]
+    pub fn toggle(&amp;mut self, idx: usize) {
+        self.bytes[idx &gt;&gt; 3] ^= 1 &lt;&lt; (idx &amp; 0b111);
+    }
+
+    #[inline(always)]
+    pub fn fill(&amp;mut self, with: u8) {
+        for v in self.bytes.iter_mut() {
+            *v = with;
+        }
+    }
+
+    #[inline(always)]
+    pub fn fill_range(&amp;mut self, chunk_start: usize, chunk_end: usize, with: u8) {
+        for v in self.bytes[chunk_start..chunk_end].iter_mut() {
+            *v = with;
+        }
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="segment-trees"><a class="header" href="#segment-trees">Segment Trees</a></h1>
+<p>Segment trees are a category of data structures which can handle range queries efficiently.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="segment-tree"><a class="header" href="#segment-tree">Segment Tree</a></h1>
+<p>Reference: AtCoder library <a href="https://atcoder.github.io/ac-library/production/document_en/index.html">https://atcoder.github.io/ac-library/production/document_en/index.html</a></p>
+<p>A segment tree is a data structure for monoids \( (S, \cdot : S \times S \rightarrow S, e \in S) \). A monoid is an algebraic structure which follows the following conditions:</p>
+<ul>
+<li>\(\cdot\) is associative. That is, \( (a \cdot b) \cdot c = a \cdot (b \cdot c) \) for all \( a, b, c \in S \).</li>
+<li>There is the identity element \(e\) such that \( a \cdot e = e \cdot a = a \) for all \( a \in S \).</li>
+</ul>
+<p>Given an array \(A\) of length \(n\) consists of the monoid \(S\) as described above, a segment tree on it can process the following queries in \(O (\log{n})\) time:</p>
+<ul>
+<li>Update an element</li>
+<li>Calculate the product of the elements of an interval</li>
+</ul>
+<p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
+<h2 id="snippet-2"><a class="header" href="#snippet-2">Snippet</a></h2>
+<pre><code class="language-rust noplayground">use std::ops::Index;
+
+fn ceil_pow2(n: usize) -&gt; usize {
+    let mut x: usize = 0;
+    while (1 &lt;&lt; x) &lt; n {
+        x += 1;
+    }
+    x
+}
+
+/// Represents each element of a segment tree, which should be a monoid $(S, \cdot)$.
+pub trait Monoid {
+    fn opr(&amp;self, other: &amp;Self) -&gt; Self;
+    fn e() -&gt; Self;
+}
+
+/// Segment tree.
+pub struct SegTree&lt;S: Monoid&gt; {
+    n: usize,
+    size: usize,
+    log: usize,
+    data: Vec&lt;S&gt;,
+}
+
+impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
+    fn update(&amp;mut self, k: usize) {
+        self.data[k] = self.data[k &lt;&lt; 1].opr(&amp;self.data[(k &lt;&lt; 1) + 1])
+    }
+
+    /// Initializes a segment tree from an array.
+    pub fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
+        let log = ceil_pow2(arr.len());
+        let mut st: Self = SegTree {
+            n: arr.len(),
+            log,
+            size: 1 &lt;&lt; log,
+            data: vec![S::e(); 1 &lt;&lt; (log + 1)],
+        };
+        for (i, v) in arr.into_iter().enumerate() {
+            st.data[st.size + i] = (*v).clone();
+        }
+        for i in (1..st.size).rev() {
+            st.update(i);
+        }
+        st
+    }
+
+    /// Sets a value at index `i` to a value `v`.
+    pub fn set(&amp;mut self, i: usize, v: &amp;S) {
+        let i = i + self.size;
+        self.data[i] = v.clone();
+        for j in 1..=self.log {
+            self.update(i &gt;&gt; j);
+        }
+    }
+
+    /// Gets a reference of a value at index `i`.
+    pub fn get(&amp;self, i: usize) -&gt; &amp;S {
+        &amp;self[i]
+    }
+
+    /// Returns $A_l \cdot A_{l+1} \cdot \cdots \cdot A_{r-1}$. If $l=r$, then returns $e$.
+    pub fn prod(&amp;self, l: usize, r: usize) -&gt; S {
+        let (mut sml, mut smr) = (S::e(), S::e());
+        let (mut l, mut r) = (l + self.size, r + self.size);
+
+        while l &lt; r {
+            if l &amp; 1 == 1 {
+                sml = sml.opr(&amp;self.data[l]);
+                l += 1;
+            }
+            if r &amp; 1 == 1 {
+                r -= 1;
+                smr = self.data[r].opr(&amp;smr);
+            }
+            l &gt;&gt;= 1;
+            r &gt;&gt;= 1;
+        }
+        sml.opr(&amp;smr)
+    }
+
+    /// Returns $A_0 \cdot A_1 \cdot \cdots A_{n-1}$.
+    pub fn all_prod(&amp;self) -&gt; S {
+        self.data[1].clone()
+    }
+
+    pub fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, l: usize, f: C) -&gt; usize {
+        if l == self.n {
+            return self.n;
+        }
+
+        let mut l = l + self.size;
+        let mut sm = S::e();
+
+        loop {
+            while l &amp; 1 == 0 {
+                l &gt;&gt;= 1;
+            }
+            if !f(&amp;sm.opr(&amp;self.data[l])) {
+                while l &lt; self.size {
+                    l &lt;&lt;= 1;
+                    if f(&amp;sm.opr(&amp;self.data[l])) {
+                        sm = sm.opr(&amp;self.data[l]);
+                        l += 1;
+                    }
+                }
+                return l - self.size;
+            }
+            sm = sm.opr(&amp;self.data[l]);
+            l += 1;
+            if l &amp; ((!l) + 1) == l {
+                break;
+            }
+        }
+        self.n
+    }
+    
+    pub fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, r: usize, f: C) -&gt; usize {
+        if r == 0 {
+            return 0;
+        }
+
+        let mut r = r + self.size;
+        let mut sm = S::e();
+
+        loop {
+            r -= 1;
+            while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+                r &gt;&gt;= 1;
+            }
+            if !f(&amp;self.data[r].opr(&amp;sm)) {
+                while r &lt; self.size {
+                    r = (r &lt;&lt; 1) + 1;
+                    if f(&amp;self.data[r].opr(&amp;sm)) {
+                        sm = self.data[r].opr(&amp;sm);
+                        r -= 1;
+                    }
+                }
+                return r + 1 - self.size;
+            }
+            sm = self.data[r].opr(&amp;sm);
+
+            if r &amp; ((!r) + 1) == r {
+                break;
+            }
+        }
+        0
+    }
+}
+
+impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
+    type Output = T;
+
+    fn index(&amp;self, index: usize) -&gt; &amp;Self::Output {
+        &amp;self.data[index + self.size]
+    }
+}
+</code></pre>
+<h2 id="using-max_right-and-min_left"><a class="header" href="#using-max_right-and-min_left">Using max_right and min_left</a></h2>
+<h3 id="max_right"><a class="header" href="#max_right">max_right</a></h3>
+<p>Given an index \(l\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<ul>
+<li>\(r=l\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
+<li>\(r=n\) or \( f \left( A_l \cdot A_{l+1} \cdots A_r \right) = false \)</li>
+</ul>
+<p>If \(f\) is monotone, this is the maximum \(r\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
+<p>It should be guaranteed that \(f(e)\) is true, \(0 \leq l \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
+<p>The search for \(r\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
+<h3 id="min_left"><a class="header" href="#min_left">min_left</a></h3>
+<p>Given an index \(r\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<ul>
+<li>\(l=r\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
+<li>\(l=0\) or \( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \)</li>
+</ul>
+<p>If \(f\) is monotone, this is the minimum \(l\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
+<p>It should be guaranteed that \(f(e)\) is true, \(0 \leq r \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
+<p>The search for \(l\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fenwick-tree"><a class="header" href="#fenwick-tree">Fenwick Tree</a></h1>
+<p>Given an integer array \(A\) of length \(n\), a Fenwick tree processes the following queries in \(O(\log{n})\) time:</p>
+<ul>
+<li>Add a certain amount to an element</li>
+<li>Calculate the sum of the elements of an interval</li>
+</ul>
+<p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
+<h2 id="snippet-3"><a class="header" href="#snippet-3">Snippet</a></h2>
+<p>Required snippets: <a href="datastructure/segtree/../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
+<pre><code class="language-rust noplayground">pub struct Fenwick&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; {
+    n: usize,
+    data: Vec&lt;T&gt;,
+}
+
+impl&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
+    pub fn new(n: usize) -&gt; Self {
+        Self {
+            n,
+            data: vec![T::zero(); n],
+        }
+    }
+
+    pub fn add(&amp;mut self, idx: usize, val: T) {
+        let mut idx = idx + 1;
+        while idx &lt;= self.n {
+            self.data[idx - 1] += val;
+            idx += idx &amp; (!idx + 1);
+        }
+    }
+
+    pub fn sum(&amp;self, l: usize, r: usize) -&gt; T {
+        self.inner_sum(r) - self.inner_sum(l)
+    }
+
+    fn inner_sum(&amp;self, mut r: usize) -&gt; T {
+        let mut s: T = T::zero();
+        while r &gt; 0 {
+            s += self.data[r - 1];
+            r -= r &amp; (!r + 1);
+        }
+        s
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="lazy-segment-tree"><a class="header" href="#lazy-segment-tree">Lazy Segment Tree</a></h1>
+<p>Reference: AtCoder library <a href="https://atcoder.github.io/ac-library/production/document_en/index.html">https://atcoder.github.io/ac-library/production/document_en/index.html</a></p>
+<p>A lazy segment tree is a data struture for a pair of a monoid \( (S, \cdot : S \times S \rightarrow S, e \in S) \) and a set \(F\) of \(S \rightarrow S\) mappings that satisfies the following properties:</p>
+<ul>
+<li>\(F\) contains the identity mapping \(Id\) such that \( Id(x) = x \) for all \(x\in S\).</li>
+<li>\(F\) is closed under composition. That is, \( f \circ g \in F \) for all \( f, g \in F \).</li>
+<li>\( f (x \cdot y) = f(x) \cdot f(y) \) hold for all \(f \in F \) and \( x, y \in S \).</li>
+</ul>
+<p>Given an array \(A\) of length \(n\) consists of the monoid \(S\) as described above, a segment tree on it can process the following queries in \(O (\log{n})\) time:</p>
+<ul>
+<li>Apply the mapping \( f \in F \) on all the elements of an interval</li>
+<li>Calculate the product of the elements of an interval</li>
+</ul>
+<p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
+<h2 id="snippet-4"><a class="header" href="#snippet-4">Snippet</a></h2>
+<pre><code class="language-rust noplayground">fn ceil_pow2(n: usize) -&gt; usize {
+    let mut x: usize = 0;
+    while (1 &lt;&lt; x) &lt; n {
+        x += 1;
+    }
+    x
+}
+
+/// Represents a monoid in a lazy segment tree $(S, \cdot)$.
+pub trait Monoid {
+    fn opr(&amp;self, other: &amp;Self) -&gt; Self;
+    fn e() -&gt; Self;
+}
+
+/// Represents a map $F$ acting on the monoid $(S, \cdot)$.
+pub trait Mapping&lt;T: Monoid&gt; {
+    fn map(&amp;self, apply: &amp;T) -&gt; T;
+    fn compos(&amp;self, other: &amp;Self) -&gt; Self;
+    fn id() -&gt; Self;
+}
+
+/// Lazy segment tree for the monoid $(S, \cdot)$ and the map $F$.
+pub struct LazySeg&lt;S: Monoid, F: Mapping&lt;S&gt;&gt; {
+    n: usize,
+    size: usize,
+    log: usize,
+    data: Vec&lt;S&gt;,
+    lazy: Vec&lt;F&gt;,
+}
+
+impl&lt;S, F&gt; LazySeg&lt;S, F&gt;
+where
+    S: Monoid + Clone,
+    F: Mapping&lt;S&gt; + Clone,
+{
+    fn update(&amp;mut self, k: usize) {
+        self.data[k] = self.data[k &lt;&lt; 1].opr(&amp;self.data[(k &lt;&lt; 1) + 1]);
+    }
+
+    fn all_apply(&amp;mut self, k: usize, f: &amp;F) {
+        self.data[k] = f.map(&amp;self.data[k]);
+        if k &lt; self.size {
+            self.lazy[k] = f.compos(&amp;self.lazy[k]);
+        }
+    }
+
+    fn push(&amp;mut self, k: usize) {
+        self.all_apply(k &lt;&lt; 1, &amp;self.lazy[k].clone());
+        self.all_apply((k &lt;&lt; 1) + 1, &amp;self.lazy[k].clone());
+        self.lazy[k] = F::id();
+    }
+
+    /// Initializes the lazy segment tree from the given array.
+    pub fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
+        let log = ceil_pow2(arr.len());
+        let mut ls: Self = LazySeg {
+            n: arr.len(),
+            log,
+            size: 1 &lt;&lt; log,
+            data: vec![S::e(); 1 &lt;&lt; (log + 1)],
+            lazy: vec![F::id(); 1 &lt;&lt; log],
+        };
+        for (i, v) in arr.into_iter().enumerate() {
+            ls.data[ls.size + i] = (*v).clone();
+        }
+        for i in (1..ls.size).rev() {
+            ls.update(i);
+        }
+        ls
+    }
+
+    /// Sets a value at the index `i` to `v`.
+    pub fn set(&amp;mut self, i: usize, v: &amp;S) {
+        let i = i + self.size;
+        for j in (1..=self.log).rev() {
+            self.push(i &gt;&gt; j);
+        }
+        self.data[i] = v.clone();
+        for j in 1..=self.log {
+            self.update(i &gt;&gt; j);
+        }
+    }
+
+    /// Returns a reference to the value at the index `i`.
+    pub fn get(&amp;mut self, i: usize) -&gt; &amp;S {
+        let i = i + self.size;
+        for j in (1..=self.log).rev() {
+            self.push(i &gt;&gt; j);
+        }
+        &amp;self.data[i]
+    }
+
+    /// Returns a product of elements in [l, r).
+    pub fn prod(&amp;mut self, l: usize, r: usize) -&gt; S {
+        if l == r {
+            return S::e();
+        }
+
+        let (mut l, mut r) = (l + self.size, r + self.size);
+
+        for i in (1..=self.log).rev() {
+            if ((l &gt;&gt; i) &lt;&lt; i) != l {
+                self.push(l &gt;&gt; i);
+            }
+            if ((r &gt;&gt; i) &lt;&lt; i) != r {
+                self.push((r - 1) &gt;&gt; i);
+            }
+        }
+
+        let (mut sml, mut smr) = (S::e(), S::e());
+        while l &lt; r {
+            if l &amp; 1 == 1 {
+                sml = sml.opr(&amp;self.data[l]);
+                l += 1;
+            }
+            if r &amp; 1 == 1 {
+                r -= 1;
+                smr = self.data[r].opr(&amp;smr);
+            }
+            l &gt;&gt;= 1;
+            r &gt;&gt;= 1;
+        }
+
+        sml.opr(&amp;smr)
+    }
+
+    /// Returns the product of every elements.
+    pub fn all_prod(&amp;self) -&gt; S {
+        self.data[1].clone()
+    }
+
+    /// Apply a map `f` to the element at `i`.
+    pub fn apply(&amp;mut self, i: usize, f: &amp;F) {
+        let i = i + self.size;
+        for j in (1..=self.log).rev() {
+            self.push(i &gt;&gt; j);
+        }
+        self.data[i] = f.map(&amp;self.data[i]);
+        for j in 1..=self.log {
+            self.update(i &gt;&gt; j);
+        }
+    }
+
+    /// Apply a map `f` to the element in an interval [l, r).
+    pub fn apply_range(&amp;mut self, l: usize, r: usize, f: &amp;F) {
+        if l == r {
+            return;
+        }
+
+        let (mut l, mut r) = (l + self.size, r + self.size);
+
+        for i in (1..=self.log).rev() {
+            if ((l &gt;&gt; i) &lt;&lt; i) != l {
+                self.push(l &gt;&gt; i);
+            }
+            if ((r &gt;&gt; i) &lt;&lt; i) != r {
+                self.push((r - 1) &gt;&gt; i);
+            }
+        }
+
+        let (l2, r2) = (l, r);
+        while l &lt; r {
+            if l &amp; 1 == 1 {
+                self.all_apply(l, f);
+                l += 1;
+            }
+            if r &amp; 1 == 1 {
+                r -= 1;
+                self.all_apply(r, f);
+            }
+            l &gt;&gt;= 1;
+            r &gt;&gt;= 1;
+        }
+        l = l2;
+        r = r2;
+
+        for i in 1..=self.log {
+            if ((l &gt;&gt; i) &lt;&lt; i) != l {
+                self.update(l &gt;&gt; i);
+            }
+            if ((r &gt;&gt; i) &lt;&lt; i) != r {
+                self.update((r - 1) &gt;&gt; i);
+            }
+        }
+    }
+    
+    pub fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, l: usize, g: C) -&gt; usize {
+        if l == self.n {
+            return self.n;
+        }
+
+        let mut l = l + self.size;
+        for i in (1..=self.log).rev() {
+            self.push(l &gt;&gt; i);
+        }
+
+        let mut sm = S::e();
+        loop {
+            while l &amp; 1 == 0 {
+                l &gt;&gt;= 1;
+            }
+            if !g(&amp;sm.opr(&amp;self.data[l])) {
+                while l &lt; self.size {
+                    self.push(l);
+                    l &lt;&lt;= 1;
+                    if g(&amp;sm.opr(&amp;self.data[l])) {
+                        sm = sm.opr(&amp;self.data[l]);
+                        l += 1;
+                    }
+                }
+                return l - self.size;
+            }
+            sm = sm.opr(&amp;self.data[l]);
+            l += 1;
+
+            if l &amp; ((!l) + 1) != l {
+                break;
+            }
+        }
+        self.n
+    }
+    
+    pub fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, r: usize, g: C) -&gt; usize {
+        if r == 0 {
+            return 0;
+        }
+
+        let mut r = r + self.size;
+        for i in (1..=self.log).rev() {
+            self.push((r - 1) &gt;&gt; i);
+        }
+
+        let mut sm = S::e();
+        loop {
+            r -= 1;
+            while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+                r &gt;&gt;= 1;
+            }
+            if !g(&amp;self.data[r].opr(&amp;sm)) {
+                while r &lt; self.size {
+                    self.push(r);
+                    r = (r &lt;&lt; 1) + 1;
+                    if g(&amp;self.data[r].opr(&amp;sm)) {
+                        sm = self.data[r].opr(&amp;sm);
+                        r -= 1;
+                    }
+                }
+                return r + 1 - self.size;
+            }
+            sm = self.data[r].opr(&amp;sm);
+
+            if r &amp; ((!r) + 1) == r {
+                break;
+            }
+        }
+        0
+    }
+}
+</code></pre>
+<h2 id="using-max_right-and-min_left-1"><a class="header" href="#using-max_right-and-min_left-1">Using max_right and min_left</a></h2>
+<h3 id="max_right-1"><a class="header" href="#max_right-1">max_right</a></h3>
+<p>Given an index \(l\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<ul>
+<li>\(r=l\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
+<li>\(r=n\) or \( f \left( A_l \cdot A_{l+1} \cdots A_r \right) = false \)</li>
+</ul>
+<p>If \(f\) is monotone, this is the maximum \(r\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
+<p>It should be guaranteed that \(f(e)\) is true, \(0 \leq l \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
+<p>The search for \(r\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
+<h3 id="min_left-1"><a class="header" href="#min_left-1">min_left</a></h3>
+<p>Given an index \(r\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<ul>
+<li>\(l=r\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
+<li>\(l=0\) or \( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \)</li>
+</ul>
+<p>If \(f\) is monotone, this is the minimum \(l\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
+<p>It should be guaranteed that \(f(e)\) is true, \(0 \leq r \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
+<p>The search for \(l\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
+<h2 id="examples-of-monoid-and-mapping-implementation"><a class="header" href="#examples-of-monoid-and-mapping-implementation">Examples of monoid and mapping implementation</a></h2>
+<h3 id="axb-lazy-segment-tree"><a class="header" href="#axb-lazy-segment-tree">\(ax+b\) lazy segment tree</a></h3>
+<pre><code class="language-rust noplayground">#[derive(Clone)]
+struct Elm {
+    len: i128,
+    sum: i128,
+}
+
+impl Monoid for Elm {
+    fn opr(&amp;self, other: &amp;Self) -&gt; Self {
+        Self {
+            len: self.len + other.len,
+            sum: self.sum + other.sum,
+        }
+    }
+    fn e() -&gt; Self {
+        Self { len: 0, sum: 0 }
+    }
+}
+
+#[derive(Clone)]
+struct Map {
+    mul: i128,
+    add: i128,
+}
+
+impl Mapping&lt;Elm&gt; for Map {
+    fn map(&amp;self, apply: &amp;Elm) -&gt; Elm {
+        Elm {
+            len: apply.len,
+            sum: self.mul * apply.sum + self.add * apply.len,
+        }
+    }
+    fn compos(&amp;self, other: &amp;Self) -&gt; Self {
+        Self {
+            mul: self.mul * other.mul,
+            add: self.mul * other.add + self.add,
+        }
+    }
+    fn id() -&gt; Self {
+        Self { mul: 1, add: 0 }
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="disjoint-set-union"><a class="header" href="#disjoint-set-union">Disjoint Set Union</a></h1>
+<p>Disjoint set union (a.k.a Union-Find) processes the following queries on a graph with \(n\) nodes without any edges:</p>
+<ul>
+<li>Add an undirected edge between two nodes (<code>union</code>)</li>
+<li>Determine if there exist a path between two nodes (<code>is_reachable</code>)</li>
+</ul>
+<h2 id="snippet-5"><a class="header" href="#snippet-5">Snippet</a></h2>
+<pre><code class="language-rust noplayground">pub struct UnionFind {
+    size: usize,
+    parents: Vec&lt;usize&gt;,
+    group_size: Vec&lt;usize&gt;,
+    group_num: usize,
+}
+
+impl UnionFind {
+    /// Returns a new UnionFind instance where `size` number of elements are in their own disjoint set.
+    pub fn new(size: usize) -&gt; Self {
+        Self {
+            size,
+            parents: vec![size; size],
+            group_size: vec![1; size],
+            group_num: size,
+        }
+    }
+
+    /// Returns the number of nodes which can be reached from x.
+    pub fn get_group_size(&amp;mut self, x: usize) -&gt; usize {
+        let root = self.find_root(x);
+        self.group_size[root]
+    }
+
+    /// Returns the number of connected components.
+    pub fn get_group_num(&amp;self) -&gt; usize {
+        self.group_num
+    }
+
+    fn find_root(&amp;mut self, x: usize) -&gt; usize {
+        if self.parents[x] == self.size {
+            return x;
+        }
+        let root = self.find_root(self.parents[x]);
+        self.parents[x] = root;
+        root
+    }
+
+    /// Returns true if there exists a path from a to b.
+    pub fn is_reachable(&amp;mut self, a: usize, b: usize) -&gt; bool {
+        self.find_root(a) == self.find_root(b)
+    }
+
+    /// Add an edge between a and b.
+    pub fn union(&amp;mut self, a: usize, b: usize) {
+        let a_root = self.find_root(a);
+        let b_root = self.find_root(b);
+
+        if a_root != b_root {
+            self.group_num -= 1;
+            let a_size = self.group_size[a_root];
+            let b_size = self.group_size[b_root];
+            if a_size &lt; b_size {
+                self.parents[a_root] = b_root;
+                self.group_size[b_root] += a_size;
+            } else {
+                self.parents[b_root] = a_root;
+                self.group_size[a_root] += b_size;
+            }
+        }
+    }
+}
+</code></pre>
+<h2 id="example-2"><a class="header" href="#example-2">Example</a></h2>
+<pre><code class="language-rust noplayground">let mut uf = UnionFind::new(10);
+assert_eq!(uf.is_reachable(2, 6), false);
+uf.union(2, 6);
+assert_eq!(uf.is_reachable(2, 6), true);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="strongly-connected-components"><a class="header" href="#strongly-connected-components">Strongly Connected Components</a></h1>
+<h2 id="snippet-6"><a class="header" href="#snippet-6">Snippet</a></h2>
+<pre><code class="language-rust noplayground">struct SccStack {
+    stack: Vec&lt;usize&gt;,
+    check: Vec&lt;bool&gt;,
+}
+
+impl SccStack {
+    fn new(cap: usize) -&gt; Self {
+        Self {
+            stack: vec![0; cap],
+            check: vec![false; cap],
+        }
+    }
+
+    fn len(&amp;self) -&gt; usize {
+        self.stack.len()
+    }
+
+    fn push(&amp;mut self, n: usize) {
+        self.stack.push(n);
+        self.check[n] = true;
+    }
+
+    fn get(&amp;self) -&gt; usize {
+        self.stack[self.len() - 1]
+    }
+
+    fn pop(&amp;mut self) -&gt; usize {
+        let tmp = self.stack.pop().unwrap();
+        self.check[tmp] = false;
+        tmp
+    }
+
+    fn is_in(&amp;self, n: usize) -&gt; bool {
+        self.check[n]
+    }
+}
+
+pub struct SccGraph {
+    n: usize,
+    graph: Vec&lt;Vec&lt;usize&gt;&gt;,
+}
+
+impl SccGraph {
+    pub fn new(n: usize) -&gt; Self {
+        Self {
+            n,
+            graph: (0..n).map(|_| Vec::new()).collect(),
+        }
+    }
+
+    pub fn add_edge(&amp;mut self, from: usize, to: usize) {
+        self.graph[from].push(to);
+    }
+
+    fn dfs(
+        &amp;self,
+        curr: usize,
+        gid: &amp;mut usize,
+        id: &amp;mut Vec&lt;usize&gt;,
+        low: &amp;mut Vec&lt;usize&gt;,
+        st: &amp;mut SccStack,
+        list: &amp;mut Vec&lt;Vec&lt;usize&gt;&gt;,
+    ) {
+        st.push(curr);
+        id[curr] = *gid;
+        low[curr] = *gid;
+        (*gid) += 1;
+
+        for i in 0..self.graph[curr].len() {
+            let next = self.graph[curr][i];
+            if id[next] == self.n {
+                self.dfs(next, gid, id, low, st, list);
+            }
+        }
+
+        for i in 0..self.graph[curr].len() {
+            let next = self.graph[curr][i];
+            if st.is_in(next) {
+                low[curr] = low[curr].min(low[next]);
+            }
+        }
+
+        if id[curr] == low[curr] {
+            let p = list.len();
+            list.push(Vec::new());
+            while st.len() != 0 &amp;&amp; st.get() != curr {
+                list[p].push(st.pop());
+            }
+            st.pop();
+            list[p].push(curr);
+        }
+    }
+
+    fn get_scc(&amp;self) -&gt; Vec&lt;Vec&lt;usize&gt;&gt; {
+        let mut st = SccStack::new(self.n);
+        let mut list: Vec&lt;Vec&lt;usize&gt;&gt; = Vec::new();
+        let mut gid: usize = 0;
+        let mut id = vec![self.n; self.n];
+        let mut low = vec![usize::MAX; self.n];
+
+        for x in 0..self.n {
+            if id[x] != self.n {
+                continue;
+            }
+            self.dfs(x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list)
+        }
+
+        list.reverse();
+        list
+    }
+
+    /// SCC list and SCC IDs
+    /// ids[node id] = id of SCC where the node is in
+    pub fn solve(&amp;self) -&gt; (Vec&lt;Vec&lt;usize&gt;&gt;, Vec&lt;usize&gt;) {
+        let list = self.get_scc();
+        let mut ids = vec![0; self.n];
+        for (i, l) in list.iter().enumerate() {
+            for v in l.iter() {
+                ids[*v] = i;
+            }
+        }
+        (list, ids)
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
+<h2 id="snippet-7"><a class="header" href="#snippet-7">Snippet</a></h2>
+<p>Required snippets: <a href="graphs/./scc.html#strongly-connected-components">SCC</a></p>
+<pre><code class="language-rust noplayground">pub struct TwoSat {
+    n: usize,
+    scc: SccGraph,
+}
+
+impl TwoSat {
+    pub fn new(n: usize) -&gt; Self {
+        Self {
+            n,
+            scc: SccGraph::new(n &lt;&lt; 1),
+        }
+    }
+
+    fn judge(f: bool, a: usize, b: usize) -&gt; usize {
+        if f {
+            a
+        } else {
+            b
+        }
+    }
+
+    pub fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
+        self.scc.add_edge(
+            (i &lt;&lt; 1) + Self::judge(f, 0, 1),
+            (j &lt;&lt; 1) + Self::judge(g, 1, 0),
+        );
+        self.scc.add_edge(
+            (j &lt;&lt; 1) + Self::judge(g, 0, 1),
+            (i &lt;&lt; 1) + Self::judge(f, 1, 0),
+        );
+    }
+
+    fn is_satisfiable(&amp;self, answer: &amp;mut [bool]) -&gt; bool {
+        let (_, ids) = self.scc.solve();
+        for i in 0..self.n {
+            if ids[i &lt;&lt; 1] == ids[(i &lt;&lt; 1) + 1] {
+                return false;
+            }
+            answer[i] = ids[i &lt;&lt; 1] &lt; ids[(i &lt;&lt; 1) + 1];
+        }
+        true
+    }
+
+    pub fn solve(&amp;self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
+        let mut answer = vec![false; self.n];
+        let doable = self.is_satisfiable(&amp;mut answer);
+        if doable {
+            Some(answer)
+        } else {
+            None
+        }
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="longest-increasing-subsequence"><a class="header" href="#longest-increasing-subsequence">Longest Increasing Subsequence</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="base-template"><a class="header" href="#base-template">Base Template</a></h1>
+<h2 id="wo-testcases"><a class="header" href="#wo-testcases">w/o Testcases</a></h2>
+<pre><code class="language-rust noplayground">use std::io::*;
+
+use fastio::*;
+
+fn main() {
+    let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
+    let handle = BufReader::new(stdin);
+    // let stdin = stdin();
+    // let handle = stdin.lock();
+    let mut scan = Scanner::new(handle);
+    let out = &amp;mut BufWriter::new(stdout());
+    
+}
+
+mod fastio {
+    use std::io::BufRead;
+
+    pub struct Scanner&lt;R&gt; {
+        reader: R,
+        buffer: Vec&lt;String&gt;,
+    }
+
+    impl&lt;R&gt; Scanner&lt;R&gt; {
+        pub fn new(reader: R) -&gt; Self {
+            Scanner {
+                reader,
+                buffer: Vec::new(),
+            }
+        }
+    }
+
+    impl&lt;R&gt; Scanner&lt;R&gt;
+    where
+        R: BufRead,
+    {
+        pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
+        where
+            T: std::str::FromStr,
+        {
+            loop {
+                if let Some(token) = self.buffer.pop() {
+                    return token.parse().ok().expect(&quot;Failed to parse&quot;);
+                }
+                let mut input = String::new();
+                self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
+                self.buffer
+                    .extend(input.split_whitespace().rev().map(String::from));
+            }
+        }
+    }
+}
+</code></pre>
+<h2 id="w-testcases"><a class="header" href="#w-testcases">w/ Testcases</a></h2>
+<pre><code class="language-rust noplayground">use std::io::*;
+
+use fastio::*;
+
+fn main() {
+    let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
+    let handle = BufReader::new(stdin);
+    // let stdin = stdin();
+    // let handle = stdin.lock();
+    let mut scan = Scanner::new(handle);
+    let out = &amp;mut BufWriter::new(stdout());
+
+    let tc: usize = scan.next();
+    for _ in 0..tc {
+        
+    }
+}
+
+mod fastio {
+    use std::io::BufRead;
+
+    pub struct Scanner&lt;R&gt; {
+        reader: R,
+        buffer: Vec&lt;String&gt;,
+    }
+
+    impl&lt;R&gt; Scanner&lt;R&gt; {
+        pub fn new(reader: R) -&gt; Self {
+            Scanner {
+                reader,
+                buffer: Vec::new(),
+            }
+        }
+    }
+
+    impl&lt;R&gt; Scanner&lt;R&gt;
+    where
+        R: BufRead,
+    {
+        pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
+        where
+            T: std::str::FromStr,
+        {
+            loop {
+                if let Some(token) = self.buffer.pop() {
+                    return token.parse().ok().expect(&quot;Failed to parse&quot;);
+                }
+                let mut input = String::new();
+                self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
+                self.buffer
+                    .extend(input.split_whitespace().rev().map(String::from));
+            }
+        }
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="zeroone-trait"><a class="header" href="#zeroone-trait">Zero/One Trait</a></h1>
+<h2 id="zero"><a class="header" href="#zero">Zero</a></h2>
+<h3 id="snippet-8"><a class="header" href="#snippet-8">Snippet</a></h3>
+<pre><code class="language-rust noplayground">pub trait Zero: Sized + Copy {
+    fn zero() -&gt; Self;
+}
+
+macro_rules! impl_zero {
+    ($ty:ty) =&gt; {
+        impl Zero for $ty {
+            fn zero() -&gt; Self {
+                0
+            }
+        }
+    };
+}
+
+impl_zero!(isize);
+impl_zero!(i8);
+impl_zero!(i16);
+impl_zero!(i32);
+impl_zero!(i64);
+impl_zero!(i128);
+impl_zero!(usize);
+impl_zero!(u8);
+impl_zero!(u16);
+impl_zero!(u32);
+impl_zero!(u64);
+impl_zero!(u128);
+</code></pre>
+<h2 id="one"><a class="header" href="#one">One</a></h2>
+<h3 id="snippet-9"><a class="header" href="#snippet-9">Snippet</a></h3>
+<pre><code class="language-rust noplayground">pub trait One: Sized + Copy {
+    fn one() -&gt; Self;
+}
+
+macro_rules! impl_one {
+    ($ty:ty) =&gt; {
+        impl One for $ty {
+            fn one() -&gt; Self {
+                1
+            }
+        }
+    };
+}
+
+impl_one!(isize);
+impl_one!(i8);
+impl_one!(i16);
+impl_one!(i32);
+impl_one!(i64);
+impl_one!(i128);
+impl_one!(usize);
+impl_one!(u8);
+impl_one!(u16);
+impl_one!(u32);
+impl_one!(u64);
+impl_one!(u128);
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+                        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            MathJax.Hub.Register.StartupHook('End', function() {
+                window.setTimeout(window.print, 100);
+            });
+        });
+        </script>
+                
+    </body>
+</html>
