@@ -6,4 +6,6 @@ src = "src"
 title = "Rust Snippets for Competitive Programming"
 
 [output.html]
+git-repository-url = "https://github.com/BamgoeSN/rust-ps-md"
 mathjax-support = true
+site-url = "/rust-ps-md/"
