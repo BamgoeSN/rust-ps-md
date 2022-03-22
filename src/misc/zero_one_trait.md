@@ -1,15 +1,20 @@
 # Zero/One Trait
 
-## Zero
-### Snippet
+## Snippet
 ```rust,noplayground
-pub trait Zero: Sized + Copy {
+pub trait ZeroOne: Sized + Copy {
     fn zero() -> Self;
+    fn one() -> Self;
 }
 
-macro_rules! impl_zero {
+macro_rules! impl_zero_one {
     ($ty:ty) => {
-        impl Zero for $ty {
+        impl ZeroOne for $ty {
+            #[inline(always)]
+            fn one() -> Self {
+                1
+            }
+            #[inline(always)]
             fn zero() -> Self {
                 0
             }
@@ -17,47 +22,16 @@ macro_rules! impl_zero {
     };
 }
 
-impl_zero!(isize);
-impl_zero!(i8);
-impl_zero!(i16);
-impl_zero!(i32);
-impl_zero!(i64);
-impl_zero!(i128);
-impl_zero!(usize);
-impl_zero!(u8);
-impl_zero!(u16);
-impl_zero!(u32);
-impl_zero!(u64);
-impl_zero!(u128);
-```
-
-## One
-### Snippet
-```rust, noplayground
-pub trait One: Sized + Copy {
-    fn one() -> Self;
-}
-
-macro_rules! impl_one {
-    ($ty:ty) => {
-        impl One for $ty {
-            fn one() -> Self {
-                1
-            }
-        }
-    };
-}
-
-impl_one!(isize);
-impl_one!(i8);
-impl_one!(i16);
-impl_one!(i32);
-impl_one!(i64);
-impl_one!(i128);
-impl_one!(usize);
-impl_one!(u8);
-impl_one!(u16);
-impl_one!(u32);
-impl_one!(u64);
-impl_one!(u128);
+impl_zero_one!(isize);
+impl_zero_one!(i8);
+impl_zero_one!(i16);
+impl_zero_one!(i32);
+impl_zero_one!(i64);
+impl_zero_one!(i128);
+impl_zero_one!(usize);
+impl_zero_one!(u8);
+impl_zero_one!(u16);
+impl_zero_one!(u32);
+impl_zero_one!(u64);
+impl_zero_one!(u128);
 ```
