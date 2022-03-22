@@ -252,10 +252,54 @@ pub fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="miller-rabin-primality-test"><a class="header" href="#miller-rabin-primality-test">Miller-Rabin Primality Test</a></h1>
-<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \(O(\log{n})\) time. This test only works for integers under \(2^{64}\).</p>
-<pre><code class="language-rust noplayground">pub trait Miller {
-    fn rem_mul(x: Self, y: Self, m: Self) -&gt; Self;
-    fn rem_pow(base: Self, exp: Self, m: Self) -&gt; Self;
+<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \(O(\log{n})\) time. This test only works for integers under \(2^{64}\). <br />
+Required snippets: <a href="algebra/../misc/zero_one_trait.html#Zero">Zero</a>, <a href="algebra/../misc/zero_one_trait.html#One">One</a></p>
+<pre><code class="language-rust noplayground">use std::ops::{BitAnd, Mul, Rem, RemAssign, ShrAssign};
+
+trait Cast&lt;T&gt; {
+    fn cast_to(self) -&gt; T;
+}
+
+macro_rules! impl_primitive_cast {
+    ($t:ty, $u:ty) =&gt; {
+        impl Cast&lt;$t&gt; for $u {
+            #[inline(always)]
+            fn cast_to(self) -&gt; $t {
+                self as $t
+            }
+        }
+    };
+}
+
+#[inline(always)]
+fn rem_mul&lt;T, U&gt;(x: T, y: T, m: T) -&gt; T
+where
+    T: Copy + Cast&lt;U&gt;,
+    U: Copy + Mul&lt;Output = U&gt; + Rem&lt;Output = U&gt; + Cast&lt;T&gt;,
+{
+    let (x, y, m): (U, U, U) = (x.cast_to(), y.cast_to(), m.cast_to());
+    ((x * y) % m).cast_to()
+}
+
+#[inline]
+fn rem_pow&lt;T, U&gt;(mut base: T, mut exp: T, m: T) -&gt; T
+where
+    T: Copy + Zero + One + Eq + RemAssign + BitAnd&lt;Output = T&gt; + ShrAssign + Cast&lt;U&gt;,
+    U: Copy + Mul&lt;Output = U&gt; + Rem&lt;Output = U&gt; + Cast&lt;T&gt;,
+{
+    exp %= m;
+    let mut r = T::one();
+    while exp != T::zero() {
+        if exp &amp; T::one() != T::zero() {
+            r = rem_mul::&lt;T, U&gt;(r, base, m);
+        }
+        exp &gt;&gt;= T::one();
+        base = rem_mul::&lt;T, U&gt;(base, base, m);
+    }
+    r
+}
+
+pub trait Miller {
     fn naive_primality(self) -&gt; bool;
     fn miller_rabin(self, a: Self) -&gt; bool;
     fn miller_primality(self) -&gt; bool;
@@ -264,23 +308,11 @@ pub fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
 
 macro_rules! miller_rabin_impl {
     ($t:ty, $u:ty, $limit:expr,  $($x:expr),*) =&gt; {
+        impl_primitive_cast!($t, $u);
+        impl_primitive_cast!($u, $t);
+
         impl Miller for $t {
             #[inline]
-            fn rem_mul(x: $t, y: $t, m: $t) -&gt; $t {
-                ((x as $u * y as $u) % m as $u) as $t
-            }
-            fn rem_pow(mut base: $t, mut exp: $t, m: $t) -&gt; $t {
-                exp %= m;
-                let mut r: $t = 1;
-                while exp != 0 {
-                    if exp &amp; 1 != 0 {
-                        r = Self::rem_mul(r, base, m);
-                    }
-                    exp &gt;&gt;= 1;
-                    base = Self::rem_mul(base, base, m);
-                }
-                r
-            }
             fn naive_primality(self) -&gt; bool {
                 let mut i: $t = 2;
                 while i * i &lt;= self {
@@ -291,23 +323,25 @@ macro_rules! miller_rabin_impl {
                 }
                 true
             }
+
             fn miller_rabin(self, a: $t) -&gt; bool {
                 let d = self - 1;
                 let mut p = d;
                 while p&amp;1==0 {
                     p&gt;&gt;=1;
                 }
-                let mut t = Self::rem_pow(a, p, self);
+                let mut t = rem_pow::&lt;$t, $u&gt;(a, p, self);
                 let at_last = t == d || t == 1;
 
                 while p!=d {
                     p &lt;&lt;= 1;
-                    t = Self::rem_mul(t, t, self);
+                    t = rem_mul::&lt;$t, $u&gt;(t, t, self);
                     if t == self-1 {return true;}
                 }
 
                 at_last
             }
+
             fn miller_primality(self) -&gt; bool {
                 $(
                     if !self.miller_rabin($x) {
@@ -316,6 +350,7 @@ macro_rules! miller_rabin_impl {
                 )*
                 true
             }
+
             fn is_prime(self) -&gt; bool {
                 if self &lt;= 1 {
                     false
@@ -1454,8 +1489,6 @@ impl TwoSat {
 <h2 id="wo-testcases"><a class="header" href="#wo-testcases">w/o Testcases</a></h2>
 <pre><code class="language-rust noplayground">use std::io::*;
 
-use fastio::*;
-
 fn main() {
     let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
     let handle = BufReader::new(stdin);
@@ -1463,51 +1496,45 @@ fn main() {
     // let handle = stdin.lock();
     let mut scan = Scanner::new(handle);
     let out = &amp;mut BufWriter::new(stdout());
-    
 }
 
-mod fastio {
-    use std::io::BufRead;
+pub struct Scanner&lt;R&gt; {
+    reader: R,
+    buffer: Vec&lt;String&gt;,
+}
 
-    pub struct Scanner&lt;R&gt; {
-        reader: R,
-        buffer: Vec&lt;String&gt;,
-    }
-
-    impl&lt;R&gt; Scanner&lt;R&gt; {
-        pub fn new(reader: R) -&gt; Self {
-            Scanner {
-                reader,
-                buffer: Vec::new(),
-            }
+impl&lt;R&gt; Scanner&lt;R&gt; {
+    pub fn new(reader: R) -&gt; Self {
+        Scanner {
+            reader,
+            buffer: Vec::new(),
         }
     }
+}
 
-    impl&lt;R&gt; Scanner&lt;R&gt;
+impl&lt;R&gt; Scanner&lt;R&gt;
+where
+    R: BufRead,
+{
+    pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
     where
-        R: BufRead,
+        T: std::str::FromStr,
     {
-        pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
-        where
-            T: std::str::FromStr,
-        {
-            loop {
-                if let Some(token) = self.buffer.pop() {
-                    return token.parse().ok().expect(&quot;Failed to parse&quot;);
-                }
-                let mut input = String::new();
-                self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
-                self.buffer
-                    .extend(input.split_whitespace().rev().map(String::from));
+        loop {
+            if let Some(token) = self.buffer.pop() {
+                return token.parse().ok().expect(&quot;Failed to parse&quot;);
             }
+            let mut input = String::new();
+            self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
+            self.buffer
+                .extend(input.split_whitespace().rev().map(String::from));
         }
     }
 }
+
 </code></pre>
 <h2 id="w-testcases"><a class="header" href="#w-testcases">w/ Testcases</a></h2>
 <pre><code class="language-rust noplayground">use std::io::*;
-
-use fastio::*;
 
 fn main() {
     let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
@@ -1518,48 +1545,43 @@ fn main() {
     let out = &amp;mut BufWriter::new(stdout());
 
     let tc: usize = scan.next();
-    for _ in 0..tc {
-        
+    for _ in 0..tc {}
+}
+
+pub struct Scanner&lt;R&gt; {
+    reader: R,
+    buffer: Vec&lt;String&gt;,
+}
+
+impl&lt;R&gt; Scanner&lt;R&gt; {
+    pub fn new(reader: R) -&gt; Self {
+        Scanner {
+            reader,
+            buffer: Vec::new(),
+        }
     }
 }
 
-mod fastio {
-    use std::io::BufRead;
-
-    pub struct Scanner&lt;R&gt; {
-        reader: R,
-        buffer: Vec&lt;String&gt;,
-    }
-
-    impl&lt;R&gt; Scanner&lt;R&gt; {
-        pub fn new(reader: R) -&gt; Self {
-            Scanner {
-                reader,
-                buffer: Vec::new(),
-            }
-        }
-    }
-
-    impl&lt;R&gt; Scanner&lt;R&gt;
+impl&lt;R&gt; Scanner&lt;R&gt;
+where
+    R: BufRead,
+{
+    pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
     where
-        R: BufRead,
+        T: std::str::FromStr,
     {
-        pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
-        where
-            T: std::str::FromStr,
-        {
-            loop {
-                if let Some(token) = self.buffer.pop() {
-                    return token.parse().ok().expect(&quot;Failed to parse&quot;);
-                }
-                let mut input = String::new();
-                self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
-                self.buffer
-                    .extend(input.split_whitespace().rev().map(String::from));
+        loop {
+            if let Some(token) = self.buffer.pop() {
+                return token.parse().ok().expect(&quot;Failed to parse&quot;);
             }
+            let mut input = String::new();
+            self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
+            self.buffer
+                .extend(input.split_whitespace().rev().map(String::from));
         }
     }
 }
+
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="zeroone-trait"><a class="header" href="#zeroone-trait">Zero/One Trait</a></h1>
 <h2 id="zero"><a class="header" href="#zero">Zero</a></h2>

@@ -143,8 +143,6 @@
 <h2 id="wo-testcases"><a class="header" href="#wo-testcases">w/o Testcases</a></h2>
 <pre><code class="language-rust noplayground">use std::io::*;
 
-use fastio::*;
-
 fn main() {
     let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
     let handle = BufReader::new(stdin);
@@ -152,51 +150,45 @@ fn main() {
     // let handle = stdin.lock();
     let mut scan = Scanner::new(handle);
     let out = &amp;mut BufWriter::new(stdout());
-    
 }
 
-mod fastio {
-    use std::io::BufRead;
+pub struct Scanner&lt;R&gt; {
+    reader: R,
+    buffer: Vec&lt;String&gt;,
+}
 
-    pub struct Scanner&lt;R&gt; {
-        reader: R,
-        buffer: Vec&lt;String&gt;,
-    }
-
-    impl&lt;R&gt; Scanner&lt;R&gt; {
-        pub fn new(reader: R) -&gt; Self {
-            Scanner {
-                reader,
-                buffer: Vec::new(),
-            }
+impl&lt;R&gt; Scanner&lt;R&gt; {
+    pub fn new(reader: R) -&gt; Self {
+        Scanner {
+            reader,
+            buffer: Vec::new(),
         }
     }
+}
 
-    impl&lt;R&gt; Scanner&lt;R&gt;
+impl&lt;R&gt; Scanner&lt;R&gt;
+where
+    R: BufRead,
+{
+    pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
     where
-        R: BufRead,
+        T: std::str::FromStr,
     {
-        pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
-        where
-            T: std::str::FromStr,
-        {
-            loop {
-                if let Some(token) = self.buffer.pop() {
-                    return token.parse().ok().expect(&quot;Failed to parse&quot;);
-                }
-                let mut input = String::new();
-                self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
-                self.buffer
-                    .extend(input.split_whitespace().rev().map(String::from));
+        loop {
+            if let Some(token) = self.buffer.pop() {
+                return token.parse().ok().expect(&quot;Failed to parse&quot;);
             }
+            let mut input = String::new();
+            self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
+            self.buffer
+                .extend(input.split_whitespace().rev().map(String::from));
         }
     }
 }
+
 </code></pre>
 <h2 id="w-testcases"><a class="header" href="#w-testcases">w/ Testcases</a></h2>
 <pre><code class="language-rust noplayground">use std::io::*;
-
-use fastio::*;
 
 fn main() {
     let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
@@ -207,48 +199,43 @@ fn main() {
     let out = &amp;mut BufWriter::new(stdout());
 
     let tc: usize = scan.next();
-    for _ in 0..tc {
-        
+    for _ in 0..tc {}
+}
+
+pub struct Scanner&lt;R&gt; {
+    reader: R,
+    buffer: Vec&lt;String&gt;,
+}
+
+impl&lt;R&gt; Scanner&lt;R&gt; {
+    pub fn new(reader: R) -&gt; Self {
+        Scanner {
+            reader,
+            buffer: Vec::new(),
+        }
     }
 }
 
-mod fastio {
-    use std::io::BufRead;
-
-    pub struct Scanner&lt;R&gt; {
-        reader: R,
-        buffer: Vec&lt;String&gt;,
-    }
-
-    impl&lt;R&gt; Scanner&lt;R&gt; {
-        pub fn new(reader: R) -&gt; Self {
-            Scanner {
-                reader,
-                buffer: Vec::new(),
-            }
-        }
-    }
-
-    impl&lt;R&gt; Scanner&lt;R&gt;
+impl&lt;R&gt; Scanner&lt;R&gt;
+where
+    R: BufRead,
+{
+    pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
     where
-        R: BufRead,
+        T: std::str::FromStr,
     {
-        pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
-        where
-            T: std::str::FromStr,
-        {
-            loop {
-                if let Some(token) = self.buffer.pop() {
-                    return token.parse().ok().expect(&quot;Failed to parse&quot;);
-                }
-                let mut input = String::new();
-                self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
-                self.buffer
-                    .extend(input.split_whitespace().rev().map(String::from));
+        loop {
+            if let Some(token) = self.buffer.pop() {
+                return token.parse().ok().expect(&quot;Failed to parse&quot;);
             }
+            let mut input = String::new();
+            self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
+            self.buffer
+                .extend(input.split_whitespace().rev().map(String::from));
         }
     }
 }
+
 </code></pre>
 
                     </main>
