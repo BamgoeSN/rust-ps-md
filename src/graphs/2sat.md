@@ -1,5 +1,5 @@
 # 2-SAT
-## Snippet
+
 Required snippets: [SCC](./scc.md#strongly-connected-components)
 ```rust,noplayground
 pub struct TwoSat {

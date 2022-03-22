@@ -3,7 +3,6 @@ Disjoint set union (a.k.a Union-Find) processes the following queries on a graph
 - Add an undirected edge between two nodes (`union`)
 - Determine if there exist a path between two nodes (`is_reachable`)
 
-## Snippet
 ```rust,noplayground
 pub struct UnionFind {
     size: usize,

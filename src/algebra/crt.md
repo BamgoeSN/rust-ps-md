@@ -3,7 +3,6 @@ Reference: PyRival <https://github.com/cheran-senthil/PyRival/blob/master/pyriva
 
 Returns \\(x\\) such that \\(x = r_i \mod m_i\\) for all \\(i\\). \
 
-## Snippet
 Required snippets: [GCD](gcd.md#gcd), [Extended Euclidean Algorithm](extgcd.md#extended-euclid-algorithm)
 ```rust,noplayground
 // Chinese remainder theorem

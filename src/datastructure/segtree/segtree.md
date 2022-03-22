@@ -12,7 +12,6 @@ Given an array \\(A\\) of length \\(n\\) consists of the monoid \\(S\\) as descr
 
 assuming that calculating the product of two elements takes \\(O(1)\\) time.
 
-## Snippet
 ```rust,noplayground
 use std::ops::Index;
 

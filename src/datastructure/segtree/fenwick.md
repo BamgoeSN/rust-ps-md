@@ -6,7 +6,6 @@ Given an integer array \\(A\\) of length \\(n\\), a Fenwick tree processes the f
 
 A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.
 
-## Snippet
 Required snippets: [Zero Trait](../../misc/zero_one_trait.md#zero)
 ```rust,noplayground
 pub struct Fenwick<T: Zero + AddAssign + Sub<Output = T>> {

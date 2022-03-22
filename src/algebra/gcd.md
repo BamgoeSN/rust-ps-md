@@ -12,11 +12,11 @@ pub fn gcd(mut a: i64, mut b: i64) -> i64 {
 ```
 
 # LCM
-Returns the least common multiplier of a and b. \
+Returns the least common multiplier of a and b.
+
 Required snippets: [GCD](#gcd)
 ```rust,noplayground
 pub fn lcm(a: i64, b: i64) -> i64 {
     a / gcd(a, b) * b
 }
 ```
-

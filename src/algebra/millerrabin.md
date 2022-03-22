@@ -1,7 +1,9 @@
 # Miller-Rabin Primality Test
 
-Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\). \
+Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\).
+
 Required snippets: [ZeroOne](../misc/zero_one_trait.md#zeroone-trait)
+
 ```rust,noplayground
 use std::ops::{BitAnd, Mul, Rem, RemAssign, ShrAssign};
 

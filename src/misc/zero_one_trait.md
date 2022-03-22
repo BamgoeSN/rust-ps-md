@@ -1,6 +1,5 @@
 # Zero/One Trait
 
-## Snippet
 ```rust,noplayground
 pub trait ZeroOne: Sized + Copy {
     fn zero() -> Self;

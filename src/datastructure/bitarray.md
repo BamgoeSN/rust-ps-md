@@ -1,5 +1,4 @@
 # Bit Array
-## Snippet
 ```rust,noplayground
 pub struct BitArray {
     bytes: Vec<u8>,

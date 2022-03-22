@@ -1,4 +1,5 @@
 # Base Template
+
 ## w/o Testcases
 ```rust,noplayground
 use std::io::*;

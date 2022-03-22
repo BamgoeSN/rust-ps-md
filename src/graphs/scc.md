@@ -1,5 +1,5 @@
 # Strongly Connected Components
-## Snippet
+
 ```rust,noplayground
 struct SccStack {
     stack: Vec<usize>,
