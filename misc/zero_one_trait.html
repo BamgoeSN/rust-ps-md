@@ -140,15 +140,19 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="zeroone-trait"><a class="header" href="#zeroone-trait">Zero/One Trait</a></h1>
-<h2 id="zero"><a class="header" href="#zero">Zero</a></h2>
-<h3 id="snippet"><a class="header" href="#snippet">Snippet</a></h3>
-<pre><code class="language-rust noplayground">pub trait Zero: Sized + Copy {
+<pre><code class="language-rust noplayground">pub trait ZeroOne: Sized + Copy {
     fn zero() -&gt; Self;
+    fn one() -&gt; Self;
 }
 
-macro_rules! impl_zero {
+macro_rules! impl_zero_one {
     ($ty:ty) =&gt; {
-        impl Zero for $ty {
+        impl ZeroOne for $ty {
+            #[inline(always)]
+            fn one() -&gt; Self {
+                1
+            }
+            #[inline(always)]
             fn zero() -&gt; Self {
                 0
             }
@@ -156,47 +160,18 @@ macro_rules! impl_zero {
     };
 }
 
-impl_zero!(isize);
-impl_zero!(i8);
-impl_zero!(i16);
-impl_zero!(i32);
-impl_zero!(i64);
-impl_zero!(i128);
-impl_zero!(usize);
-impl_zero!(u8);
-impl_zero!(u16);
-impl_zero!(u32);
-impl_zero!(u64);
-impl_zero!(u128);
-</code></pre>
-<h2 id="one"><a class="header" href="#one">One</a></h2>
-<h3 id="snippet-1"><a class="header" href="#snippet-1">Snippet</a></h3>
-<pre><code class="language-rust  noplayground">pub trait One: Sized + Copy {
-    fn one() -&gt; Self;
-}
-
-macro_rules! impl_one {
-    ($ty:ty) =&gt; {
-        impl One for $ty {
-            fn one() -&gt; Self {
-                1
-            }
-        }
-    };
-}
-
-impl_one!(isize);
-impl_one!(i8);
-impl_one!(i16);
-impl_one!(i32);
-impl_one!(i64);
-impl_one!(i128);
-impl_one!(usize);
-impl_one!(u8);
-impl_one!(u16);
-impl_one!(u32);
-impl_one!(u64);
-impl_one!(u128);
+impl_zero_one!(isize);
+impl_zero_one!(i8);
+impl_zero_one!(i16);
+impl_zero_one!(i32);
+impl_zero_one!(i64);
+impl_zero_one!(i128);
+impl_zero_one!(usize);
+impl_zero_one!(u8);
+impl_zero_one!(u16);
+impl_zero_one!(u32);
+impl_zero_one!(u64);
+impl_zero_one!(u128);
 </code></pre>
 
                     </main>

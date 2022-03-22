@@ -155,8 +155,8 @@
 }
 </code></pre>
 <h1 id="lcm"><a class="header" href="#lcm">LCM</a></h1>
-<p>Returns the least common multiplier of a and b. <br />
-Required snippets: <a href="algebra/gcd.html#gcd">GCD</a></p>
+<p>Returns the least common multiplier of a and b.</p>
+<p>Required snippets: <a href="algebra/gcd.html#gcd">GCD</a></p>
 <pre><code class="language-rust noplayground">pub fn lcm(a: i64, b: i64) -&gt; i64 {
     a / gcd(a, b) * b
 }
@@ -188,7 +188,6 @@ Required snippets: <a href="algebra/gcd.html#gcd">GCD</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chinese-remainder-theorem"><a class="header" href="#chinese-remainder-theorem">Chinese Remainder Theorem</a></h1>
 <p>Reference: PyRival <a href="https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py">https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py</a></p>
 <p>Returns \(x\) such that \(x = r_i \mod m_i\) for all \(i\). </p>
-<h2 id="snippet"><a class="header" href="#snippet">Snippet</a></h2>
 <p>Required snippets: <a href="algebra/gcd.html#gcd">GCD</a>, <a href="algebra/extgcd.html#extended-euclid-algorithm">Extended Euclidean Algorithm</a></p>
 <pre><code class="language-rust noplayground">// Chinese remainder theorem
 //
@@ -252,8 +251,8 @@ pub fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="miller-rabin-primality-test"><a class="header" href="#miller-rabin-primality-test">Miller-Rabin Primality Test</a></h1>
-<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \(O(\log{n})\) time. This test only works for integers under \(2^{64}\). <br />
-Required snippets: <a href="algebra/../misc/zero_one_trait.html#Zero">Zero</a>, <a href="algebra/../misc/zero_one_trait.html#One">One</a></p>
+<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \(O(\log{n})\) time. This test only works for integers under \(2^{64}\).</p>
+<p>Required snippets: <a href="algebra/../misc/zero_one_trait.html#zeroone-trait">ZeroOne</a></p>
 <pre><code class="language-rust noplayground">use std::ops::{BitAnd, Mul, Rem, RemAssign, ShrAssign};
 
 trait Cast&lt;T&gt; {
@@ -593,7 +592,6 @@ factors.sort();
 assert_eq!(factors, [53, 61976026187]);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bit-array"><a class="header" href="#bit-array">Bit Array</a></h1>
-<h2 id="snippet-1"><a class="header" href="#snippet-1">Snippet</a></h2>
 <pre><code class="language-rust noplayground">pub struct BitArray {
     bytes: Vec&lt;u8&gt;,
 }
@@ -665,7 +663,6 @@ impl BitArray {
 <li>Calculate the product of the elements of an interval</li>
 </ul>
 <p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
-<h2 id="snippet-2"><a class="header" href="#snippet-2">Snippet</a></h2>
 <pre><code class="language-rust noplayground">use std::ops::Index;
 
 fn ceil_pow2(n: usize) -&gt; usize {
@@ -850,7 +847,6 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
 <li>Calculate the sum of the elements of an interval</li>
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
-<h2 id="snippet-3"><a class="header" href="#snippet-3">Snippet</a></h2>
 <p>Required snippets: <a href="datastructure/segtree/../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
 <pre><code class="language-rust noplayground">pub struct Fenwick&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; {
     n: usize,
@@ -901,7 +897,6 @@ impl&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
 <li>Calculate the product of the elements of an interval</li>
 </ul>
 <p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
-<h2 id="snippet-4"><a class="header" href="#snippet-4">Snippet</a></h2>
 <pre><code class="language-rust noplayground">fn ceil_pow2(n: usize) -&gt; usize {
     let mut x: usize = 0;
     while (1 &lt;&lt; x) &lt; n {
@@ -1230,7 +1225,6 @@ impl Mapping&lt;Elm&gt; for Map {
 <li>Add an undirected edge between two nodes (<code>union</code>)</li>
 <li>Determine if there exist a path between two nodes (<code>is_reachable</code>)</li>
 </ul>
-<h2 id="snippet-5"><a class="header" href="#snippet-5">Snippet</a></h2>
 <pre><code class="language-rust noplayground">pub struct UnionFind {
     size: usize,
     parents: Vec&lt;usize&gt;,
@@ -1301,7 +1295,6 @@ uf.union(2, 6);
 assert_eq!(uf.is_reachable(2, 6), true);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="strongly-connected-components"><a class="header" href="#strongly-connected-components">Strongly Connected Components</a></h1>
-<h2 id="snippet-6"><a class="header" href="#snippet-6">Snippet</a></h2>
 <pre><code class="language-rust noplayground">struct SccStack {
     stack: Vec&lt;usize&gt;,
     check: Vec&lt;bool&gt;,
@@ -1428,7 +1421,6 @@ impl SccGraph {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
-<h2 id="snippet-7"><a class="header" href="#snippet-7">Snippet</a></h2>
 <p>Required snippets: <a href="graphs/./scc.html#strongly-connected-components">SCC</a></p>
 <pre><code class="language-rust noplayground">pub struct TwoSat {
     n: usize,
@@ -1487,7 +1479,7 @@ impl TwoSat {
 <div style="break-before: page; page-break-before: always;"></div><h1 id="convex-hull"><a class="header" href="#convex-hull">Convex Hull</a></h1>
 <h2 id="graham-scan"><a class="header" href="#graham-scan">Graham Scan</a></h2>
 <p>This snippet excludes every points on vertices from the convex hull, and only includes points of both ends.</p>
-<h3 id="snippet-8"><a class="header" href="#snippet-8">Snippet</a></h3>
+<h3 id="snippet"><a class="header" href="#snippet">Snippet</a></h3>
 <pre><code class="language-rust noplayground">use std::cmp::Ordering;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1736,15 +1728,19 @@ where
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="zeroone-trait"><a class="header" href="#zeroone-trait">Zero/One Trait</a></h1>
-<h2 id="zero"><a class="header" href="#zero">Zero</a></h2>
-<h3 id="snippet-9"><a class="header" href="#snippet-9">Snippet</a></h3>
-<pre><code class="language-rust noplayground">pub trait Zero: Sized + Copy {
+<pre><code class="language-rust noplayground">pub trait ZeroOne: Sized + Copy {
     fn zero() -&gt; Self;
+    fn one() -&gt; Self;
 }
 
-macro_rules! impl_zero {
+macro_rules! impl_zero_one {
     ($ty:ty) =&gt; {
-        impl Zero for $ty {
+        impl ZeroOne for $ty {
+            #[inline(always)]
+            fn one() -&gt; Self {
+                1
+            }
+            #[inline(always)]
             fn zero() -&gt; Self {
                 0
             }
@@ -1752,47 +1748,18 @@ macro_rules! impl_zero {
     };
 }
 
-impl_zero!(isize);
-impl_zero!(i8);
-impl_zero!(i16);
-impl_zero!(i32);
-impl_zero!(i64);
-impl_zero!(i128);
-impl_zero!(usize);
-impl_zero!(u8);
-impl_zero!(u16);
-impl_zero!(u32);
-impl_zero!(u64);
-impl_zero!(u128);
-</code></pre>
-<h2 id="one"><a class="header" href="#one">One</a></h2>
-<h3 id="snippet-10"><a class="header" href="#snippet-10">Snippet</a></h3>
-<pre><code class="language-rust  noplayground">pub trait One: Sized + Copy {
-    fn one() -&gt; Self;
-}
-
-macro_rules! impl_one {
-    ($ty:ty) =&gt; {
-        impl One for $ty {
-            fn one() -&gt; Self {
-                1
-            }
-        }
-    };
-}
-
-impl_one!(isize);
-impl_one!(i8);
-impl_one!(i16);
-impl_one!(i32);
-impl_one!(i64);
-impl_one!(i128);
-impl_one!(usize);
-impl_one!(u8);
-impl_one!(u16);
-impl_one!(u32);
-impl_one!(u64);
-impl_one!(u128);
+impl_zero_one!(isize);
+impl_zero_one!(i8);
+impl_zero_one!(i16);
+impl_zero_one!(i32);
+impl_zero_one!(i64);
+impl_zero_one!(i128);
+impl_zero_one!(usize);
+impl_zero_one!(u8);
+impl_zero_one!(u16);
+impl_zero_one!(u32);
+impl_zero_one!(u64);
+impl_zero_one!(u128);
 </code></pre>
 
                     </main>

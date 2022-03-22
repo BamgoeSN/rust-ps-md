@@ -146,7 +146,6 @@
 <li>Calculate the sum of the elements of an interval</li>
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
-<h2 id="snippet"><a class="header" href="#snippet">Snippet</a></h2>
 <p>Required snippets: <a href="../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
 <pre><code class="language-rust noplayground">pub struct Fenwick&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; {
     n: usize,
