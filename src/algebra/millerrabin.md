@@ -1,10 +1,54 @@
 # Miller-Rabin Primality Test
 
-Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\).
+Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\). \
+Required snippets: [Zero](../misc/zero_one_trait.md#Zero), [One](../misc/zero_one_trait.md#One)
 ```rust,noplayground
+use std::ops::{BitAnd, Mul, Rem, RemAssign, ShrAssign};
+
+trait Cast<T> {
+    fn cast_to(self) -> T;
+}
+
+macro_rules! impl_primitive_cast {
+    ($t:ty, $u:ty) => {
+        impl Cast<$t> for $u {
+            #[inline(always)]
+            fn cast_to(self) -> $t {
+                self as $t
+            }
+        }
+    };
+}
+
+#[inline(always)]
+fn rem_mul<T, U>(x: T, y: T, m: T) -> T
+where
+    T: Copy + Cast<U>,
+    U: Copy + Mul<Output = U> + Rem<Output = U> + Cast<T>,
+{
+    let (x, y, m): (U, U, U) = (x.cast_to(), y.cast_to(), m.cast_to());
+    ((x * y) % m).cast_to()
+}
+
+#[inline]
+fn rem_pow<T, U>(mut base: T, mut exp: T, m: T) -> T
+where
+    T: Copy + Zero + One + Eq + RemAssign + BitAnd<Output = T> + ShrAssign + Cast<U>,
+    U: Copy + Mul<Output = U> + Rem<Output = U> + Cast<T>,
+{
+    exp %= m;
+    let mut r = T::one();
+    while exp != T::zero() {
+        if exp & T::one() != T::zero() {
+            r = rem_mul::<T, U>(r, base, m);
+        }
+        exp >>= T::one();
+        base = rem_mul::<T, U>(base, base, m);
+    }
+    r
+}
+
 pub trait Miller {
-    fn rem_mul(x: Self, y: Self, m: Self) -> Self;
-    fn rem_pow(base: Self, exp: Self, m: Self) -> Self;
     fn naive_primality(self) -> bool;
     fn miller_rabin(self, a: Self) -> bool;
     fn miller_primality(self) -> bool;
@@ -13,23 +57,11 @@ pub trait Miller {
 
 macro_rules! miller_rabin_impl {
     ($t:ty, $u:ty, $limit:expr,  $($x:expr),*) => {
+        impl_primitive_cast!($t, $u);
+        impl_primitive_cast!($u, $t);
+
         impl Miller for $t {
             #[inline]
-            fn rem_mul(x: $t, y: $t, m: $t) -> $t {
-                ((x as $u * y as $u) % m as $u) as $t
-            }
-            fn rem_pow(mut base: $t, mut exp: $t, m: $t) -> $t {
-                exp %= m;
-                let mut r: $t = 1;
-                while exp != 0 {
-                    if exp & 1 != 0 {
-                        r = Self::rem_mul(r, base, m);
-                    }
-                    exp >>= 1;
-                    base = Self::rem_mul(base, base, m);
-                }
-                r
-            }
             fn naive_primality(self) -> bool {
                 let mut i: $t = 2;
                 while i * i <= self {
@@ -40,23 +72,25 @@ macro_rules! miller_rabin_impl {
                 }
                 true
             }
+
             fn miller_rabin(self, a: $t) -> bool {
                 let d = self - 1;
                 let mut p = d;
                 while p&1==0 {
                     p>>=1;
                 }
-                let mut t = Self::rem_pow(a, p, self);
+                let mut t = rem_pow::<$t, $u>(a, p, self);
                 let at_last = t == d || t == 1;
 
                 while p!=d {
                     p <<= 1;
-                    t = Self::rem_mul(t, t, self);
+                    t = rem_mul::<$t, $u>(t, t, self);
                     if t == self-1 {return true;}
                 }
 
                 at_last
             }
+
             fn miller_primality(self) -> bool {
                 $(
                     if !self.miller_rabin($x) {
@@ -65,6 +99,7 @@ macro_rules! miller_rabin_impl {
                 )*
                 true
             }
+
             fn is_prime(self) -> bool {
                 if self <= 1 {
                     false
