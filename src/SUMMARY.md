@@ -21,6 +21,9 @@
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
 
+# Geometry
+- [Convex Hull](./geometry/convexhull.md)
+
 # Unclassified
 - [Longest Increasing Subsequence](./unclass/lis.md)
 

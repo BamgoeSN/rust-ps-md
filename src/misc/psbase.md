@@ -12,40 +12,52 @@ fn main() {
     let out = &mut BufWriter::new(stdout());
 }
 
-pub struct Scanner<R> {
-    reader: R,
+struct Scanner<R> {
+    _reader: R,
     buffer: Vec<String>,
-}
-
-impl<R> Scanner<R> {
-    pub fn new(reader: R) -> Self {
-        Scanner {
-            reader,
-            buffer: Vec::new(),
-        }
-    }
 }
 
 impl<R> Scanner<R>
 where
     R: BufRead,
 {
-    pub fn next<T>(&mut self) -> T
+    fn new(mut reader: R) -> Self {
+        let mut input = String::new();
+        reader.read_to_string(&mut input).expect("Failed to read");
+
+        let mut buffer = Vec::new();
+        buffer.extend(input.split_whitespace().rev().map(String::from));
+
+        Self {
+            _reader: reader,
+            buffer,
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next<T>(&mut self) -> T
     where
         T: std::str::FromStr,
     {
-        loop {
-            if let Some(token) = self.buffer.pop() {
-                return token.parse().ok().expect("Failed to parse");
-            }
-            let mut input = String::new();
-            self.reader.read_line(&mut input).expect("Failed to read");
-            self.buffer
-                .extend(input.split_whitespace().rev().map(String::from));
+        match self.buffer.pop() {
+            Some(token) => token.parse().ok().expect("Failed to parse"),
+            None => panic!("Input is all drained"),
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next_option<T>(&mut self) -> Option<T>
+    where
+        T: std::str::FromStr,
+    {
+        match self.buffer.pop() {
+            Some(token) => token.parse().ok(),
+            None => None,
         }
     }
 }
-
 ```
 
 ## w/ Testcases
@@ -64,38 +76,50 @@ fn main() {
     for _ in 0..tc {}
 }
 
-pub struct Scanner<R> {
-    reader: R,
+struct Scanner<R> {
+    _reader: R,
     buffer: Vec<String>,
-}
-
-impl<R> Scanner<R> {
-    pub fn new(reader: R) -> Self {
-        Scanner {
-            reader,
-            buffer: Vec::new(),
-        }
-    }
 }
 
 impl<R> Scanner<R>
 where
     R: BufRead,
 {
-    pub fn next<T>(&mut self) -> T
+    fn new(mut reader: R) -> Self {
+        let mut input = String::new();
+        reader.read_to_string(&mut input).expect("Failed to read");
+
+        let mut buffer = Vec::new();
+        buffer.extend(input.split_whitespace().rev().map(String::from));
+
+        Self {
+            _reader: reader,
+            buffer,
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next<T>(&mut self) -> T
     where
         T: std::str::FromStr,
     {
-        loop {
-            if let Some(token) = self.buffer.pop() {
-                return token.parse().ok().expect("Failed to parse");
-            }
-            let mut input = String::new();
-            self.reader.read_line(&mut input).expect("Failed to read");
-            self.buffer
-                .extend(input.split_whitespace().rev().map(String::from));
+        match self.buffer.pop() {
+            Some(token) => token.parse().ok().expect("Failed to parse"),
+            None => panic!("Input is all drained"),
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next_option<T>(&mut self) -> Option<T>
+    where
+        T: std::str::FromStr,
+    {
+        match self.buffer.pop() {
+            Some(token) => token.parse().ok(),
+            None => None,
         }
     }
 }
-
 ```
