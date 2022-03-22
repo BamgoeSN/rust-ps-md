@@ -78,7 +78,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">How to use</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Primality Test</a></li><li class="chapter-item expanded "><a href="algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Prime Factorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="datastructure/bitarray.html"><strong aria-hidden="true">6.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/intro.html"><strong aria-hidden="true">7.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="datastructure/segtree/segtree.html"><strong aria-hidden="true">7.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/fenwick.html"><strong aria-hidden="true">7.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/lazyseg.html"><strong aria-hidden="true">7.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="graphs/dsu.html"><strong aria-hidden="true">8.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="graphs/scc.html"><strong aria-hidden="true">9.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="graphs/2sat.html"><strong aria-hidden="true">10.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="unclass/lis.html"><strong aria-hidden="true">11.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="misc/psbase.html"><strong aria-hidden="true">12.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="misc/zero_one_trait.html"><strong aria-hidden="true">13.</strong> Zero/One Trait</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">How to use</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Primality Test</a></li><li class="chapter-item expanded "><a href="algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Prime Factorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="datastructure/bitarray.html"><strong aria-hidden="true">6.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/intro.html"><strong aria-hidden="true">7.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="datastructure/segtree/segtree.html"><strong aria-hidden="true">7.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/fenwick.html"><strong aria-hidden="true">7.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="datastructure/segtree/lazyseg.html"><strong aria-hidden="true">7.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="graphs/dsu.html"><strong aria-hidden="true">8.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="graphs/scc.html"><strong aria-hidden="true">9.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="graphs/2sat.html"><strong aria-hidden="true">10.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="geometry/convexhull.html"><strong aria-hidden="true">11.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="unclass/lis.html"><strong aria-hidden="true">12.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="misc/psbase.html"><strong aria-hidden="true">13.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="misc/zero_one_trait.html"><strong aria-hidden="true">14.</strong> Zero/One Trait</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -1484,6 +1484,134 @@ impl TwoSat {
     }
 }
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="convex-hull"><a class="header" href="#convex-hull">Convex Hull</a></h1>
+<h2 id="graham-scan"><a class="header" href="#graham-scan">Graham Scan</a></h2>
+<p>This snippet excludes every points on vertices from the convex hull, and only includes points of both ends.</p>
+<h3 id="snippet-8"><a class="header" href="#snippet-8">Snippet</a></h3>
+<pre><code class="language-rust noplayground">use std::cmp::Ordering;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct Point {
+    x: i64,
+    y: i64,
+}
+
+impl Point {
+    fn add(&amp;self, other: &amp;Self) -&gt; Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+    fn sub(&amp;self, other: &amp;Self) -&gt; Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum Turn {
+    CW,
+    CCW,
+    Zero,
+}
+
+fn get_turn(v1: &amp;Point, v2: &amp;Point) -&gt; Turn {
+    let prod = v1.x * v2.y - v1.y * v2.x;
+    if prod &gt; 0 {
+        Turn::CCW
+    } else if prod &lt; 0 {
+        Turn::CW
+    } else {
+        Turn::Zero
+    }
+}
+
+fn compare_ccw(a: &amp;Point, b: &amp;Point) -&gt; Ordering {
+    if a == b {
+        return Ordering::Equal;
+    }
+    if a.x == 0 &amp;&amp; a.y == 0 {
+        return Ordering::Less;
+    } else if b.x == 0 &amp;&amp; b.y == 0 {
+        return Ordering::Greater;
+    }
+
+    let turn = get_turn(a, b);
+    if turn == Turn::CCW {
+        return Ordering::Less;
+    } else if turn == Turn::CW {
+        return Ordering::Greater;
+    }
+
+    let a_dist = a.x * a.x + a.y * a.y;
+    let b_dist = b.x * b.x + b.y * b.y;
+    a_dist.cmp(&amp;b_dist)
+}
+
+fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
+    let pivot = {
+        let mut pivot = Point {
+            x: i64::MAX,
+            y: i64::MAX,
+        };
+        for v in arr.iter() {
+            if pivot.y &gt; v.y || (pivot.y == v.y &amp;&amp; pivot.x &gt; v.x) {
+                pivot.x = v.x;
+                pivot.y = v.y;
+            }
+        }
+        pivot
+    };
+
+    for v in arr.iter_mut() {
+        *v = v.sub(&amp;pivot);
+    }
+
+    arr.sort_unstable_by(compare_ccw);
+
+    let mut stack = vec![arr[0].clone()];
+    let mut i = 1;
+    while i &lt; arr.len() {
+        if stack.len() == 1 {
+            if arr[i] != stack[0] {
+                stack.push(arr[i].clone());
+            }
+            i += 1;
+            continue;
+        }
+
+        let a = &amp;arr[i];
+        let b = &amp;stack[stack.len() - 1];
+        let c = &amp;stack[stack.len() - 2];
+        match get_turn(&amp;b.sub(c), &amp;a.sub(b)) {
+            Turn::CCW =&gt; {
+                stack.push(a.clone());
+                i += 1;
+            }
+            Turn::CW =&gt; {
+                stack.pop();
+            }
+            _ =&gt; {
+                stack.pop();
+                stack.push(a.clone());
+                i += 1;
+            }
+        }
+    }
+
+    for v in arr.iter_mut() {
+        *v = v.add(&amp;pivot);
+    }
+    for v in stack.iter_mut() {
+        *v = v.add(&amp;pivot);
+    }
+
+    stack
+}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="longest-increasing-subsequence"><a class="header" href="#longest-increasing-subsequence">Longest Increasing Subsequence</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="base-template"><a class="header" href="#base-template">Base Template</a></h1>
 <h2 id="wo-testcases"><a class="header" href="#wo-testcases">w/o Testcases</a></h2>
@@ -1498,40 +1626,52 @@ fn main() {
     let out = &amp;mut BufWriter::new(stdout());
 }
 
-pub struct Scanner&lt;R&gt; {
-    reader: R,
+struct Scanner&lt;R&gt; {
+    _reader: R,
     buffer: Vec&lt;String&gt;,
-}
-
-impl&lt;R&gt; Scanner&lt;R&gt; {
-    pub fn new(reader: R) -&gt; Self {
-        Scanner {
-            reader,
-            buffer: Vec::new(),
-        }
-    }
 }
 
 impl&lt;R&gt; Scanner&lt;R&gt;
 where
     R: BufRead,
 {
-    pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
+    fn new(mut reader: R) -&gt; Self {
+        let mut input = String::new();
+        reader.read_to_string(&amp;mut input).expect(&quot;Failed to read&quot;);
+
+        let mut buffer = Vec::new();
+        buffer.extend(input.split_whitespace().rev().map(String::from));
+
+        Self {
+            _reader: reader,
+            buffer,
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next&lt;T&gt;(&amp;mut self) -&gt; T
     where
         T: std::str::FromStr,
     {
-        loop {
-            if let Some(token) = self.buffer.pop() {
-                return token.parse().ok().expect(&quot;Failed to parse&quot;);
-            }
-            let mut input = String::new();
-            self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
-            self.buffer
-                .extend(input.split_whitespace().rev().map(String::from));
+        match self.buffer.pop() {
+            Some(token) =&gt; token.parse().ok().expect(&quot;Failed to parse&quot;),
+            None =&gt; panic!(&quot;Input is all drained&quot;),
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next_option&lt;T&gt;(&amp;mut self) -&gt; Option&lt;T&gt;
+    where
+        T: std::str::FromStr,
+    {
+        match self.buffer.pop() {
+            Some(token) =&gt; token.parse().ok(),
+            None =&gt; None,
         }
     }
 }
-
 </code></pre>
 <h2 id="w-testcases"><a class="header" href="#w-testcases">w/ Testcases</a></h2>
 <pre><code class="language-rust noplayground">use std::io::*;
@@ -1548,44 +1688,56 @@ fn main() {
     for _ in 0..tc {}
 }
 
-pub struct Scanner&lt;R&gt; {
-    reader: R,
+struct Scanner&lt;R&gt; {
+    _reader: R,
     buffer: Vec&lt;String&gt;,
-}
-
-impl&lt;R&gt; Scanner&lt;R&gt; {
-    pub fn new(reader: R) -&gt; Self {
-        Scanner {
-            reader,
-            buffer: Vec::new(),
-        }
-    }
 }
 
 impl&lt;R&gt; Scanner&lt;R&gt;
 where
     R: BufRead,
 {
-    pub fn next&lt;T&gt;(&amp;mut self) -&gt; T
+    fn new(mut reader: R) -&gt; Self {
+        let mut input = String::new();
+        reader.read_to_string(&amp;mut input).expect(&quot;Failed to read&quot;);
+
+        let mut buffer = Vec::new();
+        buffer.extend(input.split_whitespace().rev().map(String::from));
+
+        Self {
+            _reader: reader,
+            buffer,
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next&lt;T&gt;(&amp;mut self) -&gt; T
     where
         T: std::str::FromStr,
     {
-        loop {
-            if let Some(token) = self.buffer.pop() {
-                return token.parse().ok().expect(&quot;Failed to parse&quot;);
-            }
-            let mut input = String::new();
-            self.reader.read_line(&amp;mut input).expect(&quot;Failed to read&quot;);
-            self.buffer
-                .extend(input.split_whitespace().rev().map(String::from));
+        match self.buffer.pop() {
+            Some(token) =&gt; token.parse().ok().expect(&quot;Failed to parse&quot;),
+            None =&gt; panic!(&quot;Input is all drained&quot;),
+        }
+    }
+
+    #[allow(dead_code)]
+    #[inline(always)]
+    fn next_option&lt;T&gt;(&amp;mut self) -&gt; Option&lt;T&gt;
+    where
+        T: std::str::FromStr,
+    {
+        match self.buffer.pop() {
+            Some(token) =&gt; token.parse().ok(),
+            None =&gt; None,
         }
     }
 }
-
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="zeroone-trait"><a class="header" href="#zeroone-trait">Zero/One Trait</a></h1>
 <h2 id="zero"><a class="header" href="#zero">Zero</a></h2>
-<h3 id="snippet-8"><a class="header" href="#snippet-8">Snippet</a></h3>
+<h3 id="snippet-9"><a class="header" href="#snippet-9">Snippet</a></h3>
 <pre><code class="language-rust noplayground">pub trait Zero: Sized + Copy {
     fn zero() -&gt; Self;
 }
@@ -1614,7 +1766,7 @@ impl_zero!(u64);
 impl_zero!(u128);
 </code></pre>
 <h2 id="one"><a class="header" href="#one">One</a></h2>
-<h3 id="snippet-9"><a class="header" href="#snippet-9">Snippet</a></h3>
+<h3 id="snippet-10"><a class="header" href="#snippet-10">Snippet</a></h3>
 <pre><code class="language-rust  noplayground">pub trait One: Sized + Copy {
     fn one() -&gt; Self;
 }
