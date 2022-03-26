@@ -170,7 +170,6 @@ impl&lt;'a&gt; Scanner&lt;'a&gt; {
         }
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next&lt;T: FromStr&gt;(&amp;mut self) -&gt; T {
         self.input
@@ -181,7 +180,6 @@ impl&lt;'a&gt; Scanner&lt;'a&gt; {
             .expect(&quot;Failed to parse&quot;)
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next_option&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
         let token = self.input.next();
@@ -191,13 +189,11 @@ impl&lt;'a&gt; Scanner&lt;'a&gt; {
         }
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next_str(&amp;mut self) -&gt; &amp;'a str {
         self.input.next().expect(&quot;Input has been exhausted&quot;)
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
         self.input.next()
@@ -237,7 +233,6 @@ impl&lt;'a&gt; Scanner&lt;'a&gt; {
         }
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next&lt;T: FromStr&gt;(&amp;mut self) -&gt; T {
         self.input
@@ -248,7 +243,6 @@ impl&lt;'a&gt; Scanner&lt;'a&gt; {
             .expect(&quot;Failed to parse&quot;)
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next_option&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
         let token = self.input.next();
@@ -258,13 +252,11 @@ impl&lt;'a&gt; Scanner&lt;'a&gt; {
         }
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next_str(&amp;mut self) -&gt; &amp;'a str {
         self.input.next().expect(&quot;Input has been exhausted&quot;)
     }
 
-    #[allow(dead_code)]
     #[inline(always)]
     fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
         self.input.next()
