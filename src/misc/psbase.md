@@ -17,7 +17,8 @@ fn main() {
         .read_to_string(&mut input_str)
         .expect("Failed to read");
     let mut scan = Scanner::new(&input_str);
-    let out = &mut BufWriter::new(stdout());
+    let stdout = stdout();
+    let out = &mut BufWriter::with_capacity(262144, stdout.lock());
 }
 
 struct Scanner<'a, I: Iterator<Item = &'a str>> {
@@ -81,7 +82,8 @@ fn main() {
         .read_to_string(&mut input_str)
         .expect("Failed to read");
     let mut scan = Scanner::new(&input_str);
-    let out = &mut BufWriter::new(stdout());
+    let stdout = stdout();
+    let out = &mut BufWriter::with_capacity(262144, stdout.lock());
 
     let tc: usize = scan.next();
     for _ in 0..tc {}
