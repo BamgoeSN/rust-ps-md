@@ -20,17 +20,19 @@ fn main() {
     let out = &mut BufWriter::new(stdout());
 }
 
-struct Scanner<'a> {
-    input: SplitWhitespace<'a>,
+struct Scanner<'a, I: Iterator<Item = &'a str>> {
+    input: I,
 }
 
-impl<'a> Scanner<'a> {
+impl<'a> Scanner<'a, SplitWhitespace<'a>> {
     fn new(s: &'a str) -> Self {
         Self {
             input: s.split_whitespace(),
         }
     }
+}
 
+impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
     #[inline(always)]
     fn next<T: FromStr>(&mut self) -> T {
         self.input
@@ -85,17 +87,19 @@ fn main() {
     for _ in 0..tc {}
 }
 
-struct Scanner<'a> {
-    input: SplitWhitespace<'a>,
+struct Scanner<'a, I: Iterator<Item = &'a str>> {
+    input: I,
 }
 
-impl<'a> Scanner<'a> {
+impl<'a> Scanner<'a, SplitWhitespace<'a>> {
     fn new(s: &'a str) -> Self {
         Self {
             input: s.split_whitespace(),
         }
     }
+}
 
+impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
     #[inline(always)]
     fn next<T: FromStr>(&mut self) -> T {
         self.input
