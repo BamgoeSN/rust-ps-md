@@ -1624,6 +1624,12 @@ fn main() {
     let mut scan = Scanner::new(&amp;input_str);
     let stdout = stdout();
     let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
+
+    macro_rules! next {
+        ($t:ty) =&gt; {
+            scan.next::&lt;$t&gt;()
+        };
+    }
 }
 
 struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
@@ -1688,7 +1694,13 @@ fn main() {
     let stdout = stdout();
     let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
 
-    let tc: usize = scan.next();
+    macro_rules! next {
+        ($t:ty) =&gt; {
+            scan.next::&lt;$t&gt;()
+        };
+    }
+
+    let tc = next!(usize);
     for _ in 0..tc {}
 }
 
