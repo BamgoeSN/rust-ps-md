@@ -160,6 +160,9 @@ fn main() {
     let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
 
     macro_rules! next {
+        () =&gt; {
+            scan.next()
+        };
         ($t:ty) =&gt; {
             scan.next::&lt;$t&gt;()
         };
@@ -229,6 +232,9 @@ fn main() {
     let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
 
     macro_rules! next {
+        () =&gt; {
+            scan.next()
+        };
         ($t:ty) =&gt; {
             scan.next::&lt;$t&gt;()
         };
