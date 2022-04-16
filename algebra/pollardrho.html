@@ -141,18 +141,18 @@
                     <main>
                         <h1 id="pollard-rho-algorithm"><a class="header" href="#pollard-rho-algorithm">Pollard Rho Algorithm</a></h1>
 <p>Pollard rho algorithm is a randomized algorithm which factorizes a number in an average of \(O(n^{1/4})\) time.</p>
-<pre><code class="language-rust noplayground">pub struct RNG {
+<pre><code class="language-rust noplayground">struct RNG {
     val: u64,
 }
 
 impl RNG {
     /// Returns a new RNG instance starting with a given seed.
-    pub fn new(seed: u64) -&gt; Self {
+    fn new(seed: u64) -&gt; Self {
         Self { val: seed }
     }
 
     /// Returns a random u64 number.
-    pub fn next(&amp;mut self) -&gt; u64 {
+    fn next(&amp;mut self) -&gt; u64 {
         let mut x = self.val;
         x ^= x &lt;&lt; 13;
         x ^= x &gt;&gt; 7;
@@ -162,27 +162,27 @@ impl RNG {
     }
 
     /// Returns a random f64 number within [0, 1].
-    pub fn next_f64(&amp;mut self) -&gt; f64 {
+    fn next_f64(&amp;mut self) -&gt; f64 {
         (self.next() as f64) / (u64::MAX as f64)
     }
 
     /// Returns a random u64 number within [l, r).
-    pub fn range_u64(&amp;mut self, l: u64, r: u64) -&gt; u64 {
+    fn range_u64(&amp;mut self, l: u64, r: u64) -&gt; u64 {
         l + self.next() % (r - l)
     }
 
     /// Returns a random i64 number within [l, r).
-    pub fn range_i64(&amp;mut self, l: i64, r: i64) -&gt; i64 {
+    fn range_i64(&amp;mut self, l: i64, r: i64) -&gt; i64 {
         l + (self.next() / 2) as i64 % (r - l)
     }
 
     /// Returns a random f64 number within [l, r].
-    pub fn range_f64(&amp;mut self, l: f64, r: f64) -&gt; f64 {
+    fn range_f64(&amp;mut self, l: f64, r: f64) -&gt; f64 {
         l + self.next_f64() * (r - l)
     }
 }
 
-pub trait Miller {
+trait Miller {
     fn rem_mul(x: Self, y: Self, m: Self) -&gt; Self;
     fn rem_pow(base: Self, exp: Self, m: Self) -&gt; Self;
     fn naive_primality(self) -&gt; bool;
@@ -286,7 +286,7 @@ fn abs_diff(a: u64, b: u64) -&gt; u64 {
     }
 }
 
-pub fn factorize(mut n: u64, rng: &amp;mut RNG) -&gt; Vec&lt;u64&gt; {
+fn factorize(mut n: u64, rng: &amp;mut RNG) -&gt; Vec&lt;u64&gt; {
     if n &lt;= 1 {
         return Vec::new();
     }

@@ -141,7 +141,7 @@
                     <main>
                         <h1 id="extended-euclid-algorithm"><a class="header" href="#extended-euclid-algorithm">Extended Euclid Algorithm</a></h1>
 <p>Returns \(r, s, t\) such that \(r = \gcd(a, b)\) and \(as+bt=r\).</p>
-<pre><code class="language-rust noplayground">pub fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
+<pre><code class="language-rust noplayground">fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
     let (mut s, mut old_s) = (0, 1);
     let (mut r, mut old_r) = (b, a);
     while r != 0 {

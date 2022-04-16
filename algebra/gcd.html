@@ -141,7 +141,7 @@
                     <main>
                         <h1 id="gcd"><a class="header" href="#gcd">GCD</a></h1>
 <p>Returns the greatest common divisor of a and b.</p>
-<pre><code class="language-rust noplayground">pub fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
+<pre><code class="language-rust noplayground">fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
     while b != 0 {
         let t = b;
         b = a % b;
@@ -153,7 +153,7 @@
 <h1 id="lcm"><a class="header" href="#lcm">LCM</a></h1>
 <p>Returns the least common multiplier of a and b.</p>
 <p>Required snippets: <a href="#gcd">GCD</a></p>
-<pre><code class="language-rust noplayground">pub fn lcm(a: i64, b: i64) -&gt; i64 {
+<pre><code class="language-rust noplayground">fn lcm(a: i64, b: i64) -&gt; i64 {
     a / gcd(a, b) * b
 }
 </code></pre>

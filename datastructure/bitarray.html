@@ -140,35 +140,35 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="bit-array"><a class="header" href="#bit-array">Bit Array</a></h1>
-<pre><code class="language-rust noplayground">pub struct BitArray {
+<pre><code class="language-rust noplayground">struct BitArray {
     bytes: Vec&lt;u8&gt;,
 }
 
 impl BitArray {
     #[inline(always)]
-    pub fn new(size: usize) -&gt; Self {
+    fn new(size: usize) -&gt; Self {
         Self {
             bytes: vec![0; (size &gt;&gt; 3) + 1],
         }
     }
 
     #[inline(always)]
-    pub fn get(&amp;self, idx: usize) -&gt; bool {
+    fn get(&amp;self, idx: usize) -&gt; bool {
         (self.bytes[idx &gt;&gt; 3] &gt;&gt; (idx &amp; 0b111)) &amp; 1 == 1
     }
 
     #[inline(always)]
-    pub fn set_true(&amp;mut self, idx: usize) {
+    fn set_true(&amp;mut self, idx: usize) {
         self.bytes[idx &gt;&gt; 3] |= 1 &lt;&lt; (idx &amp; 0b111);
     }
 
     #[inline(always)]
-    pub fn set_false(&amp;mut self, idx: usize) {
+    fn set_false(&amp;mut self, idx: usize) {
         self.bytes[idx &gt;&gt; 3] &amp;= !(1 &lt;&lt; (idx &amp; 0b111));
     }
 
     #[inline(always)]
-    pub fn set(&amp;mut self, idx: usize, to: bool) {
+    fn set(&amp;mut self, idx: usize, to: bool) {
         if to {
             self.set_true(idx);
         } else {
@@ -177,19 +177,19 @@ impl BitArray {
     }
 
     #[inline(always)]
-    pub fn toggle(&amp;mut self, idx: usize) {
+    fn toggle(&amp;mut self, idx: usize) {
         self.bytes[idx &gt;&gt; 3] ^= 1 &lt;&lt; (idx &amp; 0b111);
     }
 
     #[inline(always)]
-    pub fn fill(&amp;mut self, with: u8) {
+    fn fill(&amp;mut self, with: u8) {
         for v in self.bytes.iter_mut() {
             *v = with;
         }
     }
 
     #[inline(always)]
-    pub fn fill_range(&amp;mut self, chunk_start: usize, chunk_end: usize, with: u8) {
+    fn fill_range(&amp;mut self, chunk_start: usize, chunk_end: usize, with: u8) {
         for v in self.bytes[chunk_start..chunk_end].iter_mut() {
             *v = with;
         }

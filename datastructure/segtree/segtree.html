@@ -163,13 +163,13 @@ fn ceil_pow2(n: usize) -&gt; usize {
 }
 
 /// Represents each element of a segment tree, which should be a monoid $(S, \cdot)$.
-pub trait Monoid {
+trait Monoid {
     fn opr(&amp;self, other: &amp;Self) -&gt; Self;
     fn e() -&gt; Self;
 }
 
 /// Segment tree.
-pub struct SegTree&lt;S: Monoid&gt; {
+struct SegTree&lt;S: Monoid&gt; {
     n: usize,
     size: usize,
     log: usize,
@@ -182,7 +182,7 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Initializes a segment tree from an array.
-    pub fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
+    fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
         let log = ceil_pow2(arr.len());
         let mut st: Self = SegTree {
             n: arr.len(),
@@ -200,7 +200,7 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Sets a value at index `i` to a value `v`.
-    pub fn set(&amp;mut self, i: usize, v: &amp;S) {
+    fn set(&amp;mut self, i: usize, v: &amp;S) {
         let i = i + self.size;
         self.data[i] = v.clone();
         for j in 1..=self.log {
@@ -209,12 +209,12 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Gets a reference of a value at index `i`.
-    pub fn get(&amp;self, i: usize) -&gt; &amp;S {
+    fn get(&amp;self, i: usize) -&gt; &amp;S {
         &amp;self[i]
     }
 
     /// Returns $A_l \cdot A_{l+1} \cdot \cdots \cdot A_{r-1}$. If $l=r$, then returns $e$.
-    pub fn prod(&amp;self, l: usize, r: usize) -&gt; S {
+    fn prod(&amp;self, l: usize, r: usize) -&gt; S {
         let (mut sml, mut smr) = (S::e(), S::e());
         let (mut l, mut r) = (l + self.size, r + self.size);
 
@@ -234,11 +234,11 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Returns $A_0 \cdot A_1 \cdot \cdots A_{n-1}$.
-    pub fn all_prod(&amp;self) -&gt; S {
+    fn all_prod(&amp;self) -&gt; S {
         self.data[1].clone()
     }
 
-    pub fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, l: usize, f: C) -&gt; usize {
+    fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, l: usize, f: C) -&gt; usize {
         if l == self.n {
             return self.n;
         }
@@ -269,7 +269,7 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
         self.n
     }
     
-    pub fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, r: usize, f: C) -&gt; usize {
+    fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, r: usize, f: C) -&gt; usize {
         if r == 0 {
             return 0;
         }

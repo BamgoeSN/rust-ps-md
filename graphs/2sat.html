@@ -141,13 +141,13 @@
                     <main>
                         <h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
 <p>Required snippets: <a href="./scc.html#strongly-connected-components">SCC</a></p>
-<pre><code class="language-rust noplayground">pub struct TwoSat {
+<pre><code class="language-rust noplayground">struct TwoSat {
     n: usize,
     scc: SccGraph,
 }
 
 impl TwoSat {
-    pub fn new(n: usize) -&gt; Self {
+    fn new(n: usize) -&gt; Self {
         Self {
             n,
             scc: SccGraph::new(n &lt;&lt; 1),
@@ -162,7 +162,7 @@ impl TwoSat {
         }
     }
 
-    pub fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
+    fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
         self.scc.add_edge(
             (i &lt;&lt; 1) + Self::judge(f, 0, 1),
             (j &lt;&lt; 1) + Self::judge(g, 1, 0),
@@ -184,7 +184,7 @@ impl TwoSat {
         true
     }
 
-    pub fn solve(&amp;self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
+    fn solve(&amp;self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
         let mut answer = vec![false; self.n];
         let doable = self.is_satisfiable(&amp;mut answer);
         if doable {

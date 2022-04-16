@@ -145,7 +145,7 @@
 <p>Some snippets might require other snippets from another section. For such snippets, every required section will be linked on it, so that you can get the snippet right away. You simply copy all those and paste to your code before you paste the original snippet you were going to use.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gcd"><a class="header" href="#gcd">GCD</a></h1>
 <p>Returns the greatest common divisor of a and b.</p>
-<pre><code class="language-rust noplayground">pub fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
+<pre><code class="language-rust noplayground">fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
     while b != 0 {
         let t = b;
         b = a % b;
@@ -157,13 +157,13 @@
 <h1 id="lcm"><a class="header" href="#lcm">LCM</a></h1>
 <p>Returns the least common multiplier of a and b.</p>
 <p>Required snippets: <a href="algebra/gcd.html#gcd">GCD</a></p>
-<pre><code class="language-rust noplayground">pub fn lcm(a: i64, b: i64) -&gt; i64 {
+<pre><code class="language-rust noplayground">fn lcm(a: i64, b: i64) -&gt; i64 {
     a / gcd(a, b) * b
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extended-euclid-algorithm"><a class="header" href="#extended-euclid-algorithm">Extended Euclid Algorithm</a></h1>
 <p>Returns \(r, s, t\) such that \(r = \gcd(a, b)\) and \(as+bt=r\).</p>
-<pre><code class="language-rust noplayground">pub fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
+<pre><code class="language-rust noplayground">fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
     let (mut s, mut old_s) = (0, 1);
     let (mut r, mut old_r) = (b, a);
     while r != 0 {
@@ -237,7 +237,7 @@ fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
 }
 
 /// Returns $x$ s.t. $x=r_i (mod m_i)$ for all $i$
-pub fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
+fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
     let (mut x, mut m_prod) = (0, 1);
     for (bi, mi) in r.iter().zip(m.iter()) {
         let (g, s, _) = ext_gcd(m_prod, *mi);
@@ -283,7 +283,7 @@ where
 #[inline]
 fn rem_pow&lt;T, U&gt;(mut base: T, mut exp: T, m: T) -&gt; T
 where
-    T: Copy + Zero + One + Eq + RemAssign + BitAnd&lt;Output = T&gt; + ShrAssign + Cast&lt;U&gt;,
+    T: Copy + ZeroOne + Eq + RemAssign + BitAnd&lt;Output = T&gt; + ShrAssign + Cast&lt;U&gt;,
     U: Copy + Mul&lt;Output = U&gt; + Rem&lt;Output = U&gt; + Cast&lt;T&gt;,
 {
     exp %= m;
@@ -298,7 +298,7 @@ where
     r
 }
 
-pub trait Miller {
+trait Miller {
     fn naive_primality(self) -&gt; bool;
     fn miller_rabin(self, a: Self) -&gt; bool;
     fn miller_primality(self) -&gt; bool;
@@ -374,18 +374,18 @@ assert!(!3284729387911u64.is_prime()); // 53×61976026187
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="pollard-rho-algorithm"><a class="header" href="#pollard-rho-algorithm">Pollard Rho Algorithm</a></h1>
 <p>Pollard rho algorithm is a randomized algorithm which factorizes a number in an average of \(O(n^{1/4})\) time.</p>
-<pre><code class="language-rust noplayground">pub struct RNG {
+<pre><code class="language-rust noplayground">struct RNG {
     val: u64,
 }
 
 impl RNG {
     /// Returns a new RNG instance starting with a given seed.
-    pub fn new(seed: u64) -&gt; Self {
+    fn new(seed: u64) -&gt; Self {
         Self { val: seed }
     }
 
     /// Returns a random u64 number.
-    pub fn next(&amp;mut self) -&gt; u64 {
+    fn next(&amp;mut self) -&gt; u64 {
         let mut x = self.val;
         x ^= x &lt;&lt; 13;
         x ^= x &gt;&gt; 7;
@@ -395,27 +395,27 @@ impl RNG {
     }
 
     /// Returns a random f64 number within [0, 1].
-    pub fn next_f64(&amp;mut self) -&gt; f64 {
+    fn next_f64(&amp;mut self) -&gt; f64 {
         (self.next() as f64) / (u64::MAX as f64)
     }
 
     /// Returns a random u64 number within [l, r).
-    pub fn range_u64(&amp;mut self, l: u64, r: u64) -&gt; u64 {
+    fn range_u64(&amp;mut self, l: u64, r: u64) -&gt; u64 {
         l + self.next() % (r - l)
     }
 
     /// Returns a random i64 number within [l, r).
-    pub fn range_i64(&amp;mut self, l: i64, r: i64) -&gt; i64 {
+    fn range_i64(&amp;mut self, l: i64, r: i64) -&gt; i64 {
         l + (self.next() / 2) as i64 % (r - l)
     }
 
     /// Returns a random f64 number within [l, r].
-    pub fn range_f64(&amp;mut self, l: f64, r: f64) -&gt; f64 {
+    fn range_f64(&amp;mut self, l: f64, r: f64) -&gt; f64 {
         l + self.next_f64() * (r - l)
     }
 }
 
-pub trait Miller {
+trait Miller {
     fn rem_mul(x: Self, y: Self, m: Self) -&gt; Self;
     fn rem_pow(base: Self, exp: Self, m: Self) -&gt; Self;
     fn naive_primality(self) -&gt; bool;
@@ -519,7 +519,7 @@ fn abs_diff(a: u64, b: u64) -&gt; u64 {
     }
 }
 
-pub fn factorize(mut n: u64, rng: &amp;mut RNG) -&gt; Vec&lt;u64&gt; {
+fn factorize(mut n: u64, rng: &amp;mut RNG) -&gt; Vec&lt;u64&gt; {
     if n &lt;= 1 {
         return Vec::new();
     }
@@ -592,35 +592,35 @@ factors.sort();
 assert_eq!(factors, [53, 61976026187]);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bit-array"><a class="header" href="#bit-array">Bit Array</a></h1>
-<pre><code class="language-rust noplayground">pub struct BitArray {
+<pre><code class="language-rust noplayground">struct BitArray {
     bytes: Vec&lt;u8&gt;,
 }
 
 impl BitArray {
     #[inline(always)]
-    pub fn new(size: usize) -&gt; Self {
+    fn new(size: usize) -&gt; Self {
         Self {
             bytes: vec![0; (size &gt;&gt; 3) + 1],
         }
     }
 
     #[inline(always)]
-    pub fn get(&amp;self, idx: usize) -&gt; bool {
+    fn get(&amp;self, idx: usize) -&gt; bool {
         (self.bytes[idx &gt;&gt; 3] &gt;&gt; (idx &amp; 0b111)) &amp; 1 == 1
     }
 
     #[inline(always)]
-    pub fn set_true(&amp;mut self, idx: usize) {
+    fn set_true(&amp;mut self, idx: usize) {
         self.bytes[idx &gt;&gt; 3] |= 1 &lt;&lt; (idx &amp; 0b111);
     }
 
     #[inline(always)]
-    pub fn set_false(&amp;mut self, idx: usize) {
+    fn set_false(&amp;mut self, idx: usize) {
         self.bytes[idx &gt;&gt; 3] &amp;= !(1 &lt;&lt; (idx &amp; 0b111));
     }
 
     #[inline(always)]
-    pub fn set(&amp;mut self, idx: usize, to: bool) {
+    fn set(&amp;mut self, idx: usize, to: bool) {
         if to {
             self.set_true(idx);
         } else {
@@ -629,19 +629,19 @@ impl BitArray {
     }
 
     #[inline(always)]
-    pub fn toggle(&amp;mut self, idx: usize) {
+    fn toggle(&amp;mut self, idx: usize) {
         self.bytes[idx &gt;&gt; 3] ^= 1 &lt;&lt; (idx &amp; 0b111);
     }
 
     #[inline(always)]
-    pub fn fill(&amp;mut self, with: u8) {
+    fn fill(&amp;mut self, with: u8) {
         for v in self.bytes.iter_mut() {
             *v = with;
         }
     }
 
     #[inline(always)]
-    pub fn fill_range(&amp;mut self, chunk_start: usize, chunk_end: usize, with: u8) {
+    fn fill_range(&amp;mut self, chunk_start: usize, chunk_end: usize, with: u8) {
         for v in self.bytes[chunk_start..chunk_end].iter_mut() {
             *v = with;
         }
@@ -674,13 +674,13 @@ fn ceil_pow2(n: usize) -&gt; usize {
 }
 
 /// Represents each element of a segment tree, which should be a monoid $(S, \cdot)$.
-pub trait Monoid {
+trait Monoid {
     fn opr(&amp;self, other: &amp;Self) -&gt; Self;
     fn e() -&gt; Self;
 }
 
 /// Segment tree.
-pub struct SegTree&lt;S: Monoid&gt; {
+struct SegTree&lt;S: Monoid&gt; {
     n: usize,
     size: usize,
     log: usize,
@@ -693,7 +693,7 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Initializes a segment tree from an array.
-    pub fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
+    fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
         let log = ceil_pow2(arr.len());
         let mut st: Self = SegTree {
             n: arr.len(),
@@ -711,7 +711,7 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Sets a value at index `i` to a value `v`.
-    pub fn set(&amp;mut self, i: usize, v: &amp;S) {
+    fn set(&amp;mut self, i: usize, v: &amp;S) {
         let i = i + self.size;
         self.data[i] = v.clone();
         for j in 1..=self.log {
@@ -720,12 +720,12 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Gets a reference of a value at index `i`.
-    pub fn get(&amp;self, i: usize) -&gt; &amp;S {
+    fn get(&amp;self, i: usize) -&gt; &amp;S {
         &amp;self[i]
     }
 
     /// Returns $A_l \cdot A_{l+1} \cdot \cdots \cdot A_{r-1}$. If $l=r$, then returns $e$.
-    pub fn prod(&amp;self, l: usize, r: usize) -&gt; S {
+    fn prod(&amp;self, l: usize, r: usize) -&gt; S {
         let (mut sml, mut smr) = (S::e(), S::e());
         let (mut l, mut r) = (l + self.size, r + self.size);
 
@@ -745,11 +745,11 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
     }
 
     /// Returns $A_0 \cdot A_1 \cdot \cdots A_{n-1}$.
-    pub fn all_prod(&amp;self) -&gt; S {
+    fn all_prod(&amp;self) -&gt; S {
         self.data[1].clone()
     }
 
-    pub fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, l: usize, f: C) -&gt; usize {
+    fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, l: usize, f: C) -&gt; usize {
         if l == self.n {
             return self.n;
         }
@@ -780,7 +780,7 @@ impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
         self.n
     }
     
-    pub fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, r: usize, f: C) -&gt; usize {
+    fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, r: usize, f: C) -&gt; usize {
         if r == 0 {
             return 0;
         }
@@ -848,20 +848,20 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
 <p>Required snippets: <a href="datastructure/segtree/../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
-<pre><code class="language-rust noplayground">pub struct Fenwick&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; {
+<pre><code class="language-rust noplayground">struct Fenwick&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; {
     n: usize,
     data: Vec&lt;T&gt;,
 }
 
 impl&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
-    pub fn new(n: usize) -&gt; Self {
+    fn new(n: usize) -&gt; Self {
         Self {
             n,
             data: vec![T::zero(); n],
         }
     }
 
-    pub fn add(&amp;mut self, idx: usize, val: T) {
+    fn add(&amp;mut self, idx: usize, val: T) {
         let mut idx = idx + 1;
         while idx &lt;= self.n {
             self.data[idx - 1] += val;
@@ -869,7 +869,7 @@ impl&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
         }
     }
 
-    pub fn sum(&amp;self, l: usize, r: usize) -&gt; T {
+    fn sum(&amp;self, l: usize, r: usize) -&gt; T {
         self.inner_sum(r) - self.inner_sum(l)
     }
 
@@ -906,20 +906,20 @@ impl&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
 }
 
 /// Represents a monoid in a lazy segment tree $(S, \cdot)$.
-pub trait Monoid {
+trait Monoid {
     fn opr(&amp;self, other: &amp;Self) -&gt; Self;
     fn e() -&gt; Self;
 }
 
 /// Represents a map $F$ acting on the monoid $(S, \cdot)$.
-pub trait Mapping&lt;T: Monoid&gt; {
+trait Mapping&lt;T: Monoid&gt; {
     fn map(&amp;self, apply: &amp;T) -&gt; T;
     fn compos(&amp;self, other: &amp;Self) -&gt; Self;
     fn id() -&gt; Self;
 }
 
 /// Lazy segment tree for the monoid $(S, \cdot)$ and the map $F$.
-pub struct LazySeg&lt;S: Monoid, F: Mapping&lt;S&gt;&gt; {
+struct LazySeg&lt;S: Monoid, F: Mapping&lt;S&gt;&gt; {
     n: usize,
     size: usize,
     log: usize,
@@ -950,7 +950,7 @@ where
     }
 
     /// Initializes the lazy segment tree from the given array.
-    pub fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
+    fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
         let log = ceil_pow2(arr.len());
         let mut ls: Self = LazySeg {
             n: arr.len(),
@@ -969,7 +969,7 @@ where
     }
 
     /// Sets a value at the index `i` to `v`.
-    pub fn set(&amp;mut self, i: usize, v: &amp;S) {
+    fn set(&amp;mut self, i: usize, v: &amp;S) {
         let i = i + self.size;
         for j in (1..=self.log).rev() {
             self.push(i &gt;&gt; j);
@@ -981,7 +981,7 @@ where
     }
 
     /// Returns a reference to the value at the index `i`.
-    pub fn get(&amp;mut self, i: usize) -&gt; &amp;S {
+    fn get(&amp;mut self, i: usize) -&gt; &amp;S {
         let i = i + self.size;
         for j in (1..=self.log).rev() {
             self.push(i &gt;&gt; j);
@@ -990,7 +990,7 @@ where
     }
 
     /// Returns a product of elements in [l, r).
-    pub fn prod(&amp;mut self, l: usize, r: usize) -&gt; S {
+    fn prod(&amp;mut self, l: usize, r: usize) -&gt; S {
         if l == r {
             return S::e();
         }
@@ -1024,12 +1024,12 @@ where
     }
 
     /// Returns the product of every elements.
-    pub fn all_prod(&amp;self) -&gt; S {
+    fn all_prod(&amp;self) -&gt; S {
         self.data[1].clone()
     }
 
     /// Apply a map `f` to the element at `i`.
-    pub fn apply(&amp;mut self, i: usize, f: &amp;F) {
+    fn apply(&amp;mut self, i: usize, f: &amp;F) {
         let i = i + self.size;
         for j in (1..=self.log).rev() {
             self.push(i &gt;&gt; j);
@@ -1041,7 +1041,7 @@ where
     }
 
     /// Apply a map `f` to the element in an interval [l, r).
-    pub fn apply_range(&amp;mut self, l: usize, r: usize, f: &amp;F) {
+    fn apply_range(&amp;mut self, l: usize, r: usize, f: &amp;F) {
         if l == r {
             return;
         }
@@ -1083,7 +1083,7 @@ where
         }
     }
     
-    pub fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, l: usize, g: C) -&gt; usize {
+    fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, l: usize, g: C) -&gt; usize {
         if l == self.n {
             return self.n;
         }
@@ -1119,7 +1119,7 @@ where
         self.n
     }
     
-    pub fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, r: usize, g: C) -&gt; usize {
+    fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, r: usize, g: C) -&gt; usize {
         if r == 0 {
             return 0;
         }
@@ -1225,7 +1225,7 @@ impl Mapping&lt;Elm&gt; for Map {
 <li>Add an undirected edge between two nodes (<code>union</code>)</li>
 <li>Determine if there exist a path between two nodes (<code>is_reachable</code>)</li>
 </ul>
-<pre><code class="language-rust noplayground">pub struct UnionFind {
+<pre><code class="language-rust noplayground">struct UnionFind {
     size: usize,
     parents: Vec&lt;usize&gt;,
     group_size: Vec&lt;usize&gt;,
@@ -1234,7 +1234,7 @@ impl Mapping&lt;Elm&gt; for Map {
 
 impl UnionFind {
     /// Returns a new UnionFind instance where `size` number of elements are in their own disjoint set.
-    pub fn new(size: usize) -&gt; Self {
+    fn new(size: usize) -&gt; Self {
         Self {
             size,
             parents: vec![size; size],
@@ -1244,13 +1244,13 @@ impl UnionFind {
     }
 
     /// Returns the number of nodes which can be reached from x.
-    pub fn get_group_size(&amp;mut self, x: usize) -&gt; usize {
+    fn get_group_size(&amp;mut self, x: usize) -&gt; usize {
         let root = self.find_root(x);
         self.group_size[root]
     }
 
     /// Returns the number of connected components.
-    pub fn get_group_num(&amp;self) -&gt; usize {
+    fn get_group_num(&amp;self) -&gt; usize {
         self.group_num
     }
 
@@ -1264,12 +1264,12 @@ impl UnionFind {
     }
 
     /// Returns true if there exists a path from a to b.
-    pub fn is_reachable(&amp;mut self, a: usize, b: usize) -&gt; bool {
+    fn is_reachable(&amp;mut self, a: usize, b: usize) -&gt; bool {
         self.find_root(a) == self.find_root(b)
     }
 
     /// Add an edge between a and b.
-    pub fn union(&amp;mut self, a: usize, b: usize) {
+    fn union(&amp;mut self, a: usize, b: usize) {
         let a_root = self.find_root(a);
         let b_root = self.find_root(b);
 
@@ -1332,20 +1332,20 @@ impl SccStack {
     }
 }
 
-pub struct SccGraph {
+struct SccGraph {
     n: usize,
     graph: Vec&lt;Vec&lt;usize&gt;&gt;,
 }
 
 impl SccGraph {
-    pub fn new(n: usize) -&gt; Self {
+    fn new(n: usize) -&gt; Self {
         Self {
             n,
             graph: (0..n).map(|_| Vec::new()).collect(),
         }
     }
 
-    pub fn add_edge(&amp;mut self, from: usize, to: usize) {
+    fn add_edge(&amp;mut self, from: usize, to: usize) {
         self.graph[from].push(to);
     }
 
@@ -1408,7 +1408,7 @@ impl SccGraph {
 
     /// SCC list and SCC IDs
     /// ids[node id] = id of SCC where the node is in
-    pub fn solve(&amp;self) -&gt; (Vec&lt;Vec&lt;usize&gt;&gt;, Vec&lt;usize&gt;) {
+    fn solve(&amp;self) -&gt; (Vec&lt;Vec&lt;usize&gt;&gt;, Vec&lt;usize&gt;) {
         let list = self.get_scc();
         let mut ids = vec![0; self.n];
         for (i, l) in list.iter().enumerate() {
@@ -1422,13 +1422,13 @@ impl SccGraph {
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
 <p>Required snippets: <a href="graphs/./scc.html#strongly-connected-components">SCC</a></p>
-<pre><code class="language-rust noplayground">pub struct TwoSat {
+<pre><code class="language-rust noplayground">struct TwoSat {
     n: usize,
     scc: SccGraph,
 }
 
 impl TwoSat {
-    pub fn new(n: usize) -&gt; Self {
+    fn new(n: usize) -&gt; Self {
         Self {
             n,
             scc: SccGraph::new(n &lt;&lt; 1),
@@ -1443,7 +1443,7 @@ impl TwoSat {
         }
     }
 
-    pub fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
+    fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
         self.scc.add_edge(
             (i &lt;&lt; 1) + Self::judge(f, 0, 1),
             (j &lt;&lt; 1) + Self::judge(g, 1, 0),
@@ -1465,7 +1465,7 @@ impl TwoSat {
         true
     }
 
-    pub fn solve(&amp;self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
+    fn solve(&amp;self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
         let mut answer = vec![false; self.n];
         let doable = self.is_satisfiable(&amp;mut answer);
         if doable {
