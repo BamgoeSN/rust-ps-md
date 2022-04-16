@@ -1605,6 +1605,51 @@ fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="longest-increasing-subsequence"><a class="header" href="#longest-increasing-subsequence">Longest Increasing Subsequence</a></h1>
+<h2 id="length"><a class="header" href="#length">Length</a></h2>
+<pre><code class="language-rust noplayground">fn lis_len(arr: &amp;[i64]) -&gt; usize {
+    let mut table: Vec&lt;i64&gt; = vec![arr[0]];
+    for &amp;v in arr[1..].iter() {
+        let p = table.partition_point(|&amp;x| x &lt; v);
+        if p == table.len() {
+            table.push(v);
+        } else {
+            table[p] = v;
+        }
+    }
+    table.len()
+}
+</code></pre>
+<h2 id="sequence"><a class="header" href="#sequence">Sequence</a></h2>
+<pre><code class="language-rust noplayground">fn lis(arr: &amp;[i64]) -&gt; Vec&lt;i64&gt; {
+    let n = arr.len();
+    let mut seq: Vec&lt;i64&gt; = Vec::with_capacity(n + 1);
+    seq.push(i64::MIN);
+    seq.extend(arr.iter().copied());
+
+    let mut back = vec![0usize; n + 1];
+    let mut table = vec![0usize];
+
+    for (i, &amp;v) in seq.iter().enumerate().skip(1) {
+        let p = table.partition_point(|&amp;x| seq[x] &lt; v);
+        if p == table.len() {
+            table.push(i);
+        } else {
+            table[p] = i;
+        }
+        back[i] = table[p - 1];
+    }
+
+    let mut ptr = *table.last().unwrap();
+    let mut ans: Vec&lt;i64&gt; = Vec::with_capacity(table.len() - 1);
+    while ptr != 0 {
+        ans.push(seq[ptr]);
+        ptr = back[ptr];
+    }
+
+    ans.reverse();
+    ans
+}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="base-template"><a class="header" href="#base-template">Base Template</a></h1>
 <h2 id="wo-testcases"><a class="header" href="#wo-testcases">w/o Testcases</a></h2>
 <pre><code class="language-rust noplayground">use std::{
