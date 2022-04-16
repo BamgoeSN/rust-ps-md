@@ -24,13 +24,13 @@ fn ceil_pow2(n: usize) -> usize {
 }
 
 /// Represents each element of a segment tree, which should be a monoid $(S, \cdot)$.
-pub trait Monoid {
+trait Monoid {
     fn opr(&self, other: &Self) -> Self;
     fn e() -> Self;
 }
 
 /// Segment tree.
-pub struct SegTree<S: Monoid> {
+struct SegTree<S: Monoid> {
     n: usize,
     size: usize,
     log: usize,
@@ -43,7 +43,7 @@ impl<S: Monoid + Clone> SegTree<S> {
     }
 
     /// Initializes a segment tree from an array.
-    pub fn new(arr: &Vec<S>) -> Self {
+    fn new(arr: &Vec<S>) -> Self {
         let log = ceil_pow2(arr.len());
         let mut st: Self = SegTree {
             n: arr.len(),
@@ -61,7 +61,7 @@ impl<S: Monoid + Clone> SegTree<S> {
     }
 
     /// Sets a value at index `i` to a value `v`.
-    pub fn set(&mut self, i: usize, v: &S) {
+    fn set(&mut self, i: usize, v: &S) {
         let i = i + self.size;
         self.data[i] = v.clone();
         for j in 1..=self.log {
@@ -70,12 +70,12 @@ impl<S: Monoid + Clone> SegTree<S> {
     }
 
     /// Gets a reference of a value at index `i`.
-    pub fn get(&self, i: usize) -> &S {
+    fn get(&self, i: usize) -> &S {
         &self[i]
     }
 
     /// Returns $A_l \cdot A_{l+1} \cdot \cdots \cdot A_{r-1}$. If $l=r$, then returns $e$.
-    pub fn prod(&self, l: usize, r: usize) -> S {
+    fn prod(&self, l: usize, r: usize) -> S {
         let (mut sml, mut smr) = (S::e(), S::e());
         let (mut l, mut r) = (l + self.size, r + self.size);
 
@@ -95,11 +95,11 @@ impl<S: Monoid + Clone> SegTree<S> {
     }
 
     /// Returns $A_0 \cdot A_1 \cdot \cdots A_{n-1}$.
-    pub fn all_prod(&self) -> S {
+    fn all_prod(&self) -> S {
         self.data[1].clone()
     }
 
-    pub fn max_right<C: Fn(&S) -> bool>(&self, l: usize, f: C) -> usize {
+    fn max_right<C: Fn(&S) -> bool>(&self, l: usize, f: C) -> usize {
         if l == self.n {
             return self.n;
         }
@@ -130,7 +130,7 @@ impl<S: Monoid + Clone> SegTree<S> {
         self.n
     }
     
-    pub fn min_left<C: Fn(&S) -> bool>(&self, r: usize, f: C) -> usize {
+    fn min_left<C: Fn(&S) -> bool>(&self, r: usize, f: C) -> usize {
         if r == 0 {
             return 0;
         }

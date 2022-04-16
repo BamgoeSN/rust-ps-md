@@ -1,18 +1,18 @@
 # Pollard Rho Algorithm
 Pollard rho algorithm is a randomized algorithm which factorizes a number in an average of \\(O(n^{1/4})\\) time.
 ```rust,noplayground
-pub struct RNG {
+struct RNG {
     val: u64,
 }
 
 impl RNG {
     /// Returns a new RNG instance starting with a given seed.
-    pub fn new(seed: u64) -> Self {
+    fn new(seed: u64) -> Self {
         Self { val: seed }
     }
 
     /// Returns a random u64 number.
-    pub fn next(&mut self) -> u64 {
+    fn next(&mut self) -> u64 {
         let mut x = self.val;
         x ^= x << 13;
         x ^= x >> 7;
@@ -22,27 +22,27 @@ impl RNG {
     }
 
     /// Returns a random f64 number within [0, 1].
-    pub fn next_f64(&mut self) -> f64 {
+    fn next_f64(&mut self) -> f64 {
         (self.next() as f64) / (u64::MAX as f64)
     }
 
     /// Returns a random u64 number within [l, r).
-    pub fn range_u64(&mut self, l: u64, r: u64) -> u64 {
+    fn range_u64(&mut self, l: u64, r: u64) -> u64 {
         l + self.next() % (r - l)
     }
 
     /// Returns a random i64 number within [l, r).
-    pub fn range_i64(&mut self, l: i64, r: i64) -> i64 {
+    fn range_i64(&mut self, l: i64, r: i64) -> i64 {
         l + (self.next() / 2) as i64 % (r - l)
     }
 
     /// Returns a random f64 number within [l, r].
-    pub fn range_f64(&mut self, l: f64, r: f64) -> f64 {
+    fn range_f64(&mut self, l: f64, r: f64) -> f64 {
         l + self.next_f64() * (r - l)
     }
 }
 
-pub trait Miller {
+trait Miller {
     fn rem_mul(x: Self, y: Self, m: Self) -> Self;
     fn rem_pow(base: Self, exp: Self, m: Self) -> Self;
     fn naive_primality(self) -> bool;
@@ -146,7 +146,7 @@ fn abs_diff(a: u64, b: u64) -> u64 {
     }
 }
 
-pub fn factorize(mut n: u64, rng: &mut RNG) -> Vec<u64> {
+fn factorize(mut n: u64, rng: &mut RNG) -> Vec<u64> {
     if n <= 1 {
         return Vec::new();
     }

@@ -1,7 +1,7 @@
 # Extended Euclid Algorithm
 Returns \\(r, s, t\\) such that \\(r = \gcd(a, b)\\) and \\(as+bt=r\\).
 ```rust,noplayground
-pub fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
+fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
     let (mut s, mut old_s) = (0, 1);
     let (mut r, mut old_r) = (b, a);
     while r != 0 {

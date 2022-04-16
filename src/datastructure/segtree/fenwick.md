@@ -8,20 +8,20 @@ A Fenwick tree uses half the memory of a segment tree, but the performance in te
 
 Required snippets: [Zero Trait](../../misc/zero_one_trait.md#zero)
 ```rust,noplayground
-pub struct Fenwick<T: Zero + AddAssign + Sub<Output = T>> {
+struct Fenwick<T: Zero + AddAssign + Sub<Output = T>> {
     n: usize,
     data: Vec<T>,
 }
 
 impl<T: Zero + AddAssign + Sub<Output = T>> Fenwick<T> {
-    pub fn new(n: usize) -> Self {
+    fn new(n: usize) -> Self {
         Self {
             n,
             data: vec![T::zero(); n],
         }
     }
 
-    pub fn add(&mut self, idx: usize, val: T) {
+    fn add(&mut self, idx: usize, val: T) {
         let mut idx = idx + 1;
         while idx <= self.n {
             self.data[idx - 1] += val;
@@ -29,7 +29,7 @@ impl<T: Zero + AddAssign + Sub<Output = T>> Fenwick<T> {
         }
     }
 
-    pub fn sum(&self, l: usize, r: usize) -> T {
+    fn sum(&self, l: usize, r: usize) -> T {
         self.inner_sum(r) - self.inner_sum(l)
     }
 

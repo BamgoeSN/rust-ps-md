@@ -2,13 +2,13 @@
 
 Required snippets: [SCC](./scc.md#strongly-connected-components)
 ```rust,noplayground
-pub struct TwoSat {
+struct TwoSat {
     n: usize,
     scc: SccGraph,
 }
 
 impl TwoSat {
-    pub fn new(n: usize) -> Self {
+    fn new(n: usize) -> Self {
         Self {
             n,
             scc: SccGraph::new(n << 1),
@@ -23,7 +23,7 @@ impl TwoSat {
         }
     }
 
-    pub fn add_clause(&mut self, i: usize, f: bool, j: usize, g: bool) {
+    fn add_clause(&mut self, i: usize, f: bool, j: usize, g: bool) {
         self.scc.add_edge(
             (i << 1) + Self::judge(f, 0, 1),
             (j << 1) + Self::judge(g, 1, 0),
@@ -45,7 +45,7 @@ impl TwoSat {
         true
     }
 
-    pub fn solve(&self) -> Option<Vec<bool>> {
+    fn solve(&self) -> Option<Vec<bool>> {
         let mut answer = vec![false; self.n];
         let doable = self.is_satisfiable(&mut answer);
         if doable {

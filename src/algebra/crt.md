@@ -53,7 +53,7 @@ fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
 }
 
 /// Returns $x$ s.t. $x=r_i (mod m_i)$ for all $i$
-pub fn crt(r: &[i64], m: &[i64]) -> Option<i64> {
+fn crt(r: &[i64], m: &[i64]) -> Option<i64> {
     let (mut x, mut m_prod) = (0, 1);
     for (bi, mi) in r.iter().zip(m.iter()) {
         let (g, s, _) = ext_gcd(m_prod, *mi);

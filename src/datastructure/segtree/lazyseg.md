@@ -23,20 +23,20 @@ fn ceil_pow2(n: usize) -> usize {
 }
 
 /// Represents a monoid in a lazy segment tree $(S, \cdot)$.
-pub trait Monoid {
+trait Monoid {
     fn opr(&self, other: &Self) -> Self;
     fn e() -> Self;
 }
 
 /// Represents a map $F$ acting on the monoid $(S, \cdot)$.
-pub trait Mapping<T: Monoid> {
+trait Mapping<T: Monoid> {
     fn map(&self, apply: &T) -> T;
     fn compos(&self, other: &Self) -> Self;
     fn id() -> Self;
 }
 
 /// Lazy segment tree for the monoid $(S, \cdot)$ and the map $F$.
-pub struct LazySeg<S: Monoid, F: Mapping<S>> {
+struct LazySeg<S: Monoid, F: Mapping<S>> {
     n: usize,
     size: usize,
     log: usize,
@@ -67,7 +67,7 @@ where
     }
 
     /// Initializes the lazy segment tree from the given array.
-    pub fn new(arr: &Vec<S>) -> Self {
+    fn new(arr: &Vec<S>) -> Self {
         let log = ceil_pow2(arr.len());
         let mut ls: Self = LazySeg {
             n: arr.len(),
@@ -86,7 +86,7 @@ where
     }
 
     /// Sets a value at the index `i` to `v`.
-    pub fn set(&mut self, i: usize, v: &S) {
+    fn set(&mut self, i: usize, v: &S) {
         let i = i + self.size;
         for j in (1..=self.log).rev() {
             self.push(i >> j);
@@ -98,7 +98,7 @@ where
     }
 
     /// Returns a reference to the value at the index `i`.
-    pub fn get(&mut self, i: usize) -> &S {
+    fn get(&mut self, i: usize) -> &S {
         let i = i + self.size;
         for j in (1..=self.log).rev() {
             self.push(i >> j);
@@ -107,7 +107,7 @@ where
     }
 
     /// Returns a product of elements in [l, r).
-    pub fn prod(&mut self, l: usize, r: usize) -> S {
+    fn prod(&mut self, l: usize, r: usize) -> S {
         if l == r {
             return S::e();
         }
@@ -141,12 +141,12 @@ where
     }
 
     /// Returns the product of every elements.
-    pub fn all_prod(&self) -> S {
+    fn all_prod(&self) -> S {
         self.data[1].clone()
     }
 
     /// Apply a map `f` to the element at `i`.
-    pub fn apply(&mut self, i: usize, f: &F) {
+    fn apply(&mut self, i: usize, f: &F) {
         let i = i + self.size;
         for j in (1..=self.log).rev() {
             self.push(i >> j);
@@ -158,7 +158,7 @@ where
     }
 
     /// Apply a map `f` to the element in an interval [l, r).
-    pub fn apply_range(&mut self, l: usize, r: usize, f: &F) {
+    fn apply_range(&mut self, l: usize, r: usize, f: &F) {
         if l == r {
             return;
         }
@@ -200,7 +200,7 @@ where
         }
     }
     
-    pub fn max_right<C: Fn(&S) -> bool>(&mut self, l: usize, g: C) -> usize {
+    fn max_right<C: Fn(&S) -> bool>(&mut self, l: usize, g: C) -> usize {
         if l == self.n {
             return self.n;
         }
@@ -236,7 +236,7 @@ where
         self.n
     }
     
-    pub fn min_left<C: Fn(&S) -> bool>(&mut self, r: usize, g: C) -> usize {
+    fn min_left<C: Fn(&S) -> bool>(&mut self, r: usize, g: C) -> usize {
         if r == 0 {
             return 0;
         }

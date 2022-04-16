@@ -38,20 +38,20 @@ impl SccStack {
     }
 }
 
-pub struct SccGraph {
+struct SccGraph {
     n: usize,
     graph: Vec<Vec<usize>>,
 }
 
 impl SccGraph {
-    pub fn new(n: usize) -> Self {
+    fn new(n: usize) -> Self {
         Self {
             n,
             graph: (0..n).map(|_| Vec::new()).collect(),
         }
     }
 
-    pub fn add_edge(&mut self, from: usize, to: usize) {
+    fn add_edge(&mut self, from: usize, to: usize) {
         self.graph[from].push(to);
     }
 
@@ -114,7 +114,7 @@ impl SccGraph {
 
     /// SCC list and SCC IDs
     /// ids[node id] = id of SCC where the node is in
-    pub fn solve(&self) -> (Vec<Vec<usize>>, Vec<usize>) {
+    fn solve(&self) -> (Vec<Vec<usize>>, Vec<usize>) {
         let list = self.get_scc();
         let mut ids = vec![0; self.n];
         for (i, l) in list.iter().enumerate() {

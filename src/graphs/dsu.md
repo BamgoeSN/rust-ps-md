@@ -4,7 +4,7 @@ Disjoint set union (a.k.a Union-Find) processes the following queries on a graph
 - Determine if there exist a path between two nodes (`is_reachable`)
 
 ```rust,noplayground
-pub struct UnionFind {
+struct UnionFind {
     size: usize,
     parents: Vec<usize>,
     group_size: Vec<usize>,
@@ -13,7 +13,7 @@ pub struct UnionFind {
 
 impl UnionFind {
     /// Returns a new UnionFind instance where `size` number of elements are in their own disjoint set.
-    pub fn new(size: usize) -> Self {
+    fn new(size: usize) -> Self {
         Self {
             size,
             parents: vec![size; size],
@@ -23,13 +23,13 @@ impl UnionFind {
     }
 
     /// Returns the number of nodes which can be reached from x.
-    pub fn get_group_size(&mut self, x: usize) -> usize {
+    fn get_group_size(&mut self, x: usize) -> usize {
         let root = self.find_root(x);
         self.group_size[root]
     }
 
     /// Returns the number of connected components.
-    pub fn get_group_num(&self) -> usize {
+    fn get_group_num(&self) -> usize {
         self.group_num
     }
 
@@ -43,12 +43,12 @@ impl UnionFind {
     }
 
     /// Returns true if there exists a path from a to b.
-    pub fn is_reachable(&mut self, a: usize, b: usize) -> bool {
+    fn is_reachable(&mut self, a: usize, b: usize) -> bool {
         self.find_root(a) == self.find_root(b)
     }
 
     /// Add an edge between a and b.
-    pub fn union(&mut self, a: usize, b: usize) {
+    fn union(&mut self, a: usize, b: usize) {
         let a_root = self.find_root(a);
         let b_root = self.find_root(b);
 

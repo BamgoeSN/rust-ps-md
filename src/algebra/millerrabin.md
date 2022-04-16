@@ -35,7 +35,7 @@ where
 #[inline]
 fn rem_pow<T, U>(mut base: T, mut exp: T, m: T) -> T
 where
-    T: Copy + Zero + One + Eq + RemAssign + BitAnd<Output = T> + ShrAssign + Cast<U>,
+    T: Copy + ZeroOne + Eq + RemAssign + BitAnd<Output = T> + ShrAssign + Cast<U>,
     U: Copy + Mul<Output = U> + Rem<Output = U> + Cast<T>,
 {
     exp %= m;
@@ -50,7 +50,7 @@ where
     r
 }
 
-pub trait Miller {
+trait Miller {
     fn naive_primality(self) -> bool;
     fn miller_rabin(self, a: Self) -> bool;
     fn miller_primality(self) -> bool;
