@@ -4,14 +4,14 @@ Required snippets: [SCC](./scc.md#strongly-connected-components)
 ```rust,noplayground
 struct TwoSat {
     n: usize,
-    scc: SccGraph,
+    graph: Graph<()>,
 }
 
 impl TwoSat {
-    fn new(n: usize) -> Self {
+    fn new(n: usize, clause_num: usize) -> Self {
         Self {
             n,
-            scc: SccGraph::new(n << 1),
+            graph: Graph::new(n << 1, clause_num << 1),
         }
     }
 
@@ -24,35 +24,31 @@ impl TwoSat {
     }
 
     fn add_clause(&mut self, i: usize, f: bool, j: usize, g: bool) {
-        self.scc.add_edge(
+        self.graph.add_edge(
             (i << 1) + Self::judge(f, 0, 1),
             (j << 1) + Self::judge(g, 1, 0),
+            (),
         );
-        self.scc.add_edge(
+        self.graph.add_edge(
             (j << 1) + Self::judge(g, 0, 1),
             (i << 1) + Self::judge(f, 1, 0),
+            (),
         );
     }
 
-    fn is_satisfiable(&self, answer: &mut [bool]) -> bool {
-        let (_, ids) = self.scc.solve();
+    fn solve(self) -> Option<Vec<bool>> {
+        let mut answer = vec![false; self.n];
+
+        let scc = SCC::new(&self.graph);
+        let ids = &scc.scc_ids;
+
         for i in 0..self.n {
             if ids[i << 1] == ids[(i << 1) + 1] {
-                return false;
+                return None;
             }
             answer[i] = ids[i << 1] < ids[(i << 1) + 1];
         }
-        true
-    }
-
-    fn solve(&self) -> Option<Vec<bool>> {
-        let mut answer = vec![false; self.n];
-        let doable = self.is_satisfiable(&mut answer);
-        if doable {
-            Some(answer)
-        } else {
-            None
-        }
+        Some(answer)
     }
 }
 ```
