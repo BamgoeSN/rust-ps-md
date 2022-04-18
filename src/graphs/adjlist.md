@@ -5,6 +5,7 @@ Credits to kiwiyou
 ```rust,noplayground
 #[derive(Debug)]
 struct Graph<T> {
+    n: usize,
     first: Vec<usize>,
     edge: Vec<(usize, usize, T)>, // (to, prev, data)
 }
@@ -12,12 +13,13 @@ struct Graph<T> {
 impl<T> Graph<T> {
     fn new(n: usize, e: usize) -> Self {
         Self {
+            n,
             first: vec![usize::MAX; n],
             edge: Vec::with_capacity(e),
         }
     }
 
-    fn connect(&mut self, from: usize, to: usize, data: T) {
+    fn add_edge(&mut self, from: usize, to: usize, data: T) {
         let prev = std::mem::replace(&mut self.first[from], self.edge.len());
         self.edge.push((to, prev, data));
     }
