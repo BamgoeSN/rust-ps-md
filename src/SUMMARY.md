@@ -26,6 +26,7 @@
 - [Convex Hull](./geometry/convexhull.md)
 
 # Unclassified
+- [Value Compression](./unclass/valcomp.md)
 - [Longest Increasing Subsequence](./unclass/lis.md)
 
 # Misc
