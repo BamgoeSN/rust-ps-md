@@ -140,7 +140,51 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="strongly-connected-components"><a class="header" href="#strongly-connected-components">Strongly Connected Components</a></h1>
-<pre><code class="language-rust noplayground">struct SccStack {
+<pre><code class="language-rust noplayground">#[derive(Debug)]
+struct Graph&lt;T&gt; {
+    n: usize,
+    first: Vec&lt;usize&gt;,
+    edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
+}
+
+impl&lt;T&gt; Graph&lt;T&gt; {
+    fn new(n: usize, e: usize) -&gt; Self {
+        Self {
+            n,
+            first: vec![usize::MAX; n],
+            edge: Vec::with_capacity(e),
+        }
+    }
+
+    fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
+        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
+        self.edge.push((to, prev, data));
+    }
+
+    fn neighbor(&amp;self, of: usize) -&gt; Neighbor&lt;T&gt; {
+        Neighbor {
+            graph: self,
+            next_edge: self.first[of],
+        }
+    }
+}
+
+struct Neighbor&lt;'g, T&gt; {
+    graph: &amp;'g Graph&lt;T&gt;,
+    next_edge: usize,
+}
+
+impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
+    type Item = (usize, &amp;'g T);
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        let (to, next_edge, data) = self.graph.edge.get(self.next_edge)?;
+        self.next_edge = *next_edge;
+        Some((*to, data))
+    }
+}
+
+struct SccStack {
     stack: Vec&lt;usize&gt;,
     check: Vec&lt;bool&gt;,
 }
@@ -177,25 +221,44 @@ impl SccStack {
     }
 }
 
-struct SccGraph {
-    n: usize,
-    graph: Vec&lt;Vec&lt;usize&gt;&gt;,
+struct SCC&lt;'g, T&gt; {
+    graph: &amp;'g Graph&lt;T&gt;,
+    scc_list: Vec&lt;Vec&lt;usize&gt;&gt;,
+    scc_ids: Vec&lt;usize&gt;,
 }
 
-impl SccGraph {
-    fn new(n: usize) -&gt; Self {
+impl&lt;'g, T: 'g&gt; SCC&lt;'g, T&gt; {
+    fn new(graph: &amp;'g Graph&lt;T&gt;) -&gt; Self {
+        let mut st = SccStack::new(graph.n);
+        let mut list: Vec&lt;Vec&lt;usize&gt;&gt; = Vec::new();
+        let mut gid: usize = 0;
+        let mut id = vec![graph.n; graph.n];
+        let mut low = vec![usize::MAX; graph.n];
+
+        for x in 0..graph.n {
+            if id[x] != graph.n {
+                continue;
+            }
+            Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list)
+        }
+        list.reverse();
+
+        let mut ids = vec![0; graph.n];
+        for (i, l) in list.iter().enumerate() {
+            for v in l.iter() {
+                ids[*v] = i;
+            }
+        }
+
         Self {
-            n,
-            graph: (0..n).map(|_| Vec::new()).collect(),
+            graph,
+            scc_list: list,
+            scc_ids: ids,
         }
     }
 
-    fn add_edge(&amp;mut self, from: usize, to: usize) {
-        self.graph[from].push(to);
-    }
-
     fn dfs(
-        &amp;self,
+        graph: &amp;Graph&lt;T&gt;,
         curr: usize,
         gid: &amp;mut usize,
         id: &amp;mut Vec&lt;usize&gt;,
@@ -208,15 +271,13 @@ impl SccGraph {
         low[curr] = *gid;
         (*gid) += 1;
 
-        for i in 0..self.graph[curr].len() {
-            let next = self.graph[curr][i];
-            if id[next] == self.n {
-                self.dfs(next, gid, id, low, st, list);
+        for (next, _) in graph.neighbor(curr) {
+            if id[next] == graph.n {
+                Self::dfs(graph, next, gid, id, low, st, list);
             }
         }
 
-        for i in 0..self.graph[curr].len() {
-            let next = self.graph[curr][i];
+        for (next, _) in graph.neighbor(curr) {
             if st.is_in(next) {
                 low[curr] = low[curr].min(low[next]);
             }
@@ -231,37 +292,6 @@ impl SccGraph {
             st.pop();
             list[p].push(curr);
         }
-    }
-
-    fn get_scc(&amp;self) -&gt; Vec&lt;Vec&lt;usize&gt;&gt; {
-        let mut st = SccStack::new(self.n);
-        let mut list: Vec&lt;Vec&lt;usize&gt;&gt; = Vec::new();
-        let mut gid: usize = 0;
-        let mut id = vec![self.n; self.n];
-        let mut low = vec![usize::MAX; self.n];
-
-        for x in 0..self.n {
-            if id[x] != self.n {
-                continue;
-            }
-            self.dfs(x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list)
-        }
-
-        list.reverse();
-        list
-    }
-
-    /// SCC list and SCC IDs
-    /// ids[node id] = id of SCC where the node is in
-    fn solve(&amp;self) -&gt; (Vec&lt;Vec&lt;usize&gt;&gt;, Vec&lt;usize&gt;) {
-        let list = self.get_scc();
-        let mut ids = vec![0; self.n];
-        for (i, l) in list.iter().enumerate() {
-            for v in l.iter() {
-                ids[*v] = i;
-            }
-        }
-        (list, ids)
     }
 }
 </code></pre>

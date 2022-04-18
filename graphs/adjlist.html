@@ -143,6 +143,7 @@
 <p>Credits to kiwiyou</p>
 <pre><code class="language-rust noplayground">#[derive(Debug)]
 struct Graph&lt;T&gt; {
+    n: usize,
     first: Vec&lt;usize&gt;,
     edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
 }
@@ -150,12 +151,13 @@ struct Graph&lt;T&gt; {
 impl&lt;T&gt; Graph&lt;T&gt; {
     fn new(n: usize, e: usize) -&gt; Self {
         Self {
+            n,
             first: vec![usize::MAX; n],
             edge: Vec::with_capacity(e),
         }
     }
 
-    fn connect(&amp;mut self, from: usize, to: usize, data: T) {
+    fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
         let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
         self.edge.push((to, prev, data));
     }
