@@ -9,6 +9,12 @@
 - [Primality Test](./algebra/millerrabin.md)
 - [Prime Factorization](./algebra/pollardrho.md)
 
+# Numerical Algorithms
+- [Linear Recurrence](./numerical/linrec/intro.md)
+  - [Berlekamp-Massey](./numerical/linrec/berlekamp.md)
+  - [Kitamasa](./numerical/linrec/kitamasa.md)
+  - [Bostan-Mori](./numerical/linrec/bostanmori.md)
+
 # Data Structures
 - [Bit Array](./datastructure/bitarray.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
