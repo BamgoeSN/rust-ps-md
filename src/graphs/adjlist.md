@@ -1,4 +1,4 @@
-# Adjancy List Graph Representation
+# Adjacency List Graph Representation
 
 Credits to kiwiyou
 

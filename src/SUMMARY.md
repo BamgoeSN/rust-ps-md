@@ -23,7 +23,7 @@
     - [Lazy Segment Tree](./datastructure/segtree/lazyseg.md)
 
 # Graphs
-- [Adjancy List Graph Representation](./graphs/adjlist.md)
+- [Adjacency List Graph Representation](./graphs/adjlist.md)
 - [Disjoint Set Union](./graphs/dsu.md)
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
