@@ -5,83 +5,8 @@ Reference - [Alin Bostan, Ryuhei Mori. A Simple and Fast Algorithm for Computing
 
 ### Naive multiplication, under prime modulo
 ```rust,noplayground
-/// f = f[0] + f[1]x + f[2]x2 + ...
-fn poly_mul(f: &[u64], g: &[u64], m: u64) -> Vec<u64> {
-    let mut h: Vec<u64> = vec![0; f.len() + g.len() - 1];
-    for (i, &u) in f.iter().enumerate() {
-        // u*x**i
-        for (j, &v) in g.iter().enumerate() {
-            // v*x**j
-            h[i + j] += u * v;
-            h[i + j] %= m;
-        }
-    }
-    while let Some(&v) = h.last() {
-        if v != 0 {
-            break;
-        }
-        h.pop();
-    }
-    h
-}
-
-fn poly_mul_even_order(f: &[u64], g: &[u64], m: u64) -> Vec<u64> {
-    let mut h: Vec<u64> = vec![0; (f.len() + g.len()) / 2 + 2];
-    for (i, &u) in f.iter().enumerate() {
-        if i & 1 == 0 {
-            for (j, &v) in g.iter().enumerate().step_by(2) {
-                h[(i + j) >> 1] += u * v;
-                h[(i + j) >> 1] %= m;
-            }
-        } else {
-            for (j, &v) in g.iter().enumerate().skip(1).step_by(2) {
-                h[(i + j) >> 1] += u * v;
-                h[(i + j) >> 1] %= m;
-            }
-        }
-    }
-    while let Some(&v) = h.last() {
-        if v != 0 {
-            break;
-        }
-        h.pop();
-    }
-    h
-}
-
-fn poly_mul_odd_order(f: &[u64], g: &[u64], m: u64) -> Vec<u64> {
-    let mut h: Vec<u64> = vec![0; (f.len() + g.len()) / 2 + 2];
-    for (i, &u) in f.iter().enumerate() {
-        if i & 1 != 0 {
-            for (j, &v) in g.iter().enumerate().step_by(2) {
-                h[(i + j) >> 1] += u * v;
-                h[(i + j) >> 1] %= m;
-            }
-        } else {
-            for (j, &v) in g.iter().enumerate().skip(1).step_by(2) {
-                h[(i + j) >> 1] += u * v;
-                h[(i + j) >> 1] %= m;
-            }
-        }
-    }
-    while let Some(&v) = h.last() {
-        if v != 0 {
-            break;
-        }
-        h.pop();
-    }
-    h
-}
-
-/// f(x) -> f(-x)
-fn get_neg_x(f: &[u64], m: u64) -> Vec<u64> {
-    f.iter()
-        .enumerate()
-        .map(|(i, &v)| if i & 1 == 0 { v } else { m - v })
-        .collect()
-}
-
 /// Returns g, s, t s.t. g=gcd(a,b) and as+bt=r
+#[inline(always)]
 fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
     let (mut s, mut old_s) = (0, 1);
     let (mut r, mut old_r) = (b, a);
@@ -110,6 +35,86 @@ fn mod_inv(a: u64, m: u64) -> u64 {
         x += m as i64;
     }
     x as u64 % m
+}
+
+/// f = f[0] + f[1]x + f[2]x2 + ...
+#[inline(always)]
+fn poly_mul(f: &[u64], g: &[u64], m: u64) -> Vec<u64> {
+    let mut h: Vec<u64> = vec![0; f.len() + g.len() - 1];
+    for (i, &u) in f.iter().enumerate() {
+        // u*x**i
+        for (j, &v) in g.iter().enumerate() {
+            // v*x**j
+            h[i + j] += u * v;
+            h[i + j] %= m;
+        }
+    }
+    while let Some(&v) = h.last() {
+        if v != 0 {
+            break;
+        }
+        h.pop();
+    }
+    h
+}
+
+#[inline(always)]
+fn poly_mul_even_order(f: &[u64], g: &[u64], m: u64) -> Vec<u64> {
+    let mut h: Vec<u64> = vec![0; (f.len() + g.len()) / 2 + 2];
+    for (i, &u) in f.iter().enumerate() {
+        if i & 1 == 0 {
+            for (j, &v) in g.iter().enumerate().step_by(2) {
+                h[(i + j) >> 1] += u * v;
+                h[(i + j) >> 1] %= m;
+            }
+        } else {
+            for (j, &v) in g.iter().enumerate().skip(1).step_by(2) {
+                h[(i + j) >> 1] += u * v;
+                h[(i + j) >> 1] %= m;
+            }
+        }
+    }
+    while let Some(&v) = h.last() {
+        if v != 0 {
+            break;
+        }
+        h.pop();
+    }
+    h
+}
+
+#[inline(always)]
+fn poly_mul_odd_order(f: &[u64], g: &[u64], m: u64) -> Vec<u64> {
+    let mut h: Vec<u64> = vec![0; (f.len() + g.len()) / 2 + 2];
+    for (i, &u) in f.iter().enumerate() {
+        if i & 1 != 0 {
+            for (j, &v) in g.iter().enumerate().step_by(2) {
+                h[(i + j) >> 1] += u * v;
+                h[(i + j) >> 1] %= m;
+            }
+        } else {
+            for (j, &v) in g.iter().enumerate().skip(1).step_by(2) {
+                h[(i + j) >> 1] += u * v;
+                h[(i + j) >> 1] %= m;
+            }
+        }
+    }
+    while let Some(&v) = h.last() {
+        if v != 0 {
+            break;
+        }
+        h.pop();
+    }
+    h
+}
+
+/// f(x) -> f(-x)
+#[inline(always)]
+fn get_neg_x(f: &[u64], m: u64) -> Vec<u64> {
+    f.iter()
+        .enumerate()
+        .map(|(i, &v)| if i & 1 == 0 { v } else { m - v })
+        .collect()
 }
 
 /// Finds arr[n] where
