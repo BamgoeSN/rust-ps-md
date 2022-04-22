@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Value Compression - Rust Snippets for Competitive Programming</title>
+        <title>Integer Square Root - Rust Snippets for Competitive Programming</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -77,7 +77,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">How to use</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Prime Factorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">8.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">9.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">9.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">9.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">9.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html"><strong aria-hidden="true">10.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">11.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">12.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">13.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">14.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html" class="active"><strong aria-hidden="true">15.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">16.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/psbase.html"><strong aria-hidden="true">17.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">18.</strong> Zero/One Trait</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">How to use</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Prime Factorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html" class="active"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">8.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">9.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">9.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">9.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">9.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html"><strong aria-hidden="true">10.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">11.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">12.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">13.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">14.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html"><strong aria-hidden="true">15.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">16.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/psbase.html"><strong aria-hidden="true">17.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">18.</strong> Zero/One Trait</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -139,32 +139,19 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<pre><code class="language-rust noplayground">/// Returns (compressor, reevaluator)
-/// compressor[original_value] = compressed_value
-/// reevaluator[compressed_value] = original_value
-fn compress_value&lt;T: Clone + Ord + Hash&gt;(arr: &amp;Vec&lt;T&gt;) -&gt; (HashMap&lt;T, usize&gt;, Vec&lt;T&gt;) {
-    let mut sorted = arr.clone();
-    sorted.sort_unstable();
-
-    let mut compressor: HashMap&lt;T, usize&gt; = HashMap::new();
-    let mut reevaluator: Vec&lt;T&gt; = Vec::new();
-
-    let mut prev: Option&lt;&amp;T&gt; = None;
-    let mut cmpr = 0usize;
-    for v in sorted.iter() {
-        if let Some(prev) = prev {
-            if prev == v {
-                continue;
-            }
+                        <h1 id="integer-square-root"><a class="header" href="#integer-square-root">Integer Square Root</a></h1>
+<pre><code class="language-rust noplayground">fn isqrt(s: u64) -&gt; u64 {
+    let mut x0 = s &gt;&gt; 1;
+    if x0 != 0 {
+        let mut x1 = (x0 + s / x0) &gt;&gt; 1;
+        while x1 &lt; x0 {
+            x0 = x1;
+            x1 = (x0 + s / x0) &gt;&gt; 1
         }
-        prev = Some(v);
-        compressor.insert(v.clone(), cmpr);
-        reevaluator.push(v.clone());
-        cmpr += 1;
+        x0
+    } else {
+        s
     }
-
-    (compressor, reevaluator)
 }
 </code></pre>
 
@@ -172,10 +159,10 @@ fn compress_value&lt;T: Clone + Ord + Hash&gt;(arr: &amp;Vec&lt;T&gt;) -&gt; (Ha
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../geometry/convexhull.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../algebra/pollardrho.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../unclass/lis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../numerical/linrec/intro.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -184,10 +171,10 @@ fn compress_value&lt;T: Clone + Ord + Hash&gt;(arr: &amp;Vec&lt;T&gt;) -&gt; (Ha
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../geometry/convexhull.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../algebra/pollardrho.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../unclass/lis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../numerical/linrec/intro.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
