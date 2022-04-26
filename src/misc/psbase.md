@@ -8,10 +8,8 @@ use std::{
 };
 
 fn main() {
-    let stdin = std::fs::File::open("input.txt").ok().unwrap();
-    let mut handle = BufReader::new(stdin);
-    // let stdin = stdin();
-    // let mut handle = stdin.lock();
+    let stdin = stdin();
+    let mut handle = stdin.lock();
     let mut input_str = String::new();
     handle
         .read_to_string(&mut input_str)
@@ -82,10 +80,8 @@ use std::{
 };
 
 fn main() {
-    let stdin = std::fs::File::open("input.txt").ok().unwrap();
-    let mut handle = BufReader::new(stdin);
-    // let stdin = stdin();
-    // let mut handle = stdin.lock();
+    let stdin = stdin();
+    let mut handle = stdin.lock();
     let mut input_str = String::new();
     handle
         .read_to_string(&mut input_str)
