@@ -26,6 +26,12 @@ fn main() {
             scan.next::<$t>()
         };
     }
+
+    #[allow(unused)]
+    macro_rules! out { ($($arg:tt)*) => { write!(out, $($arg)*).ok(); }; }
+
+    #[allow(unused)]
+    macro_rules! outln { ($($arg:tt)*) => { writeln!(out, $($arg)*).ok(); }; }
 }
 
 struct Scanner<'a, I: Iterator<Item = &'a str>> {
@@ -98,6 +104,12 @@ fn main() {
             scan.next::<$t>()
         };
     }
+
+    #[allow(unused)]
+    macro_rules! out { ($($arg:tt)*) => { write!(out, $($arg)*).ok(); }; }
+
+    #[allow(unused)]
+    macro_rules! outln { ($($arg:tt)*) => { writeln!(out, $($arg)*).ok(); }; }
 
     let tc = next!(usize);
     for _ in 0..tc {}
