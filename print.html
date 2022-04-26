@@ -2064,6 +2064,12 @@ fn main() {
             scan.next::&lt;$t&gt;()
         };
     }
+
+    #[allow(unused)]
+    macro_rules! out { ($($arg:tt)*) =&gt; { write!(out, $($arg)*).ok(); }; }
+
+    #[allow(unused)]
+    macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(out, $($arg)*).ok(); }; }
 }
 
 struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
@@ -2134,6 +2140,12 @@ fn main() {
             scan.next::&lt;$t&gt;()
         };
     }
+
+    #[allow(unused)]
+    macro_rules! out { ($($arg:tt)*) =&gt; { write!(out, $($arg)*).ok(); }; }
+
+    #[allow(unused)]
+    macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(out, $($arg)*).ok(); }; }
 
     let tc = next!(usize);
     for _ in 0..tc {}
