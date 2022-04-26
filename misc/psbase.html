@@ -147,10 +147,8 @@
 };
 
 fn main() {
-    let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
-    let mut handle = BufReader::new(stdin);
-    // let stdin = stdin();
-    // let mut handle = stdin.lock();
+    let stdin = stdin();
+    let mut handle = stdin.lock();
     let mut input_str = String::new();
     handle
         .read_to_string(&amp;mut input_str)
@@ -219,10 +217,8 @@ impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
 };
 
 fn main() {
-    let stdin = std::fs::File::open(&quot;input.txt&quot;).ok().unwrap();
-    let mut handle = BufReader::new(stdin);
-    // let stdin = stdin();
-    // let mut handle = stdin.lock();
+    let stdin = stdin();
+    let mut handle = stdin.lock();
     let mut input_str = String::new();
     handle
         .read_to_string(&amp;mut input_str)
