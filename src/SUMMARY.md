@@ -39,3 +39,4 @@
 # Misc
 - [Base Template](./misc/psbase.md)
 - [Zero/One Trait](./misc/zero_one_trait.md)
+- [Fast n-dimensional Array](./misc/matrix.md)
