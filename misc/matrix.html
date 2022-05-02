@@ -142,6 +142,13 @@
                         <h1 id="fast-n-dimensional-array"><a class="header" href="#fast-n-dimensional-array">Fast n-dimensional Array</a></h1>
 <pre><code class="language-rust noplayground">struct Matrix&lt;T&gt;(Vec&lt;T&gt;, usize); // colnum
 
+impl&lt;T&gt; Matrix&lt;T&gt; {
+    fn new(arr: Vec&lt;T&gt;, r: usize, c: usize) -&gt; Self {
+        assert_eq!(arr.len(), r * c);
+        Self(arr, c)
+    }
+}
+
 impl&lt;T&gt; std::ops::Index&lt;usize&gt; for Matrix&lt;T&gt; {
     type Output = [T];
 

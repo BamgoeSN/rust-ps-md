@@ -2222,6 +2222,13 @@ impl_zero_one!(isize, i8, i16, i32, i64, i128, usize, u8, u16, u32, u64, u128);
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fast-n-dimensional-array"><a class="header" href="#fast-n-dimensional-array">Fast n-dimensional Array</a></h1>
 <pre><code class="language-rust noplayground">struct Matrix&lt;T&gt;(Vec&lt;T&gt;, usize); // colnum
 
+impl&lt;T&gt; Matrix&lt;T&gt; {
+    fn new(arr: Vec&lt;T&gt;, r: usize, c: usize) -&gt; Self {
+        assert_eq!(arr.len(), r * c);
+        Self(arr, c)
+    }
+}
+
 impl&lt;T&gt; std::ops::Index&lt;usize&gt; for Matrix&lt;T&gt; {
     type Output = [T];
 
