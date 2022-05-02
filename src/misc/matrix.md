@@ -3,6 +3,13 @@
 ```rust,noplayground
 struct Matrix<T>(Vec<T>, usize); // colnum
 
+impl<T> Matrix<T> {
+    fn new(arr: Vec<T>, r: usize, c: usize) -> Self {
+        assert_eq!(arr.len(), r * c);
+        Self(arr, c)
+    }
+}
+
 impl<T> std::ops::Index<usize> for Matrix<T> {
     type Output = [T];
 
