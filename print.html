@@ -2082,6 +2082,10 @@ impl&lt;'a&gt; Scanner&lt;'a, SplitAsciiWhitespace&lt;'a&gt;&gt; {
 
 impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
     #[inline(always)]
+    fn next_str(&amp;mut self) -&gt; &amp;'a str {
+        self.input.next().expect(&quot;Input has been exhausted&quot;)
+    }
+    #[inline(always)]
     fn next&lt;T: ParsableNum&gt;(&amp;mut self) -&gt; T {
         T::from_str(self.next_str())
     }
@@ -2090,8 +2094,8 @@ impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
         self.next_str().parse().ok().expect(&quot;Failed to parse&quot;)
     }
     #[inline(always)]
-    fn next_str(&amp;mut self) -&gt; &amp;'a str {
-        self.input.next().expect(&quot;Input has been exhausted&quot;)
+    fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
+        self.input.next()
     }
     #[inline(always)]
     fn next_option&lt;T: ParsableNum&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
@@ -2100,10 +2104,6 @@ impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
     #[inline(always)]
     fn next_elem_option&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
         self.next_str_option().and_then(|s| s.parse().ok())
-    }
-    #[inline(always)]
-    fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
-        self.input.next()
     }
 }
 
