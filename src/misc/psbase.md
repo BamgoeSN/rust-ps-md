@@ -44,6 +44,10 @@ impl<'a> Scanner<'a, SplitAsciiWhitespace<'a>> {
 
 impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
     #[inline(always)]
+    fn next_str(&mut self) -> &'a str {
+        self.input.next().expect("Input has been exhausted")
+    }
+    #[inline(always)]
     fn next<T: ParsableNum>(&mut self) -> T {
         T::from_str(self.next_str())
     }
@@ -52,8 +56,8 @@ impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
         self.next_str().parse().ok().expect("Failed to parse")
     }
     #[inline(always)]
-    fn next_str(&mut self) -> &'a str {
-        self.input.next().expect("Input has been exhausted")
+    fn next_str_option(&mut self) -> Option<&'a str> {
+        self.input.next()
     }
     #[inline(always)]
     fn next_option<T: ParsableNum>(&mut self) -> Option<T> {
@@ -62,10 +66,6 @@ impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
     #[inline(always)]
     fn next_elem_option<T: FromStr>(&mut self) -> Option<T> {
         self.next_str_option().and_then(|s| s.parse().ok())
-    }
-    #[inline(always)]
-    fn next_str_option(&mut self) -> Option<&'a str> {
-        self.input.next()
     }
 }
 
