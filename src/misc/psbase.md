@@ -9,14 +9,13 @@ fn main() {
     let input_str: &str = get_input();
     let mut scan: Scanner<_> = Scanner::tokenize(input_str);
     let stdout = stdout();
-    let out = &mut BufWriter::with_capacity(262144, stdout.lock());
+    let out = &mut BufWriter::with_capacity(1 << 18, stdout.lock());
 
     // FastIO Macros
     macro_rules! next {
         () => { scan.next() };
         (str) => { scan.next_str() };
         ($($t:ty) +) => { ($(scan.next::<$t>()),+) };
-        ($n:expr) => { (0..$n).map(|_| next!()).collect() };
     }
     macro_rules! out { ($($arg:tt)*) => { write!(out, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) => { writeln!(out, $($arg)*).ok(); }; }
@@ -84,14 +83,13 @@ fn main() {
     use fastio::*;
     let input_str: &str = get_input();
     let mut scan: Scanner<_> = Scanner::tokenize(input_str);
-    let mut out = Flusher::with_capacity(5000000);
+    let mut out = Flusher::with_capacity(1 << 18);
 
     // FastIO Macros
     macro_rules! next {
         () => { scan.next() };
         (str) => { scan.next_str() };
-        ($($t:ty),+) => { ($(scan.next::<$t>()),+) };
-        ($n:expr) => { (0..$n).map(|_| next!()).collect() };
+        ($($t:ty) +) => { ($(scan.next::<$t>()),+) };
     }
     macro_rules! out { ($($arg:tt),*) => {$( $arg.push_num(&mut out); out.buf.push(b' '); )*}; }
     macro_rules! outln { ($($arg:tt),*) => { out!($($arg),*); out.buf.push(b'\n'); } }
@@ -100,10 +98,7 @@ fn main() {
 }
 
 mod fastio {
-    use std::{
-        io::{stdout, Write},
-        str::{Lines, SplitAsciiWhitespace},
-    };
+    use std::io::{stdout, Write};
 
     extern "C" {
         fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -> *mut u8;
@@ -121,7 +116,7 @@ mod fastio {
         it: I,
     }
 
-    impl<'a> Scanner<'a, SplitAsciiWhitespace<'a>> {
+    impl<'a> Scanner<'a, std::str::SplitAsciiWhitespace<'a>> {
         pub fn tokenize(s: &'a str) -> Self {
             Self {
                 it: s.split_ascii_whitespace(),
@@ -129,7 +124,7 @@ mod fastio {
         }
     }
 
-    impl<'a> Scanner<'a, Lines<'a>> {
+    impl<'a> Scanner<'a, std::str::Lines<'a>> {
         pub fn lines(s: &'a str) -> Self {
             Self { it: s.lines() }
         }
