@@ -1139,12 +1139,12 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
 <p>Required snippets: <a href="datastructure/segtree/../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
-<pre><code class="language-rust noplayground">struct Fenwick&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; {
+<pre><code class="language-rust noplayground">struct Fenwick&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; {
     n: usize,
     data: Vec&lt;T&gt;,
 }
 
-impl&lt;T: Zero + AddAssign + Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
+impl&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
     fn new(n: usize) -&gt; Self {
         Self {
             n,
