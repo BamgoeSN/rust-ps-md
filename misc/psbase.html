@@ -140,172 +140,75 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="base-template"><a class="header" href="#base-template">Base Template</a></h1>
-<h2 id="wo-testcases"><a class="header" href="#wo-testcases">w/o Testcases</a></h2>
-<pre><code class="language-rust noplayground">use std::{
-    io::*,
-    str::{FromStr, SplitAsciiWhitespace},
-};
-
-fn main() {
-    let stdin = stdin();
-    let mut handle = stdin.lock();
-    let mut input_str = String::new();
-    handle
-        .read_to_string(&amp;mut input_str)
-        .expect(&quot;Failed to read&quot;);
-    let mut scan = Scanner::new(&amp;input_str);
+<pre><code class="language-rust noplayground">fn main() {
+    use {fastio::*, std::io::*};
+    let input_str: &amp;str = get_input();
+    let mut scan: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
     let stdout = stdout();
     let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
 
     macro_rules! next {
-        () =&gt; {
-            scan.next()
-        };
-        ($t:ty) =&gt; {
-            scan.next::&lt;$t&gt;()
-        };
-    }
-    macro_rules! out { ($($arg:tt)*) =&gt; { write!(out, $($arg)*).ok(); }; }
-    macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(out, $($arg)*).ok(); }; }
-}
-
-struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
-    input: I,
-}
-
-impl&lt;'a&gt; Scanner&lt;'a, SplitAsciiWhitespace&lt;'a&gt;&gt; {
-    fn new(s: &amp;'a str) -&gt; Self {
-        Self {
-            input: s.split_ascii_whitespace(),
-        }
-    }
-}
-
-impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
-    #[inline(always)]
-    fn next_str(&amp;mut self) -&gt; &amp;'a str {
-        self.input.next().expect(&quot;Input has been exhausted&quot;)
-    }
-    #[inline(always)]
-    fn next&lt;T: ParsableNum&gt;(&amp;mut self) -&gt; T {
-        T::from_str(self.next_str())
-    }
-    #[inline(always)]
-    fn next_elem&lt;T: FromStr&gt;(&amp;mut self) -&gt; T {
-        self.next_str().parse().ok().expect(&quot;Failed to parse&quot;)
-    }
-    #[inline(always)]
-    fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
-        self.input.next()
-    }
-    #[inline(always)]
-    fn next_option&lt;T: ParsableNum&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-        self.next_str_option().map(|s| T::from_str(s))
-    }
-    #[inline(always)]
-    fn next_elem_option&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-        self.next_str_option().and_then(|s| s.parse().ok())
-    }
-}
-
-trait ParsableNum {
-    fn from_str(s: &amp;str) -&gt; Self;
-}
-macro_rules! impl_uint { ($($t:ty) *) =&gt; {$( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &amp;str) -&gt; Self { s.bytes().fold(0, |a, b| a * 10 + (b - b'0') as Self) }
-})+ }; }
-impl_uint!(u8 u16 u32 u64 u128 usize);
-macro_rules! impl_int { ($($t:ty) *) =&gt; { $( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &amp;str) -&gt; Self { let mut s = s.as_bytes(); let is_neg = s[0] == b'-'; if is_neg {s = &amp;s[1..];} let n = s.iter().fold(0, |a, b| a * 10 + (b - b'0') as Self); if is_neg {-n} else {n} }
-})+ }; }
-impl_int!(i8 i16 i32 i64 i128 isize);
-</code></pre>
-<h2 id="w-testcases"><a class="header" href="#w-testcases">w/ Testcases</a></h2>
-<pre><code class="language-rust noplayground">use std::{
-    io::*,
-    str::{FromStr, SplitAsciiWhitespace},
-};
-
-fn main() {
-    let stdin = stdin();
-    let mut handle = stdin.lock();
-    let mut input_str = String::new();
-    handle
-        .read_to_string(&amp;mut input_str)
-        .expect(&quot;Failed to read&quot;);
-    let mut scan = Scanner::new(&amp;input_str);
-    let stdout = stdout();
-    let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
-
-    macro_rules! next {
-        () =&gt; {
-            scan.next()
-        };
-        ($t:ty) =&gt; {
-            scan.next::&lt;$t&gt;()
-        };
+        () =&gt; { scan.next() };
+        (str) =&gt; { scan.next_str() };
+        ($($t:ty) +) =&gt; { ($(scan.next::&lt;$t&gt;()),+) };
+        ($n:expr) =&gt; { (0..$n).map(|_| next!()).collect() };
     }
     macro_rules! out { ($($arg:tt)*) =&gt; { write!(out, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(out, $($arg)*).ok(); }; }
 
-    let tc_s: usize = next!();
-    for _ in 0..tc_s {}
+    // Main
 }
 
-struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
-    input: I,
-}
+mod fastio {
+    extern &quot;C&quot; {
+        fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -&gt; *mut u8;
+        fn fstat(fd: i32, stat: *mut usize) -&gt; i32;
+    }
 
-impl&lt;'a&gt; Scanner&lt;'a, SplitAsciiWhitespace&lt;'a&gt;&gt; {
-    fn new(s: &amp;'a str) -&gt; Self {
-        Self {
-            input: s.split_ascii_whitespace(),
+    pub fn get_input() -&gt; &amp;'static str {
+        let mut stat = [0; 20];
+        unsafe { fstat(0, (&amp;mut stat).as_mut_ptr()) };
+        let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
+        unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(buffer, stat[6])) }
+    }
+
+    pub struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
+        it: I,
+    }
+
+    impl&lt;'a&gt; Scanner&lt;'a, std::str::SplitAsciiWhitespace&lt;'a&gt;&gt; {
+        pub fn tokenize(s: &amp;'a str) -&gt; Self {
+            Self {
+                it: s.split_ascii_whitespace(),
+            }
+        }
+    }
+
+    impl&lt;'a&gt; Scanner&lt;'a, std::str::Lines&lt;'a&gt;&gt; {
+        pub fn lines(s: &amp;'a str) -&gt; Self {
+            Self { it: s.lines() }
+        }
+    }
+
+    impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
+        #[inline(always)]
+        pub fn next&lt;T: std::str::FromStr&gt;(&amp;mut self) -&gt; T {
+            self.it.next().unwrap().parse().ok().unwrap()
+        }
+        #[inline(always)]
+        pub fn next_str(&amp;mut self) -&gt; &amp;'a str {
+            self.it.next().unwrap()
+        }
+        #[inline(always)]
+        pub fn next_option&lt;T: std::str::FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
+            self.it.next().and_then(|s| s.parse().ok())
+        }
+        #[inline(always)]
+        pub fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
+            self.it.next()
         }
     }
 }
-
-impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
-    #[inline(always)]
-    fn next&lt;T: ParsableNum&gt;(&amp;mut self) -&gt; T {
-        T::from_str(self.next_str())
-    }
-    #[inline(always)]
-    fn next_elem&lt;T: FromStr&gt;(&amp;mut self) -&gt; T {
-        self.next_str().parse().ok().expect(&quot;Failed to parse&quot;)
-    }
-    #[inline(always)]
-    fn next_str(&amp;mut self) -&gt; &amp;'a str {
-        self.input.next().expect(&quot;Input has been exhausted&quot;)
-    }
-    #[inline(always)]
-    fn next_option&lt;T: ParsableNum&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-        self.next_str_option().map(|s| T::from_str(s))
-    }
-    #[inline(always)]
-    fn next_elem_option&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-        self.next_str_option().and_then(|s| s.parse().ok())
-    }
-    #[inline(always)]
-    fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
-        self.input.next()
-    }
-}
-
-trait ParsableNum {
-    fn from_str(s: &amp;str) -&gt; Self;
-}
-macro_rules! impl_uint { ($($t:ty) *) =&gt; {$( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &amp;str) -&gt; Self { s.bytes().fold(0, |a, b| a * 10 + (b - b'0') as Self) }
-})+ }; }
-impl_uint!(u8 u16 u32 u64 u128 usize);
-macro_rules! impl_int { ($($t:ty) *) =&gt; { $( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &amp;str) -&gt; Self { let mut s = s.as_bytes(); let is_neg = s[0] == b'-'; if is_neg {s = &amp;s[1..];} let n = s.iter().fold(0, |a, b| a * 10 + (b - b'0') as Self); if is_neg {-n} else {n} }
-})+ }; }
-impl_int!(i8 i16 i32 i64 i128 isize);
 </code></pre>
 
                     </main>
