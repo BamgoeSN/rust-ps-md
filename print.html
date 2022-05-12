@@ -2039,6 +2039,7 @@ fn compress_value&lt;T: Clone + Ord + Hash&gt;(arr: &amp;Vec&lt;T&gt;) -&gt; (Ha
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="base-template"><a class="header" href="#base-template">Base Template</a></h1>
+<h2 id="normal"><a class="header" href="#normal">Normal</a></h2>
 <pre><code class="language-rust noplayground">fn main() {
     // FastIO
     use {fastio::*, std::io::*};
@@ -2109,6 +2110,139 @@ mod fastio {
             self.it.next()
         }
     }
+}
+</code></pre>
+<h2 id="with-faster-print"><a class="header" href="#with-faster-print">With faster print</a></h2>
+<pre><code class="language-rust noplayground">fn main() {
+    // FastIO
+    use fastio::*;
+    let input_str: &amp;str = get_input();
+    let mut scan: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
+    let mut out = Flusher::with_capacity(5000000);
+
+    // FastIO Macros
+    macro_rules! next {
+        () =&gt; { scan.next() };
+        (str) =&gt; { scan.next_str() };
+        ($($t:ty),+) =&gt; { ($(scan.next::&lt;$t&gt;()),+) };
+        ($n:expr) =&gt; { (0..$n).map(|_| next!()).collect() };
+    }
+    macro_rules! out { ($($arg:tt),*) =&gt; {$( $arg.push_num(&amp;mut out); out.buf.push(b' '); )*}; }
+    macro_rules! outln { ($($arg:tt),*) =&gt; { out!($($arg),*); out.buf.push(b'\n'); } }
+
+    // Main
+}
+
+mod fastio {
+    use std::{
+        io::{stdout, Write},
+        str::{Lines, SplitAsciiWhitespace},
+    };
+
+    extern &quot;C&quot; {
+        fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -&gt; *mut u8;
+        fn fstat(fd: i32, stat: *mut usize) -&gt; i32;
+    }
+
+    pub fn get_input() -&gt; &amp;'static str {
+        let mut stat = [0; 20];
+        unsafe { fstat(0, (&amp;mut stat).as_mut_ptr()) };
+        let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
+        unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(buffer, stat[6])) }
+    }
+
+    pub struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
+        it: I,
+    }
+
+    impl&lt;'a&gt; Scanner&lt;'a, SplitAsciiWhitespace&lt;'a&gt;&gt; {
+        pub fn tokenize(s: &amp;'a str) -&gt; Self {
+            Self {
+                it: s.split_ascii_whitespace(),
+            }
+        }
+    }
+
+    impl&lt;'a&gt; Scanner&lt;'a, Lines&lt;'a&gt;&gt; {
+        pub fn lines(s: &amp;'a str) -&gt; Self {
+            Self { it: s.lines() }
+        }
+    }
+
+    impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
+        #[inline(always)]
+        pub fn next&lt;T: std::str::FromStr&gt;(&amp;mut self) -&gt; T {
+            self.it.next().unwrap().parse().ok().unwrap()
+        }
+        #[inline(always)]
+        pub fn next_str(&amp;mut self) -&gt; &amp;'a str {
+            self.it.next().unwrap()
+        }
+        #[inline(always)]
+        pub fn next_option&lt;T: std::str::FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
+            self.it.next().and_then(|s| s.parse().ok())
+        }
+        #[inline(always)]
+        pub fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
+            self.it.next()
+        }
+    }
+
+    pub struct Flusher {
+        pub buf: Vec&lt;u8&gt;,
+    }
+
+    impl Flusher {
+        pub fn with_capacity(cap: usize) -&gt; Self {
+            Self {
+                buf: Vec::with_capacity(cap),
+            }
+        }
+    }
+
+    impl Drop for Flusher {
+        fn drop(&amp;mut self) {
+            stdout().write_all(&amp;self.buf).ok();
+        }
+    }
+
+    pub trait PushPrint {
+        fn push_num(self, wr: &amp;mut Flusher);
+    }
+
+    impl PushPrint for &amp;str {
+        fn push_num(self, wr: &amp;mut Flusher) {
+            wr.buf.extend_from_slice(self.as_bytes());
+        }
+    }
+
+    macro_rules! impl_pushprint {
+        ($($i:ty;$u:ty) *) =&gt; {
+            $(
+                impl PushPrint for $i {
+                    fn push_num(self, wr: &amp;mut Flusher) {
+                        if self &lt; 0 {
+                            wr.buf.push(b'-');
+                            ((-self) as $u).push_num(wr);
+                        } else {
+                            (self as $u).push_num(wr);
+                        }
+                    }
+                }
+
+                impl PushPrint for $u {
+                    fn push_num(self, wr: &amp;mut Flusher) {
+                        if self &gt;= 10 {
+                            (self / 10).push_num(wr);
+                        }
+                        wr.buf.push((self % 10) as u8 + b'0');
+                    }
+                }
+            )*
+        };
+    }
+
+    impl_pushprint!(i8;u8 i16;u16 i32;u32 i64;u64 i128;u128 isize;usize);
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="zeroone-trait"><a class="header" href="#zeroone-trait">Zero/One Trait</a></h1>
