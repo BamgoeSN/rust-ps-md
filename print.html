@@ -143,22 +143,17 @@
                         <h1 id="how-to-use"><a class="header" href="#how-to-use">How to use</a></h1>
 <p>For any algorithm included here, simply copy its snippet and paste into your code, then it's done!</p>
 <p>Some snippets might require other snippets from another section. For such snippets, every required section will be linked on it, so that you can get the snippet right away. You simply copy all those and paste to your code before you paste the original snippet you were going to use.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="gcd"><a class="header" href="#gcd">GCD</a></h1>
-<p>Returns the greatest common divisor of a and b.</p>
-<pre><code class="language-rust noplayground">fn gcd(mut a: i64, mut b: i64) -&gt; i64 {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gcd-lcm"><a class="header" href="#gcd-lcm">GCD, LCM</a></h1>
+<pre><code class="language-rust noplayground">fn gcd(x: u64, y: u64) -&gt; u64 {
+    if y == 0 {
+        x
+    } else {
+        gcd(y, x % y)
     }
-    a
 }
-</code></pre>
-<h1 id="lcm"><a class="header" href="#lcm">LCM</a></h1>
-<p>Returns the least common multiplier of a and b.</p>
-<p>Required snippets: <a href="algebra/gcd.html#gcd">GCD</a></p>
-<pre><code class="language-rust noplayground">fn lcm(a: i64, b: i64) -&gt; i64 {
-    a / gcd(a, b) * b
+
+fn lcm(x: u64, y: u64) -&gt; u64 {
+    x / gcd(x, y) * y
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extended-euclid-algorithm"><a class="header" href="#extended-euclid-algorithm">Extended Euclid Algorithm</a></h1>
