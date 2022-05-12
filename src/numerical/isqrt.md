@@ -1,5 +1,7 @@
 # Integer Square Root
 
+Reference: <https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton's_method>
+
 ```rust,noplayground
 fn isqrt(s: u64) -> u64 {
     let mut x0 = s >> 1;
