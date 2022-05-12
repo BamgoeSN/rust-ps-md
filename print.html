@@ -584,6 +584,7 @@ factors.sort();
 assert_eq!(factors, [53, 61976026187]);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="integer-square-root"><a class="header" href="#integer-square-root">Integer Square Root</a></h1>
+<p>Reference: <a href="https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton&#x27;s_method">https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton's_method</a></p>
 <pre><code class="language-rust noplayground">fn isqrt(s: u64) -&gt; u64 {
     let mut x0 = s &gt;&gt; 1;
     if x0 != 0 {
@@ -670,7 +671,13 @@ pub fn berlekamp_massey(vals: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="kitamasa"><a class="header" href="#kitamasa">Kitamasa</a></h1>
-<pre><code class="language-rust noplayground">fn poly_mul(v: &amp;[u64], w: &amp;[u64], rec: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
+<p>Reference: JusticeHui's Blog: <a href="https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/">https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/</a></p>
+<h2 id="naive-implementation"><a class="header" href="#naive-implementation">Naive Implementation</a></h2>
+<pre><code class="language-rust noplayground">// Kitamasas
+//
+// Reference: JusticeHui's Blog: &lt;https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/&gt;
+
+fn poly_mul(v: &amp;[u64], w: &amp;[u64], rec: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
     let mut t = vec![0; 2 * v.len()];
 
     for j in 0..v.len() {

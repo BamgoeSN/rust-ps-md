@@ -140,7 +140,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="kitamasa"><a class="header" href="#kitamasa">Kitamasa</a></h1>
-<pre><code class="language-rust noplayground">fn poly_mul(v: &amp;[u64], w: &amp;[u64], rec: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
+<p>Reference: JusticeHui's Blog: <a href="https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/">https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/</a></p>
+<h2 id="naive-implementation"><a class="header" href="#naive-implementation">Naive Implementation</a></h2>
+<pre><code class="language-rust noplayground">// Kitamasas
+//
+// Reference: JusticeHui's Blog: &lt;https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/&gt;
+
+fn poly_mul(v: &amp;[u64], w: &amp;[u64], rec: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
     let mut t = vec![0; 2 * v.len()];
 
     for j in 0..v.len() {
