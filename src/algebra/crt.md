@@ -20,6 +20,8 @@ fn safe_mod(mut x: i64, m: i64) -> i64 {
 }
 
 /// Returns the greatest common divisor of a and b
+/// Using loop based impl for inlining
+#[inline(always)]
 fn gcd(mut a: i64, mut b: i64) -> i64 {
     while b != 0 {
         let t = b;
@@ -30,17 +32,15 @@ fn gcd(mut a: i64, mut b: i64) -> i64 {
 }
 
 /// Returns gcd(a, b), s, r s.t. a*s + b*r = gcd(a, b)
+#[inline(always)]
 fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
     let (mut s, mut old_s) = (0, 1);
     let (mut r, mut old_r) = (b, a);
     while r != 0 {
         let q = old_r / r;
-
-        let new_r = old_r - q * r;
-        old_r = r;
-        r = new_r;
-
-        let new_s = old_s - q * s;
+        let (new_r, new_s) = (old_r - q * r, old_s - q * s);
+        old_r = r; // Not using destructuring to support low version
+        r = new_r; // AtCoder is using 1.42.0
         old_s = s;
         s = new_s;
     }
