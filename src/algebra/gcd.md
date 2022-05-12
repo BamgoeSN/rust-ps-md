@@ -1,22 +1,15 @@
-# GCD
-Returns the greatest common divisor of a and b.
+# GCD, LCM
+
 ```rust,noplayground
-fn gcd(mut a: i64, mut b: i64) -> i64 {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
+fn gcd(x: u64, y: u64) -> u64 {
+    if y == 0 {
+        x
+    } else {
+        gcd(y, x % y)
     }
-    a
 }
-```
 
-# LCM
-Returns the least common multiplier of a and b.
-
-Required snippets: [GCD](#gcd)
-```rust,noplayground
-fn lcm(a: i64, b: i64) -> i64 {
-    a / gcd(a, b) * b
+fn lcm(x: u64, y: u64) -> u64 {
+    x / gcd(x, y) * y
 }
 ```
