@@ -2040,12 +2040,14 @@ fn compress_value&lt;T: Clone + Ord + Hash&gt;(arr: &amp;Vec&lt;T&gt;) -&gt; (Ha
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="base-template"><a class="header" href="#base-template">Base Template</a></h1>
 <pre><code class="language-rust noplayground">fn main() {
+    // FastIO
     use {fastio::*, std::io::*};
     let input_str: &amp;str = get_input();
     let mut scan: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
     let stdout = stdout();
     let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
 
+    // FastIO Macros
     macro_rules! next {
         () =&gt; { scan.next() };
         (str) =&gt; { scan.next_str() };
