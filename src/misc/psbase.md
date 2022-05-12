@@ -2,12 +2,14 @@
 
 ```rust,noplayground
 fn main() {
+    // FastIO
     use {fastio::*, std::io::*};
     let input_str: &str = get_input();
     let mut scan: Scanner<_> = Scanner::tokenize(input_str);
     let stdout = stdout();
     let out = &mut BufWriter::with_capacity(262144, stdout.lock());
 
+    // FastIO Macros
     macro_rules! next {
         () => { scan.next() };
         (str) => { scan.next_str() };
