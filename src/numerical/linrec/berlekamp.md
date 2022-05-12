@@ -1,6 +1,10 @@
 # Berlekamp-Massey
 
 ```rust,noplayground
+// References
+// https://blog.naver.com/jinhan814/222140081932
+// https://koosaga.com/231
+
 fn rem_pow(mut base: i64, mut exp: i64, m: i64) -> i64 {
     let mut result = 1;
     while exp != 0 {
