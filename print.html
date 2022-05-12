@@ -602,7 +602,11 @@ assert_eq!(factors, [53, 61976026187]);
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linear-recurrence"><a class="header" href="#linear-recurrence">Linear Recurrence</a></h1>
 <p>Algorithms related to linear recurrences</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="berlekamp-massey"><a class="header" href="#berlekamp-massey">Berlekamp-Massey</a></h1>
-<pre><code class="language-rust noplayground">fn rem_pow(mut base: i64, mut exp: i64, m: i64) -&gt; i64 {
+<pre><code class="language-rust noplayground">// References
+// https://blog.naver.com/jinhan814/222140081932
+// https://koosaga.com/231
+
+fn rem_pow(mut base: i64, mut exp: i64, m: i64) -&gt; i64 {
     let mut result = 1;
     while exp != 0 {
         if exp &amp; 1 != 0 {

@@ -140,7 +140,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="berlekamp-massey"><a class="header" href="#berlekamp-massey">Berlekamp-Massey</a></h1>
-<pre><code class="language-rust noplayground">fn rem_pow(mut base: i64, mut exp: i64, m: i64) -&gt; i64 {
+<pre><code class="language-rust noplayground">// References
+// https://blog.naver.com/jinhan814/222140081932
+// https://koosaga.com/231
+
+fn rem_pow(mut base: i64, mut exp: i64, m: i64) -&gt; i64 {
     let mut result = 1;
     while exp != 0 {
         if exp &amp; 1 != 0 {
