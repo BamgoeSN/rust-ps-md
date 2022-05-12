@@ -1,172 +1,73 @@
 # Base Template
 
-## w/o Testcases
 ```rust,noplayground
-use std::{
-    io::*,
-    str::{FromStr, SplitAsciiWhitespace},
-};
-
 fn main() {
-    let stdin = stdin();
-    let mut handle = stdin.lock();
-    let mut input_str = String::new();
-    handle
-        .read_to_string(&mut input_str)
-        .expect("Failed to read");
-    let mut scan = Scanner::new(&input_str);
+    use {fastio::*, std::io::*};
+    let input_str: &str = get_input();
+    let mut scan: Scanner<_> = Scanner::tokenize(input_str);
     let stdout = stdout();
     let out = &mut BufWriter::with_capacity(262144, stdout.lock());
 
     macro_rules! next {
-        () => {
-            scan.next()
-        };
-        ($t:ty) => {
-            scan.next::<$t>()
-        };
-    }
-    macro_rules! out { ($($arg:tt)*) => { write!(out, $($arg)*).ok(); }; }
-    macro_rules! outln { ($($arg:tt)*) => { writeln!(out, $($arg)*).ok(); }; }
-}
-
-struct Scanner<'a, I: Iterator<Item = &'a str>> {
-    input: I,
-}
-
-impl<'a> Scanner<'a, SplitAsciiWhitespace<'a>> {
-    fn new(s: &'a str) -> Self {
-        Self {
-            input: s.split_ascii_whitespace(),
-        }
-    }
-}
-
-impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
-    #[inline(always)]
-    fn next_str(&mut self) -> &'a str {
-        self.input.next().expect("Input has been exhausted")
-    }
-    #[inline(always)]
-    fn next<T: ParsableNum>(&mut self) -> T {
-        T::from_str(self.next_str())
-    }
-    #[inline(always)]
-    fn next_elem<T: FromStr>(&mut self) -> T {
-        self.next_str().parse().ok().expect("Failed to parse")
-    }
-    #[inline(always)]
-    fn next_str_option(&mut self) -> Option<&'a str> {
-        self.input.next()
-    }
-    #[inline(always)]
-    fn next_option<T: ParsableNum>(&mut self) -> Option<T> {
-        self.next_str_option().map(|s| T::from_str(s))
-    }
-    #[inline(always)]
-    fn next_elem_option<T: FromStr>(&mut self) -> Option<T> {
-        self.next_str_option().and_then(|s| s.parse().ok())
-    }
-}
-
-trait ParsableNum {
-    fn from_str(s: &str) -> Self;
-}
-macro_rules! impl_uint { ($($t:ty) *) => {$( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &str) -> Self { s.bytes().fold(0, |a, b| a * 10 + (b - b'0') as Self) }
-})+ }; }
-impl_uint!(u8 u16 u32 u64 u128 usize);
-macro_rules! impl_int { ($($t:ty) *) => { $( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &str) -> Self { let mut s = s.as_bytes(); let is_neg = s[0] == b'-'; if is_neg {s = &s[1..];} let n = s.iter().fold(0, |a, b| a * 10 + (b - b'0') as Self); if is_neg {-n} else {n} }
-})+ }; }
-impl_int!(i8 i16 i32 i64 i128 isize);
-```
-
-## w/ Testcases
-```rust,noplayground
-use std::{
-    io::*,
-    str::{FromStr, SplitAsciiWhitespace},
-};
-
-fn main() {
-    let stdin = stdin();
-    let mut handle = stdin.lock();
-    let mut input_str = String::new();
-    handle
-        .read_to_string(&mut input_str)
-        .expect("Failed to read");
-    let mut scan = Scanner::new(&input_str);
-    let stdout = stdout();
-    let out = &mut BufWriter::with_capacity(262144, stdout.lock());
-
-    macro_rules! next {
-        () => {
-            scan.next()
-        };
-        ($t:ty) => {
-            scan.next::<$t>()
-        };
+        () => { scan.next() };
+        (str) => { scan.next_str() };
+        ($($t:ty) +) => { ($(scan.next::<$t>()),+) };
+        ($n:expr) => { (0..$n).map(|_| next!()).collect() };
     }
     macro_rules! out { ($($arg:tt)*) => { write!(out, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) => { writeln!(out, $($arg)*).ok(); }; }
 
-    let tc_s: usize = next!();
-    for _ in 0..tc_s {}
+    // Main
 }
 
-struct Scanner<'a, I: Iterator<Item = &'a str>> {
-    input: I,
-}
+mod fastio {
+    extern "C" {
+        fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -> *mut u8;
+        fn fstat(fd: i32, stat: *mut usize) -> i32;
+    }
 
-impl<'a> Scanner<'a, SplitAsciiWhitespace<'a>> {
-    fn new(s: &'a str) -> Self {
-        Self {
-            input: s.split_ascii_whitespace(),
+    pub fn get_input() -> &'static str {
+        let mut stat = [0; 20];
+        unsafe { fstat(0, (&mut stat).as_mut_ptr()) };
+        let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
+        unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(buffer, stat[6])) }
+    }
+
+    pub struct Scanner<'a, I: Iterator<Item = &'a str>> {
+        it: I,
+    }
+
+    impl<'a> Scanner<'a, std::str::SplitAsciiWhitespace<'a>> {
+        pub fn tokenize(s: &'a str) -> Self {
+            Self {
+                it: s.split_ascii_whitespace(),
+            }
+        }
+    }
+
+    impl<'a> Scanner<'a, std::str::Lines<'a>> {
+        pub fn lines(s: &'a str) -> Self {
+            Self { it: s.lines() }
+        }
+    }
+
+    impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
+        #[inline(always)]
+        pub fn next<T: std::str::FromStr>(&mut self) -> T {
+            self.it.next().unwrap().parse().ok().unwrap()
+        }
+        #[inline(always)]
+        pub fn next_str(&mut self) -> &'a str {
+            self.it.next().unwrap()
+        }
+        #[inline(always)]
+        pub fn next_option<T: std::str::FromStr>(&mut self) -> Option<T> {
+            self.it.next().and_then(|s| s.parse().ok())
+        }
+        #[inline(always)]
+        pub fn next_str_option(&mut self) -> Option<&'a str> {
+            self.it.next()
         }
     }
 }
-
-impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
-    #[inline(always)]
-    fn next<T: ParsableNum>(&mut self) -> T {
-        T::from_str(self.next_str())
-    }
-    #[inline(always)]
-    fn next_elem<T: FromStr>(&mut self) -> T {
-        self.next_str().parse().ok().expect("Failed to parse")
-    }
-    #[inline(always)]
-    fn next_str(&mut self) -> &'a str {
-        self.input.next().expect("Input has been exhausted")
-    }
-    #[inline(always)]
-    fn next_option<T: ParsableNum>(&mut self) -> Option<T> {
-        self.next_str_option().map(|s| T::from_str(s))
-    }
-    #[inline(always)]
-    fn next_elem_option<T: FromStr>(&mut self) -> Option<T> {
-        self.next_str_option().and_then(|s| s.parse().ok())
-    }
-    #[inline(always)]
-    fn next_str_option(&mut self) -> Option<&'a str> {
-        self.input.next()
-    }
-}
-
-trait ParsableNum {
-    fn from_str(s: &str) -> Self;
-}
-macro_rules! impl_uint { ($($t:ty) *) => {$( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &str) -> Self { s.bytes().fold(0, |a, b| a * 10 + (b - b'0') as Self) }
-})+ }; }
-impl_uint!(u8 u16 u32 u64 u128 usize);
-macro_rules! impl_int { ($($t:ty) *) => { $( impl ParsableNum for $t {
-    #[inline(always)]
-    fn from_str(s: &str) -> Self { let mut s = s.as_bytes(); let is_neg = s[0] == b'-'; if is_neg {s = &s[1..];} let n = s.iter().fold(0, |a, b| a * 10 + (b - b'0') as Self); if is_neg {-n} else {n} }
-})+ }; }
-impl_int!(i8 i16 i32 i64 i128 isize);
 ```
