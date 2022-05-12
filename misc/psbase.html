@@ -147,14 +147,13 @@
     let input_str: &amp;str = get_input();
     let mut scan: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
     let stdout = stdout();
-    let out = &amp;mut BufWriter::with_capacity(262144, stdout.lock());
+    let out = &amp;mut BufWriter::with_capacity(1 &lt;&lt; 18, stdout.lock());
 
     // FastIO Macros
     macro_rules! next {
         () =&gt; { scan.next() };
         (str) =&gt; { scan.next_str() };
         ($($t:ty) +) =&gt; { ($(scan.next::&lt;$t&gt;()),+) };
-        ($n:expr) =&gt; { (0..$n).map(|_| next!()).collect() };
     }
     macro_rules! out { ($($arg:tt)*) =&gt; { write!(out, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(out, $($arg)*).ok(); }; }
@@ -219,14 +218,13 @@ mod fastio {
     use fastio::*;
     let input_str: &amp;str = get_input();
     let mut scan: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
-    let mut out = Flusher::with_capacity(5000000);
+    let mut out = Flusher::with_capacity(1 &lt;&lt; 18);
 
     // FastIO Macros
     macro_rules! next {
         () =&gt; { scan.next() };
         (str) =&gt; { scan.next_str() };
-        ($($t:ty),+) =&gt; { ($(scan.next::&lt;$t&gt;()),+) };
-        ($n:expr) =&gt; { (0..$n).map(|_| next!()).collect() };
+        ($($t:ty) +) =&gt; { ($(scan.next::&lt;$t&gt;()),+) };
     }
     macro_rules! out { ($($arg:tt),*) =&gt; {$( $arg.push_num(&amp;mut out); out.buf.push(b' '); )*}; }
     macro_rules! outln { ($($arg:tt),*) =&gt; { out!($($arg),*); out.buf.push(b'\n'); } }
@@ -235,10 +233,7 @@ mod fastio {
 }
 
 mod fastio {
-    use std::{
-        io::{stdout, Write},
-        str::{Lines, SplitAsciiWhitespace},
-    };
+    use std::io::{stdout, Write};
 
     extern &quot;C&quot; {
         fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -&gt; *mut u8;
@@ -256,7 +251,7 @@ mod fastio {
         it: I,
     }
 
-    impl&lt;'a&gt; Scanner&lt;'a, SplitAsciiWhitespace&lt;'a&gt;&gt; {
+    impl&lt;'a&gt; Scanner&lt;'a, std::str::SplitAsciiWhitespace&lt;'a&gt;&gt; {
         pub fn tokenize(s: &amp;'a str) -&gt; Self {
             Self {
                 it: s.split_ascii_whitespace(),
@@ -264,7 +259,7 @@ mod fastio {
         }
     }
 
-    impl&lt;'a&gt; Scanner&lt;'a, Lines&lt;'a&gt;&gt; {
+    impl&lt;'a&gt; Scanner&lt;'a, std::str::Lines&lt;'a&gt;&gt; {
         pub fn lines(s: &amp;'a str) -&gt; Self {
             Self { it: s.lines() }
         }
