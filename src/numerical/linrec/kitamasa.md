@@ -1,6 +1,14 @@
 # Kitamasa
 
+Reference: JusticeHui's Blog: <https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/>
+
+## Naive Implementation
+
 ```rust,noplayground
+// Kitamasas
+//
+// Reference: JusticeHui's Blog: <https://justicehui.github.io/hard-algorithm/2021/03/13/kitamasa/>
+
 fn poly_mul(v: &[u64], w: &[u64], rec: &[u64], m: u64) -> Vec<u64> {
     let mut t = vec![0; 2 * v.len()];
 
