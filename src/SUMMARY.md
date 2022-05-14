@@ -3,6 +3,7 @@
 [How to use](./intro.md)
 
 # Algebra
+
 - [GCD, LCM](./algebra/gcd.md)
 - [Extended Euclidean Algorithm](./algebra/extgcd.md)
 - [Chinese Remainder Theorem](./algebra/crt.md)
@@ -10,6 +11,7 @@
 - [Prime Factorization](./algebra/pollardrho.md)
 
 # Numerical Algorithms
+
 - [Integer Square Root](./numerical/isqrt.md)
 - [Linear Recurrence](./numerical/linrec/intro.md)
   - [Berlekamp-Massey](./numerical/linrec/berlekamp.md)
@@ -17,26 +19,31 @@
   - [Bostan-Mori](./numerical/linrec/bostanmori.md)
 
 # Data Structures
+
 - [Bit Array](./datastructure/bitarray.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
-    - [Segment Tree](./datastructure/segtree/segtree.md)
-    - [Fenwick Tree](./datastructure/segtree/fenwick.md)
-    - [Lazy Segment Tree](./datastructure/segtree/lazyseg.md)
+  - [Segment Tree](./datastructure/segtree/segtree.md)
+  - [Fenwick Tree](./datastructure/segtree/fenwick.md)
+  - [Lazy Segment Tree](./datastructure/segtree/lazyseg.md)
 
 # Graphs
+
 - [Adjacency List Graph Representation](./graphs/adjlist.md)
 - [Disjoint Set Union](./graphs/dsu.md)
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
 
 # Geometry
+
 - [Convex Hull](./geometry/convexhull.md)
 
 # Unclassified
+
 - [Value Compression](./unclass/valcomp.md)
 - [Longest Increasing Subsequence](./unclass/lis.md)
 
 # Misc
+
 - [Base Template](./misc/psbase.md)
 - [Zero/One Trait](./misc/zero_one_trait.md)
 - [Fast n-dimensional Array](./misc/matrix.md)
