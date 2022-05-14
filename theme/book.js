@@ -356,6 +356,11 @@ function playground_text(playground) {
       stylesheets.tomorrowNight.disabled = true;
       stylesheets.highlight.disabled = true;
       ace_theme = "ace/theme/tomorrow_night";
+    } else if (theme == "coal" || theme == "navy") {
+      stylesheets.ayuHighlight.disabled = true;
+      stylesheets.tomorrowNight.disabled = false;
+      stylesheets.highlight.disabled = true;
+      ace_theme = "ace/theme/tomorrow_night";
     } else {
       stylesheets.ayuHighlight.disabled = true;
       stylesheets.tomorrowNight.disabled = true;
@@ -363,12 +368,6 @@ function playground_text(playground) {
       ace_theme = "ace/theme/dawn";
     }
 
-    // if (theme == 'coal' || theme == 'navy') {
-    //     stylesheets.ayuHighlight.disabled = true;
-    //     stylesheets.tomorrowNight.disabled = false;
-    //     stylesheets.highlight.disabled = true;
-
-    //     ace_theme = "ace/theme/tomorrow_night";
     // } else if (theme == 'ayu') {
     //     stylesheets.ayuHighlight.disabled = false;
     //     stylesheets.tomorrowNight.disabled = true;
