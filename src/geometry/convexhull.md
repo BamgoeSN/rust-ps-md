@@ -5,8 +5,6 @@ This snippet excludes every points on vertices from the convex hull, and only in
 
 ### Snippet
 ```rust,noplayground
-use std::cmp::Ordering;
-
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Point {
     x: i64,
@@ -46,7 +44,8 @@ fn get_turn(v1: &Point, v2: &Point) -> Turn {
     }
 }
 
-fn compare_ccw(a: &Point, b: &Point) -> Ordering {
+fn compare_ccw(a: &Point, b: &Point) -> std::cmp::Ordering {
+    use std::cmp::Ordering;
     if a == b {
         return Ordering::Equal;
     }
