@@ -3,19 +3,19 @@
 Required snippets: [SCC](./scc.md#strongly-connected-components)
 ```rust,noplayground
 struct TwoSat {
-    n: usize,
+    n: u32,
     graph: Graph<()>,
 }
 
 impl TwoSat {
-    fn new(n: usize, clause_num: usize) -> Self {
+    fn new(n: u32, clause_num: u32) -> Self {
         Self {
             n,
             graph: Graph::new(n << 1, clause_num << 1),
         }
     }
 
-    fn judge(f: bool, a: usize, b: usize) -> usize {
+    fn judge(f: bool, a: u32, b: u32) -> u32 {
         if f {
             a
         } else {
@@ -23,7 +23,7 @@ impl TwoSat {
         }
     }
 
-    fn add_clause(&mut self, i: usize, f: bool, j: usize, g: bool) {
+    fn add_clause(&mut self, i: u32, f: bool, j: u32, g: bool) {
         self.graph.add_edge(
             (i << 1) + Self::judge(f, 0, 1),
             (j << 1) + Self::judge(g, 1, 0),
@@ -37,16 +37,16 @@ impl TwoSat {
     }
 
     fn solve(self) -> Option<Vec<bool>> {
-        let mut answer = vec![false; self.n];
+        let mut answer = vec![false; self.n as usize];
 
         let scc = SCC::new(&self.graph);
         let ids = &scc.scc_ids;
 
         for i in 0..self.n {
-            if ids[i << 1] == ids[(i << 1) + 1] {
+            if ids[(i as usize) << 1] == ids[((i as usize) << 1) + 1] {
                 return None;
             }
-            answer[i] = ids[i << 1] < ids[(i << 1) + 1];
+            answer[i as usize] = ids[(i as usize) << 1] < ids[((i as usize) << 1) + 1];
         }
         Some(answer)
     }
