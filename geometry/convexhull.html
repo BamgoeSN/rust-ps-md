@@ -143,9 +143,7 @@
 <h2 id="graham-scan"><a class="header" href="#graham-scan">Graham Scan</a></h2>
 <p>This snippet excludes every points on vertices from the convex hull, and only includes points of both ends.</p>
 <h3 id="snippet"><a class="header" href="#snippet">Snippet</a></h3>
-<pre><code class="language-rust noplayground">use std::cmp::Ordering;
-
-#[derive(Clone, Debug, Eq, PartialEq)]
+<pre><code class="language-rust noplayground">#[derive(Clone, Debug, Eq, PartialEq)]
 struct Point {
     x: i64,
     y: i64,
@@ -184,7 +182,8 @@ fn get_turn(v1: &amp;Point, v2: &amp;Point) -&gt; Turn {
     }
 }
 
-fn compare_ccw(a: &amp;Point, b: &amp;Point) -&gt; Ordering {
+fn compare_ccw(a: &amp;Point, b: &amp;Point) -&gt; std::cmp::Ordering {
+    use std::cmp::Ordering;
     if a == b {
         return Ordering::Equal;
     }

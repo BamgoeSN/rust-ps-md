@@ -142,19 +142,19 @@
                         <h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
 <p>Required snippets: <a href="./scc.html#strongly-connected-components">SCC</a></p>
 <pre><code class="language-rust noplayground">struct TwoSat {
-    n: usize,
+    n: u32,
     graph: Graph&lt;()&gt;,
 }
 
 impl TwoSat {
-    fn new(n: usize, clause_num: usize) -&gt; Self {
+    fn new(n: u32, clause_num: u32) -&gt; Self {
         Self {
             n,
             graph: Graph::new(n &lt;&lt; 1, clause_num &lt;&lt; 1),
         }
     }
 
-    fn judge(f: bool, a: usize, b: usize) -&gt; usize {
+    fn judge(f: bool, a: u32, b: u32) -&gt; u32 {
         if f {
             a
         } else {
@@ -162,7 +162,7 @@ impl TwoSat {
         }
     }
 
-    fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
+    fn add_clause(&amp;mut self, i: u32, f: bool, j: u32, g: bool) {
         self.graph.add_edge(
             (i &lt;&lt; 1) + Self::judge(f, 0, 1),
             (j &lt;&lt; 1) + Self::judge(g, 1, 0),
@@ -176,16 +176,16 @@ impl TwoSat {
     }
 
     fn solve(self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
-        let mut answer = vec![false; self.n];
+        let mut answer = vec![false; self.n as usize];
 
         let scc = SCC::new(&amp;self.graph);
         let ids = &amp;scc.scc_ids;
 
         for i in 0..self.n {
-            if ids[i &lt;&lt; 1] == ids[(i &lt;&lt; 1) + 1] {
+            if ids[(i as usize) &lt;&lt; 1] == ids[((i as usize) &lt;&lt; 1) + 1] {
                 return None;
             }
-            answer[i] = ids[i &lt;&lt; 1] &lt; ids[(i &lt;&lt; 1) + 1];
+            answer[i as usize] = ids[(i as usize) &lt;&lt; 1] &lt; ids[((i as usize) &lt;&lt; 1) + 1];
         }
         Some(answer)
     }
