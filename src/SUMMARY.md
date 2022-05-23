@@ -33,6 +33,10 @@
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
 
+# Strings
+
+- [Manacher](./strings/manacher.md)
+
 # Geometry
 
 - [Convex Hull](./geometry/convexhull.md)
