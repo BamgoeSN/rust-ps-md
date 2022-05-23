@@ -20,6 +20,7 @@
 
 # Data Structures
 
+- [Fast n-dimensional Array](./datastructure/matrix.md)
 - [Bit Array](./datastructure/bitarray.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
   - [Segment Tree](./datastructure/segtree/segtree.md)
@@ -50,5 +51,4 @@
 
 - [Base Template](./misc/psbase.md)
 - [Zero/One Trait](./misc/zero_one_trait.md)
-- [Fast n-dimensional Array](./misc/matrix.md)
 - [Macros](./misc/macro.md)
