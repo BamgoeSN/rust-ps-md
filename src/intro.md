@@ -15,7 +15,7 @@ This book is a collection of snippets for competitive programming and problem so
 
 ### C++
 
-- [aeren1564's Library](https://github.com/Aeren1564/Algorithms)
+- [aeren1564 Bible](https://github.com/Aeren1564/Algorithms)
 - AtCoder Library: [Doc](https://atcoder.github.io/ac-library/production/document_en/), [GitHub](https://github.com/atcoder/ac-library)
 - [koosaga's Library](https://github.com/koosaga/olympiad/tree/master/Library)
 - [justiceHui's Teamnote](https://github.com/justiceHui/icpc-teamnote)
