@@ -1,5 +1,21 @@
-# How to use
+# Introduction
 
-For any algorithm included here, simply copy its snippet and paste into your code, then it's done!
+This book is a collection of snippets for competitive programming and problem solving with Rust. All you have to do for using snippets is simply copying snippets you need and pasting them into your code.
 
-Some snippets might require other snippets from another section. For such snippets, every required section will be linked on it, so that you can get the snippet right away. You simply copy all those and paste to your code before you paste the original snippet you were going to use.
+## Other Resources
+
+### C++
+
+- [aeren1564's Library](https://github.com/Aeren1564/Algorithms)
+- AtCoder Library: [Doc](https://atcoder.github.io/ac-library/production/document_en/), [GitHub](https://github.com/atcoder/ac-library)
+- [koosaga's Library](https://github.com/koosaga/olympiad/tree/master/Library)
+- [justiceHui's Teamnote](https://github.com/justiceHui/icpc-teamnote)
+
+### Python
+
+- [PyRival](https://github.com/cheran-senthil/PyRival)
+
+### Rust
+
+- [Contest Algorithms in Rust by EbTech](https://github.com/EbTech/rust-algorithms)
+- [kiwiyou's Snippets Collection](https://snippets.kiwiyou.dev/)

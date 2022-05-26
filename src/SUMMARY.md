@@ -1,6 +1,6 @@
 # Summary
 
-[How to use](./intro.md)
+[Introduction](./intro.md)
 
 # Algebra
 
