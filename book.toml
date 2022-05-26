@@ -6,6 +6,8 @@ src = "src"
 title = "Rust Snippets for Competitive Programming"
 
 [output.html]
+default-theme = "nord_light"
+preferred-dark-theme = "nord_dark"
 git-repository-url = "https://github.com/BamgoeSN/rust-ps-md"
 mathjax-support = true
 site-url = "/rust-ps-md/"
