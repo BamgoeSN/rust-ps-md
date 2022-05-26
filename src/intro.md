@@ -4,6 +4,10 @@ This book is a collection of snippets for competitive programming and problem so
 
 ## Other Resources
 
+### General
+
+- [The Ultimate Topic List by Shahjalal Shohag](https://blog.shahjalalshohag.com/topic-list/)
+
 ### C++
 
 - [aeren1564's Library](https://github.com/Aeren1564/Algorithms)
