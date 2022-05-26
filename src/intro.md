@@ -8,6 +8,11 @@ This book is a collection of snippets for competitive programming and problem so
 
 - [The Ultimate Topic List by Shahjalal Shohag](https://blog.shahjalalshohag.com/topic-list/)
 
+### Rust
+
+- [Contest Algorithms in Rust by EbTech](https://github.com/EbTech/rust-algorithms)
+- [kiwiyou's Snippets Collection](https://snippets.kiwiyou.dev/)
+
 ### C++
 
 - [aeren1564's Library](https://github.com/Aeren1564/Algorithms)
@@ -18,8 +23,3 @@ This book is a collection of snippets for competitive programming and problem so
 ### Python
 
 - [PyRival](https://github.com/cheran-senthil/PyRival)
-
-### Rust
-
-- [Contest Algorithms in Rust by EbTech](https://github.com/EbTech/rust-algorithms)
-- [kiwiyou's Snippets Collection](https://snippets.kiwiyou.dev/)
