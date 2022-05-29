@@ -9,7 +9,7 @@ fn main() {
     let input_str: &str = get_input();
     let mut scan: Scanner<_> = Scanner::tokenize(input_str);
     let stdout = stdout();
-    let out = &mut BufWriter::with_capacity(1 << 18, stdout.lock());
+    let out = &mut BufWriter::new(stdout.lock());
 
     // FastIO Macros
     macro_rules! next {
