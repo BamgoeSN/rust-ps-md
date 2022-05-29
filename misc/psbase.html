@@ -147,7 +147,7 @@
     let input_str: &amp;str = get_input();
     let mut scan: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
     let stdout = stdout();
-    let out = &amp;mut BufWriter::with_capacity(1 &lt;&lt; 18, stdout.lock());
+    let out = &amp;mut BufWriter::new(stdout.lock());
 
     // FastIO Macros
     macro_rules! next {
