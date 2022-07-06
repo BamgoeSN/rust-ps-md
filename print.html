@@ -2046,6 +2046,24 @@ fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
+<h2 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h2>
+<pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
+/// reevaluator[compressed_value] = original_value
+fn compress_value&lt;T: Ord + std::hash::Hash&gt;(
+    arr: &amp;[T],
+) -&gt; (std::collections::HashMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
+    use std::collections::*;
+    let compressor: HashMap&lt;&amp;T, usize&gt; = {
+        let mut sorted: Vec&lt;_&gt; = arr.iter().collect();
+        sorted.sort_unstable();
+        sorted.dedup();
+        sorted.into_iter().enumerate().map(|x| (x.1, x.0)).collect()
+    };
+    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
+    (compressor, reevaluator)
+}
+</code></pre>
+<h2 id="w0-hashmap"><a class="header" href="#w0-hashmap">w/0 HashMap</a></h2>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
 fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
