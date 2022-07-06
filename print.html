@@ -2046,30 +2046,17 @@ fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<pre><code class="language-rust noplayground">/// Returns (compressor, reevaluator)
-/// compressor[original_value] = compressed_value
+<pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
-fn compress_value&lt;T: Clone + Ord + Hash&gt;(arr: &amp;Vec&lt;T&gt;) -&gt; (HashMap&lt;T, usize&gt;, Vec&lt;T&gt;) {
-    let mut sorted = arr.clone();
-    sorted.sort_unstable();
-
-    let mut compressor: HashMap&lt;T, usize&gt; = HashMap::new();
-    let mut reevaluator: Vec&lt;T&gt; = Vec::new();
-
-    let mut prev: Option&lt;&amp;T&gt; = None;
-    let mut cmpr = 0usize;
-    for v in sorted.iter() {
-        if let Some(prev) = prev {
-            if prev == v {
-                continue;
-            }
-        }
-        prev = Some(v);
-        compressor.insert(v.clone(), cmpr);
-        reevaluator.push(v.clone());
-        cmpr += 1;
-    }
-
+fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
+    use std::collections::*;
+    let compressor: BTreeMap&lt;&amp;T, usize&gt; = {
+        let mut sorted: Vec&lt;_&gt; = arr.iter().collect();
+        sorted.sort_unstable();
+        sorted.dedup();
+        sorted.into_iter().enumerate().map(|x| (x.1, x.0)).collect()
+    };
+    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
     (compressor, reevaluator)
 }
 </code></pre>
