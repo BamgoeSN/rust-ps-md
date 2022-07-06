@@ -37,6 +37,7 @@
 # Strings
 
 - [Manacher](./strings/manacher.md)
+- [Suffix Array and LCP Array](./strings/salcp.md)
 
 # Geometry
 
