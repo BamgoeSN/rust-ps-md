@@ -1,30 +1,17 @@
 # Value Compression
 
 ```rust,noplayground
-/// Returns (compressor, reevaluator)
 /// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
-fn compress_value<T: Clone + Ord + Hash>(arr: &Vec<T>) -> (HashMap<T, usize>, Vec<T>) {
-    let mut sorted = arr.clone();
-    sorted.sort_unstable();
-
-    let mut compressor: HashMap<T, usize> = HashMap::new();
-    let mut reevaluator: Vec<T> = Vec::new();
-
-    let mut prev: Option<&T> = None;
-    let mut cmpr = 0usize;
-    for v in sorted.iter() {
-        if let Some(prev) = prev {
-            if prev == v {
-                continue;
-            }
-        }
-        prev = Some(v);
-        compressor.insert(v.clone(), cmpr);
-        reevaluator.push(v.clone());
-        cmpr += 1;
-    }
-
+fn compress_value<T: Ord>(arr: &[T]) -> (std::collections::BTreeMap<&T, usize>, Vec<&T>) {
+    use std::collections::*;
+    let compressor: BTreeMap<&T, usize> = {
+        let mut sorted: Vec<_> = arr.iter().collect();
+        sorted.sort_unstable();
+        sorted.dedup();
+        sorted.into_iter().enumerate().map(|x| (x.1, x.0)).collect()
+    };
+    let reevaluator: Vec<&T> = compressor.iter().map(|x| *x.0).collect();
     (compressor, reevaluator)
 }
 ```
