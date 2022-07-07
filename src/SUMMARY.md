@@ -53,5 +53,5 @@
 # Misc
 
 - [Base Template](./misc/fastio.md)
-- [Zero/One Trait (Deprecated)](./misc/zero_one_trait.md)
 - [Macros](./misc/macro.md)
+- [Zero/One Trait (Deprecated)](./misc/zero_one_trait.md)
