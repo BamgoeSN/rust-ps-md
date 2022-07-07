@@ -1,7 +1,6 @@
 # GCD, LCM
 
-`gcd(x, y)` returns the greatest common divisor (GCD) of `x` and `y`.
-
+`gcd(x, y)` returns the greatest common divisor (GCD) of `x` and `y`. \
 `lcm(x, y)` returns the least common multiple (LCM) of `x` and `y`.
 
 `gcd` is implemented using Euclidean algorithm, whose time complexity is \\(O( \log \_{\phi} x )\\) where \\(\phi\\) is a golden ratio.
