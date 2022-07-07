@@ -187,29 +187,29 @@ for i in 0..s.len() {
 </span><span class="boring">}
 </span></code></pre></pre>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
-<pre><code class="language-rust noplayground">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;u32&gt; {
-    let n = arr.len() as u32;
-    let mut mana: Vec&lt;u32&gt; = vec![1; n as usize];
-    let mut r: u32 = 1;
-    let mut p: u32 = 0;
+<pre><code class="language-rust noplayground">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;usize&gt; {
+    let n = arr.len();
+    let mut mana: Vec&lt;usize&gt; = vec![1; n];
+    let mut r: usize = 1;
+    let mut p: usize = 0;
 
-    for i in 1..arr.len() as u32 {
+    for i in 1..arr.len() {
         if i + 1 &gt;= r {
-            mana[i as usize] = 1;
+            mana[i] = 1;
         } else {
             let j = 2 * p - i;
-            mana[i as usize] = mana[j as usize].min(r - i);
+            mana[i] = mana[j].min(r - i);
         }
 
-        while mana[i as usize] &lt;= i &amp;&amp; i + mana[i as usize] &lt; n {
-            if arr[(i - mana[i as usize]) as usize] != arr[(i + mana[i as usize]) as usize] {
+        while mana[i] &lt;= i &amp;&amp; i + mana[i] &lt; n {
+            if arr[(i - mana[i])] != arr[(i + mana[i])] {
                 break;
             }
-            mana[i as usize] += 1;
+            mana[i] += 1;
         }
 
-        if r &lt; mana[i as usize] + i {
-            r = mana[i as usize] + i;
+        if r &lt; mana[i] + i {
+            r = mana[i] + i;
             p = i;
         }
     }
