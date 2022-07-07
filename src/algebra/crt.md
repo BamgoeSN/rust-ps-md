@@ -1,6 +1,6 @@
 # Chinese Remainder Theorem
 
-Returns \\(x\\) such that \\(x = r_i \mod m_i\\) for all \\(i\\).
+`crt(r, m)` returns \\(x\\) such that \\(x \equiv r_i \pmod {m_i}\\) for all \\(i\\).
 
 ```rust,noplayground
 // Chinese remainder theorem
@@ -14,7 +14,7 @@ fn gcd(x: i64, y: i64) -> i64 {
     }
 }
 
-/// Returns gcd(a, b), s, r s.t. a*s + b*r = gcd(a, b)
+/// Returns gcd(a, b), s, t s.t. a*s + b*t = gcd(a, b)
 #[inline(always)]
 fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
     let (mut s, mut old_s) = (0, 1);
@@ -35,7 +35,7 @@ fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
     )
 }
 
-/// Returns $x$ s.t. $x=r_i (mod m_i)$ for all $i$
+/// Returns x s.t. x=r_i (mod m_i) for all i
 fn crt(r: &[i64], m: &[i64]) -> Option<i64> {
     let (mut x, mut m_prod) = (0, 1);
     for (bi, mi) in r.iter().zip(m.iter()) {
