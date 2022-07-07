@@ -1,6 +1,8 @@
 # Deterministic Miller-Rabin Primality Test
 
-Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\).
+`x.miller_primality()` determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\).
+
+`x.is_prime()` chooses a roughly faster algorithm among naive primality test and Miller-Rabin test, and returns `true` if `x` is a prime, `false` if not.
 
 ```rust,noplayground
 trait MillerRabin: From<u8> + PartialOrd {
