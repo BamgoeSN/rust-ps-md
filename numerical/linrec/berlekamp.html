@@ -140,7 +140,101 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="berlekamp-massey"><a class="header" href="#berlekamp-massey">Berlekamp-Massey</a></h1>
-<pre><code class="language-rust noplayground">// References
+<p><code>berlekamp_massey(A, m)</code> returns a vector <code>C</code> of length \(n\) which satisfies
+\[ \begin{aligned}
+A_x &amp;= \sum_{i=0}^{i=k-1} {C_i A_{x-k+i}} \\
+&amp;= C_0 A_{x-k} + C_1 A_{x-k+1} + \cdots + C_{k-1} A_{x-1}
+\end{aligned} \]
+with minimum \(n\) under <strong>prime</strong> modulo \(m\). It is safe to have the length of <code>vals</code> as at least \(3n\).</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>// vals[x] = vals[x-3] + 2*vals[x-2] + 3*vals[x-1]
+let m: u64 = 1000000007;
+let mut vals: Vec&lt;u64&gt; = vec![1, 2, 3];
+for x in 3..20 {
+    vals.push((vals[x - 3] + 2 * vals[x - 2] + 3 * vals[x - 1]) % m);
+}
+
+let rec = berlekamp_massey(&amp;vals, m);
+println!(&quot;{:?}&quot;, rec); // [1, 2, 3]
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">// Berlekamp-Massey
+</span><span class="boring">// References
+</span><span class="boring">// https://blog.naver.com/jinhan814/222140081932
+</span><span class="boring">// https://koosaga.com/231
+</span><span class="boring">
+</span><span class="boring">fn rem_pow(mut base: i64, mut exp: i64, m: i64) -&gt; i64 {
+</span><span class="boring">    let mut result = 1;
+</span><span class="boring">    while exp != 0 {
+</span><span class="boring">        if exp &amp; 1 != 0 {
+</span><span class="boring">            result = (result * base) % m;
+</span><span class="boring">        }
+</span><span class="boring">        exp &gt;&gt;= 1;
+</span><span class="boring">        base = (base * base) % m;
+</span><span class="boring">    }
+</span><span class="boring">    result
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">/// Finds rec[n] which satisfies
+</span><span class="boring">/// vals[d] = rec[0]vals[0] + rec[1]vals[1] + ... + rec[d-1]vals[d-1]
+</span><span class="boring">/// with minimum n.
+</span><span class="boring">fn berlekamp_massey(vals: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
+</span><span class="boring">    let m = m as i64;
+</span><span class="boring">    let mut cur: Vec&lt;i64&gt; = Vec::new();
+</span><span class="boring">    let (mut lf, mut ld) = (0, 0);
+</span><span class="boring">    let mut ls: Vec&lt;i64&gt; = Vec::new();
+</span><span class="boring">    for i in 0..vals.len() {
+</span><span class="boring">        let mut t = 0;
+</span><span class="boring">        for (j, v) in cur.iter().enumerate() {
+</span><span class="boring">            t = (t + vals[i - j - 1] as i64 * v) % m;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        if (t - vals[i] as i64) % m == 0 {
+</span><span class="boring">            continue;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        if cur.len() == 0 {
+</span><span class="boring">            cur = vec![0; i + 1];
+</span><span class="boring">            lf = i;
+</span><span class="boring">            ld = (t - vals[i] as i64) % m;
+</span><span class="boring">            continue;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        let k = -(vals[i] as i64 - t) * rem_pow(ld, m - 2, m) % m;
+</span><span class="boring">        let mut c: Vec&lt;i64&gt; = vec![0; i - lf + ls.len()];
+</span><span class="boring">        c[i - lf - 1] = k as i64;
+</span><span class="boring">        for (p, j) in ls.iter().enumerate() {
+</span><span class="boring">            c[i - lf + p] = -j * k % m;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        if c.len() &lt; cur.len() {
+</span><span class="boring">            c.extend((0..(cur.len() - c.len())).map(|_| 0));
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        for j in 0..cur.len() {
+</span><span class="boring">            c[j] = (c[j] + cur[j]) % m;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        if i - lf + ls.len() &gt;= cur.len() {
+</span><span class="boring">            ls = cur;
+</span><span class="boring">            lf = i;
+</span><span class="boring">            ld = (t - vals[i] as i64) % m;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        cur = c;
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    for i in 0..cur.len() {
+</span><span class="boring">        cur[i] = (cur[i] % m + m) % m;
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    cur.into_iter().rev().map(|x| x as u64).collect()
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">// Berlekamp-Massey
+// References
 // https://blog.naver.com/jinhan814/222140081932
 // https://koosaga.com/231
 
@@ -157,9 +251,9 @@ fn rem_pow(mut base: i64, mut exp: i64, m: i64) -&gt; i64 {
 }
 
 /// Finds rec[n] which satisfies
-/// vals[d] = rec[0]vals[0] + rec[1]vals[1] + ... + rev[d-1]vals[d-1]
+/// vals[d] = rec[0]vals[0] + rec[1]vals[1] + ... + rec[d-1]vals[d-1]
 /// with minimum n.
-pub fn berlekamp_massey(vals: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
+fn berlekamp_massey(vals: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
     let m = m as i64;
     let mut cur: Vec&lt;i64&gt; = Vec::new();
     let (mut lf, mut ld) = (0, 0);
