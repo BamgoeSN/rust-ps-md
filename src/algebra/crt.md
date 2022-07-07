@@ -4,7 +4,7 @@ Returns \\(x\\) such that \\(x = r_i \mod m_i\\) for all \\(i\\).
 
 ```rust,noplayground
 // Chinese remainder theorem
-// Reference: PyRival <https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py>
+// Reference: PyRival https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/chinese_remainder.py
 
 fn gcd(x: i64, y: i64) -> i64 {
     if y == 0 {
