@@ -130,7 +130,7 @@ println!("{:?}", lcp); // [x, 3, 0, 1, 1, 0, 2, 2]
 // Suffix array and LCP array
 // Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
 
-fn suffix_array<T: Ord + std::hash::Hash>(s: &[T]) -> Vec<usize> {
+fn suffix_array<T: Ord>(s: &[T]) -> Vec<usize> {
     use std::collections::*;
 
     if s.len() == 0 {
@@ -202,7 +202,7 @@ fn suffix_array<T: Ord + std::hash::Hash>(s: &[T]) -> Vec<usize> {
     sa
 }
 
-fn sa_lcp<T: Ord + std::hash::Hash>(arr: &[T]) -> (Vec<usize>, Vec<usize>) {
+fn sa_lcp<T: Ord>(arr: &[T]) -> (Vec<usize>, Vec<usize>) {
     let n = arr.len();
     let sa = suffix_array(arr);
     let mut lcp: Vec<usize> = vec![0; n];
