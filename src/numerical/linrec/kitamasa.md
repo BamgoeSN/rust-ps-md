@@ -5,7 +5,7 @@
 A_x &= \sum_{i=0}^{i=k-1} {C_i A_{x-k+i}} \\\\
 &= C_0 A_{x-k} + C_1 A_{x-k+1} + \cdots + C_{k-1} A_{x-1}
 \end{aligned} \\]
-in a time complexity of \\( O(T(k) \log{n}) \\), where \\(O(T(k))\\) is a time complexity taken for multiplying two polynomials of order \\(k\\).
+in a time complexity of \\( O(T(k) \log{n}) \\), where \\(O(T(k))\\) is a time complexity taken for multiplying two polynomials of order \\(k\\), and \\(k\\) is a length of \\(C\\).
 
 ## Example
 
