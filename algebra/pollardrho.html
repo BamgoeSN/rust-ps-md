@@ -144,7 +144,7 @@
 <p><code>x.factorize()</code> factorizes <code>x</code> and returns a vector with the factors. The order of factors in the vector is undefined.</p>
 <h2 id="example"><a class="header" href="#example">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
-</span>let mut rng = rng::RNG::new(12345);
+</span>let mut rng = rng::RNG::new(15163487);
 let a: u32 = 1237172;
 let mut factors = a.factorize(&amp;mut rng);
 factors.sort_unstable();
@@ -190,7 +190,7 @@ println!(&quot;{}&quot;, factors.iter().product::&lt;u32&gt;()); // 1237172
 </span><span class="boring">                    i += 1;
 </span><span class="boring">                    x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
 </span><span class="boring">                    d = gcd(y.abs_diff(x), self);
-</span><span class="boring">                    if d == self || i &gt;= $reset {
+</span><span class="boring">                    if d == self || i &gt;= reset_limit {
 </span><span class="boring">                        // Reset
 </span><span class="boring">                        reset_limit = reset_limit * 3 / 2;
 </span><span class="boring">                        i = 0;
@@ -381,7 +381,7 @@ macro_rules! impl_pollardrho {
                     i += 1;
                     x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
                     d = gcd(y.abs_diff(x), self);
-                    if d == self || i &gt;= $reset {
+                    if d == self || i &gt;= reset_limit {
                         // Reset
                         reset_limit = reset_limit * 3 / 2;
                         i = 0;

@@ -289,7 +289,7 @@ fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chinese-remainder-theorem"><a class="header" href="#chinese-remainder-theorem">Chinese Remainder Theorem</a></h1>
-<p><code>crt(r, m)</code> returns \(x\) such that \(x \equiv r_i \pmod {m_i}\) for all \(i\).</p>
+<p><code>crt(r, m)</code> returns <code>Some(x)</code> such that \(x \equiv r_i \pmod {m_i}\) for all \(i\). If such \(x\) does not exist, then it returns <code>None</code>.</p>
 <h2 id="example-2"><a class="header" href="#example-2">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let r: Vec&lt;i64&gt; = vec![1, 2, 3];
@@ -571,7 +571,7 @@ impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 17952
 <p><code>x.factorize()</code> factorizes <code>x</code> and returns a vector with the factors. The order of factors in the vector is undefined.</p>
 <h2 id="example-4"><a class="header" href="#example-4">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
-</span>let mut rng = rng::RNG::new(12345);
+</span>let mut rng = rng::RNG::new(15163487);
 let a: u32 = 1237172;
 let mut factors = a.factorize(&amp;mut rng);
 factors.sort_unstable();
@@ -617,7 +617,7 @@ println!(&quot;{}&quot;, factors.iter().product::&lt;u32&gt;()); // 1237172
 </span><span class="boring">                    i += 1;
 </span><span class="boring">                    x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
 </span><span class="boring">                    d = gcd(y.abs_diff(x), self);
-</span><span class="boring">                    if d == self || i &gt;= $reset {
+</span><span class="boring">                    if d == self || i &gt;= reset_limit {
 </span><span class="boring">                        // Reset
 </span><span class="boring">                        reset_limit = reset_limit * 3 / 2;
 </span><span class="boring">                        i = 0;
@@ -808,7 +808,7 @@ macro_rules! impl_pollardrho {
                     i += 1;
                     x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
                     d = gcd(y.abs_diff(x), self);
-                    if d == self || i &gt;= $reset {
+                    if d == self || i &gt;= reset_limit {
                         // Reset
                         reset_limit = reset_limit * 3 / 2;
                         i = 0;
