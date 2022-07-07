@@ -140,7 +140,29 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="integer-square-root"><a class="header" href="#integer-square-root">Integer Square Root</a></h1>
-<p>Reference: <a href="https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton&#x27;s_method">https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton's_method</a></p>
+<p><code>isqrt(s)</code> returns \( \left\lfloor \sqrt{s} \right\rfloor \). It runs much faster than the typical binary search method.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let x: u64 = 10002;
+let sq = isqrt(x);
+println!(&quot;{}&quot;, sq); // 100
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn isqrt(s: u64) -&gt; u64 {
+</span><span class="boring">    let mut x0 = s &gt;&gt; 1;
+</span><span class="boring">    if x0 != 0 {
+</span><span class="boring">        let mut x1 = (x0 + s / x0) &gt;&gt; 1;
+</span><span class="boring">        while x1 &lt; x0 {
+</span><span class="boring">            x0 = x1;
+</span><span class="boring">            x1 = (x0 + s / x0) &gt;&gt; 1
+</span><span class="boring">        }
+</span><span class="boring">        x0
+</span><span class="boring">    } else {
+</span><span class="boring">        s
+</span><span class="boring">    }
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust noplayground">fn isqrt(s: u64) -&gt; u64 {
     let mut x0 = s &gt;&gt; 1;
     if x0 != 0 {
@@ -148,6 +170,30 @@
         while x1 &lt; x0 {
             x0 = x1;
             x1 = (x0 + s / x0) &gt;&gt; 1
+        }
+        x0
+    } else {
+        s
+    }
+}
+</code></pre>
+<h2 id="generic-version"><a class="header" href="#generic-version">Generic Version</a></h2>
+<p>The function below works for any primitive unsigned integer types.</p>
+<pre><code class="language-rust noplayground">fn isqrt&lt;T&gt;(s: T) -&gt; T
+where
+    T: Copy
+        + std::ops::Shr&lt;Output = T&gt;
+        + std::ops::Add&lt;Output = T&gt;
+        + std::ops::Div&lt;Output = T&gt;
+        + PartialOrd
+        + From&lt;u8&gt;,
+{
+    let mut x0 = s &gt;&gt; 1.into();
+    if x0 != 0.into() {
+        let mut x1 = (x0 + s / x0) &gt;&gt; 1.into();
+        while x1 &lt; x0 {
+            x0 = x1;
+            x1 = (x0 + s / x0) &gt;&gt; 1.into();
         }
         x0
     } else {

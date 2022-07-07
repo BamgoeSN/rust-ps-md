@@ -961,7 +961,29 @@ mod rng {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="integer-square-root"><a class="header" href="#integer-square-root">Integer Square Root</a></h1>
-<p>Reference: <a href="https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton&#x27;s_method">https://en.wikipedia.org/wiki/Integer_square_root#Algorithm_using_Newton's_method</a></p>
+<p><code>isqrt(s)</code> returns \( \left\lfloor \sqrt{s} \right\rfloor \). It runs much faster than the typical binary search method.</p>
+<h2 id="example-5"><a class="header" href="#example-5">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let x: u64 = 10002;
+let sq = isqrt(x);
+println!(&quot;{}&quot;, sq); // 100
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn isqrt(s: u64) -&gt; u64 {
+</span><span class="boring">    let mut x0 = s &gt;&gt; 1;
+</span><span class="boring">    if x0 != 0 {
+</span><span class="boring">        let mut x1 = (x0 + s / x0) &gt;&gt; 1;
+</span><span class="boring">        while x1 &lt; x0 {
+</span><span class="boring">            x0 = x1;
+</span><span class="boring">            x1 = (x0 + s / x0) &gt;&gt; 1
+</span><span class="boring">        }
+</span><span class="boring">        x0
+</span><span class="boring">    } else {
+</span><span class="boring">        s
+</span><span class="boring">    }
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code-5"><a class="header" href="#code-5">Code</a></h2>
 <pre><code class="language-rust noplayground">fn isqrt(s: u64) -&gt; u64 {
     let mut x0 = s &gt;&gt; 1;
     if x0 != 0 {
@@ -969,6 +991,30 @@ mod rng {
         while x1 &lt; x0 {
             x0 = x1;
             x1 = (x0 + s / x0) &gt;&gt; 1
+        }
+        x0
+    } else {
+        s
+    }
+}
+</code></pre>
+<h2 id="generic-version-1"><a class="header" href="#generic-version-1">Generic Version</a></h2>
+<p>The function below works for any primitive unsigned integer types.</p>
+<pre><code class="language-rust noplayground">fn isqrt&lt;T&gt;(s: T) -&gt; T
+where
+    T: Copy
+        + std::ops::Shr&lt;Output = T&gt;
+        + std::ops::Add&lt;Output = T&gt;
+        + std::ops::Div&lt;Output = T&gt;
+        + PartialOrd
+        + From&lt;u8&gt;,
+{
+    let mut x0 = s &gt;&gt; 1.into();
+    if x0 != 0.into() {
+        let mut x1 = (x0 + s / x0) &gt;&gt; 1.into();
+        while x1 &lt; x0 {
+            x0 = x1;
+            x1 = (x0 + s / x0) &gt;&gt; 1.into();
         }
         x0
     } else {
@@ -2026,7 +2072,7 @@ impl UnionFind {
     }
 }
 </code></pre>
-<h2 id="example-5"><a class="header" href="#example-5">Example</a></h2>
+<h2 id="example-6"><a class="header" href="#example-6">Example</a></h2>
 <pre><code class="language-rust noplayground">let mut uf = UnionFind::new(10);
 assert_eq!(uf.is_reachable(2, 6), false);
 uf.union(2, 6);
@@ -2384,7 +2430,7 @@ fn suffix_and_lcp&lt;T: Ord + std::hash::Hash&gt;(arr: &amp;[T]) -&gt; (Vec&lt;u
     (sa, lcp)
 }
 </code></pre>
-<h2 id="example-6"><a class="header" href="#example-6">Example</a></h2>
+<h2 id="example-7"><a class="header" href="#example-7">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;asdsdasd&quot;;
 let (sa, lcp) = suffix_and_lcp(s.as_bytes());
