@@ -140,6 +140,156 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="kmp"><a class="header" href="#kmp">KMP</a></h1>
+<p>Given an array \(P\), <code>KMPNeedle::new(P)</code> returns a <code>KMPNeedle</code> instance for searching \(P\) in any array, using <code>KMPMatcher</code>.</p>
+<p>Given a <code>KMPNeedle</code> instance <code>p</code> and an array target \(T\), <code>KMPMatcher::new(&amp;p, T)</code> returns an iterator yielding indicies where \(P\) appears within \(T\). Even if some ranges where \(P\) exists within \(T\) overlap with each other, they are still all yielded as shown in the second string from the example <code>&quot;ABCDABCDABCD&quot;</code>.</p>
+<p><code>KMPNeedle::new(P)</code> runs in a time complexity of \(O(\left| P \right|)\) and <code>KMPMatcher::new(T)</code> takes a time complexity of \(O(\left| T \right|)\) to be consumed. <code>KMPMatcher</code> searches for a pattern lazily, so it only takes time of total searched length in \(T\).</p>
+<p>A single <code>KMPNeedle</code> instance can be used to search \(P\) in multiple arrays as shown in the example.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let pattern = &quot;ABCDABC&quot;;
+let targets = vec![&quot;ABDABCDABCE&quot;, &quot;ABCDABCDABCD&quot;, &quot;ABBCCABCDABDABCDABC&quot;];
+
+let needle = KMPNeedle::new(pattern.as_bytes());
+for &amp;t in targets.iter() {
+    let kmp = KMPMatcher::new(&amp;needle, t.as_bytes());
+    for v in kmp {
+        print!(&quot;{} &quot;, v);
+    }
+    println!();
+}
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct KMPNeedle&lt;'a, T: PartialEq&gt; {
+</span><span class="boring">    p: &amp;'a [T],
+</span><span class="boring">    c: Vec&lt;usize&gt;,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;'a, T: PartialEq&gt; KMPNeedle&lt;'a, T&gt; {
+</span><span class="boring">    fn new(p: &amp;'a [T]) -&gt; Self {
+</span><span class="boring">        let mut c: Vec&lt;usize&gt; = vec![0; p.len() + 1];
+</span><span class="boring">
+</span><span class="boring">        let mut l = 0;
+</span><span class="boring">        for (r, v) in p.iter().enumerate().skip(1) {
+</span><span class="boring">            while l &gt; 0 &amp;&amp; p[l] != *v {
+</span><span class="boring">                l = c[l];
+</span><span class="boring">            }
+</span><span class="boring">            if p[l] == *v {
+</span><span class="boring">                c[r + 1] = l + 1;
+</span><span class="boring">                l += 1;
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        Self { p, c }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct KMPMatcher&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; {
+</span><span class="boring">    needle: &amp;'c KMPNeedle&lt;'b, T&gt;,
+</span><span class="boring">    t: &amp;'a [T],
+</span><span class="boring">    i: usize,
+</span><span class="boring">    j: usize,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; KMPMatcher&lt;'a, 'b, 'c, T&gt; {
+</span><span class="boring">    fn new(needle: &amp;'c KMPNeedle&lt;'b, T&gt;, t: &amp;'a [T]) -&gt; Self {
+</span><span class="boring">        Self {
+</span><span class="boring">            needle,
+</span><span class="boring">            t,
+</span><span class="boring">            i: 0,
+</span><span class="boring">            j: 0,
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; Iterator for KMPMatcher&lt;'a, 'b, 'c, T&gt; {
+</span><span class="boring">    type Item = usize;
+</span><span class="boring">
+</span><span class="boring">    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+</span><span class="boring">        while self.i &lt; self.t.len() {
+</span><span class="boring">            while self.j &gt; 0 &amp;&amp; self.t[self.i] != self.needle.p[self.j] {
+</span><span class="boring">                self.j = self.needle.c[self.j];
+</span><span class="boring">            }
+</span><span class="boring">            if self.t[self.i] == self.needle.p[self.j] {
+</span><span class="boring">                if self.j == self.needle.p.len() - 1 {
+</span><span class="boring">                    self.j = self.needle.c[self.j + 1];
+</span><span class="boring">                    self.i += 1;
+</span><span class="boring">                    return Some(self.i - self.needle.p.len());
+</span><span class="boring">                } else {
+</span><span class="boring">                    self.j += 1;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">            self.i += 1;
+</span><span class="boring">        }
+</span><span class="boring">        None
+</span><span class="boring">    }
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">struct KMPNeedle&lt;'a, T: PartialEq&gt; {
+    p: &amp;'a [T],
+    c: Vec&lt;usize&gt;,
+}
+
+impl&lt;'a, T: PartialEq&gt; KMPNeedle&lt;'a, T&gt; {
+    fn new(p: &amp;'a [T]) -&gt; Self {
+        let mut c: Vec&lt;usize&gt; = vec![0; p.len() + 1];
+
+        let mut l = 0;
+        for (r, v) in p.iter().enumerate().skip(1) {
+            while l &gt; 0 &amp;&amp; p[l] != *v {
+                l = c[l];
+            }
+            if p[l] == *v {
+                c[r + 1] = l + 1;
+                l += 1;
+            }
+        }
+
+        Self { p, c }
+    }
+}
+
+struct KMPMatcher&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; {
+    needle: &amp;'c KMPNeedle&lt;'b, T&gt;,
+    t: &amp;'a [T],
+    i: usize,
+    j: usize,
+}
+
+impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; KMPMatcher&lt;'a, 'b, 'c, T&gt; {
+    fn new(needle: &amp;'c KMPNeedle&lt;'b, T&gt;, t: &amp;'a [T]) -&gt; Self {
+        Self {
+            needle,
+            t,
+            i: 0,
+            j: 0,
+        }
+    }
+}
+
+impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; Iterator for KMPMatcher&lt;'a, 'b, 'c, T&gt; {
+    type Item = usize;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        while self.i &lt; self.t.len() {
+            while self.j &gt; 0 &amp;&amp; self.t[self.i] != self.needle.p[self.j] {
+                self.j = self.needle.c[self.j];
+            }
+            if self.t[self.i] == self.needle.p[self.j] {
+                if self.j == self.needle.p.len() - 1 {
+                    self.j = self.needle.c[self.j + 1];
+                    self.i += 1;
+                    return Some(self.i - self.needle.p.len());
+                } else {
+                    self.j += 1;
+                }
+            }
+            self.i += 1;
+        }
+        None
+    }
+}
+</code></pre>
 
                     </main>
 
