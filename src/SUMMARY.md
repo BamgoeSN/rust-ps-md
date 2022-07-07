@@ -52,6 +52,6 @@
 
 # Misc
 
-- [Base Template](./misc/psbase.md)
+- [Base Template](./misc/fastio.md)
 - [Zero/One Trait](./misc/zero_one_trait.md)
 - [Macros](./misc/macro.md)
