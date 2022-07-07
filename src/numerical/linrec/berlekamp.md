@@ -1,6 +1,6 @@
 # Berlekamp-Massey
 
-`berlekamp_massey(A, m)` returns a vector `C` of size \\(n\\) which satisfies
+`berlekamp_massey(A, m)` returns a vector `C` of length \\(n\\) which satisfies
 \\[ \begin{aligned}
 A_x &= \sum_{i=0}^{i=k-1} {C_i A_{x-k+i}} \\\\
 &= C_0 A_{x-k} + C_1 A_{x-k+1} + \cdots + C_{k-1} A_{x-1}
