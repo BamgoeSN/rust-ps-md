@@ -5,20 +5,6 @@
 
 `gcd` is implemented using Euclidean algorithm, whose time complexity is \\(O( \log \_{\phi} x )\\) where \\(\phi\\) is a golden ratio.
 
-```rust,noplayground
-fn gcd(x: u64, y: u64) -> u64 {
-    if y == 0 {
-        x
-    } else {
-        gcd(y, x % y)
-    }
-}
-
-fn lcm(x: u64, y: u64) -> u64 {
-    x / gcd(x, y) * y
-}
-```
-
 ## Example
 
 ```rust
@@ -43,4 +29,51 @@ println!("{}", l); // 50
 #fn lcm(x: u64, y: u64) -> u64 {
 #    x / gcd(x, y) * y
 #}
+```
+
+## Code
+
+```rust,noplayground
+fn gcd(x: u64, y: u64) -> u64 {
+    if y == 0 {
+        x
+    } else {
+        gcd(y, x % y)
+    }
+}
+
+fn lcm(x: u64, y: u64) -> u64 {
+    x / gcd(x, y) * y
+}
+```
+
+## Generic Version
+
+The function below works for any primitive unsigned integer types.
+
+```rust,noplayground
+pub fn gcd<T>(x: T, y: T) -> T
+where
+    T: Copy + PartialEq + PartialOrd + std::ops::Rem<Output = T> + From<u8>,
+{
+    if y == 0.into() {
+        x
+    } else {
+        let v = x % y;
+        gcd(y, v)
+    }
+}
+
+pub fn lcm<T>(x: T, y: T) -> T
+where
+    T: Copy
+        + PartialEq
+        + PartialOrd
+        + std::ops::Rem<Output = T>
+        + std::ops::Div<Output = T>
+        + std::ops::Mul<Output = T>
+        + From<u8>,
+{
+    x / gcd(x, y) * y
+}
 ```
