@@ -141,6 +141,52 @@
                     <main>
                         <h1 id="manacher"><a class="header" href="#manacher">Manacher</a></h1>
 <p>For an array \(A\) of length \(n\), <code>manacher(A)</code> returns a vector \(M\) where, for every \(i \in \left[0, n\right)\), \(A_{i-j} = A_{i+j}\) holds for every \(j \in \left[0, M_i \right)\).</p>
+<p>Additional modification should be added by a user to use this function for finding every palindromes among subsequences of a string.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let s = &quot;abracadacabra&quot;.as_bytes();
+let man = manacher(s);
+println!(&quot;{:?}&quot;, man); // [1, 1, 1, 1, 2, 1, 4, 1, 2, 1, 1, 1, 1]
+
+for i in 0..s.len() {
+    println!(
+        &quot;{}&quot;,
+        std::str::from_utf8(&amp;s[i + 1 - man[i]..i + man[i]]).unwrap()
+    );
+}
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;usize&gt; {
+</span><span class="boring">    let n = arr.len();
+</span><span class="boring">    let mut mana: Vec&lt;usize&gt; = vec![1; n];
+</span><span class="boring">    let mut r: usize = 1;
+</span><span class="boring">    let mut p: usize = 0;
+</span><span class="boring">
+</span><span class="boring">    for i in 1..arr.len() {
+</span><span class="boring">        if i + 1 &gt;= r {
+</span><span class="boring">            mana[i] = 1;
+</span><span class="boring">        } else {
+</span><span class="boring">            let j = 2 * p - i;
+</span><span class="boring">            mana[i] = mana[j].min(r - i);
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        while mana[i] &lt;= i &amp;&amp; i + mana[i] &lt; n {
+</span><span class="boring">            if arr[(i - mana[i])] != arr[(i + mana[i])] {
+</span><span class="boring">                break;
+</span><span class="boring">            }
+</span><span class="boring">            mana[i] += 1;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        if r &lt; mana[i] + i {
+</span><span class="boring">            r = mana[i] + i;
+</span><span class="boring">            p = i;
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    mana
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust noplayground">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;u32&gt; {
     let n = arr.len() as u32;
     let mut mana: Vec&lt;u32&gt; = vec![1; n as usize];
