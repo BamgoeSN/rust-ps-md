@@ -7,8 +7,8 @@
 - [GCD, LCM](./algebra/gcd.md)
 - [Extended Euclidean Algorithm](./algebra/extgcd.md)
 - [Chinese Remainder Theorem](./algebra/crt.md)
-- [Primality Test](./algebra/millerrabin.md)
-- [Prime Factorization](./algebra/pollardrho.md)
+- [Deterministic Miller-Rabin Primality Test](./algebra/millerrabin.md)
+- [Pollard's Rho Algorithm](./algebra/pollardrho.md)
 
 # Numerical Algorithms
 

@@ -1,4 +1,4 @@
-# Miller-Rabin Primality Test
+# Deterministic Miller-Rabin Primality Test
 
 Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \\(O(\log{n})\\) time. This test only works for integers under \\(2^{64}\\).
 

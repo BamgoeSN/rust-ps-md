@@ -1,4 +1,4 @@
-# Pollard Rho Algorithm
+# Pollard's Rho Algorithm
 
 Pollard rho algorithm is a randomized algorithm which factorizes a number in an average of \\(O(n^{1/4})\\) time.
 
