@@ -2,8 +2,8 @@
 
 `berlekamp_massey(A, m)` returns a vector `C` of size \\(n\\) which satisfies
 \\[ \begin{aligned}
-A_x &= \sum_{k=0}^{k=n-1} {C_k A_{x-n+k}} \\\\
-&= C_0 A_{x-n} + C_1 A_{x-n+1} + \cdots + C_{n-1} A_{x-1}
+A_x &= \sum_{i=0}^{i=k-1} {C_i A_{x-k+i}} \\\\
+&= C_0 A_{x-k} + C_1 A_{x-k+1} + \cdots + C_{k-1} A_{x-1}
 \end{aligned} \\]
 with minimum \\(n\\) under **prime** modulo \\(m\\). It is safe to have the length of `vals` as at least \\(3n\\).
 
