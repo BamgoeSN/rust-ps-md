@@ -1,6 +1,6 @@
 # Chinese Remainder Theorem
 
-`crt(r, m)` returns \\(x\\) such that \\(x \equiv r_i \pmod {m_i}\\) for all \\(i\\).
+`crt(r, m)` returns \\(x\\) such that \\(x \equiv r_i \pmod {m_i}\\) for all \\(i\\). If such \\(x\\) does not exist, then it returns `None`.
 
 ## Example
 
