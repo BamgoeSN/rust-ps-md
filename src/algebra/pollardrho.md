@@ -8,7 +8,7 @@ Pollard rho algorithm is a randomized algorithm which factorizes a number in an 
 
 ```rust
 # fn main() {
-let mut rng = rng::RNG::new(12345);
+let mut rng = rng::RNG::new(15163487);
 let a: u32 = 1237172;
 let mut factors = a.factorize(&mut rng);
 factors.sort_unstable();
@@ -54,7 +54,7 @@ println!("{}", factors.iter().product::<u32>()); // 1237172
 #                     i += 1;
 #                     x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
 #                     d = gcd(y.abs_diff(x), self);
-#                     if d == self || i >= $reset {
+#                     if d == self || i >= reset_limit {
 #                         // Reset
 #                         reset_limit = reset_limit * 3 / 2;
 #                         i = 0;
@@ -248,7 +248,7 @@ macro_rules! impl_pollardrho {
                     i += 1;
                     x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
                     d = gcd(y.abs_diff(x), self);
-                    if d == self || i >= $reset {
+                    if d == self || i >= reset_limit {
                         // Reset
                         reset_limit = reset_limit * 3 / 2;
                         i = 0;
