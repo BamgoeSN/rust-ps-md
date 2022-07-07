@@ -1,4 +1,6 @@
-# Zero/One Trait
+# Zero/One Trait (Deprecated)
+
+This trait was used for representing numeric values, but the author has learned that `Into` and `From` traits exist, hence this trait is now deprecated. Any other templates which includes or requires to include this trait will be fixed soon.
 
 ```rust,noplayground
 pub trait ZeroOne: Sized + Copy {
