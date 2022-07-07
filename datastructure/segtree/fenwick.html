@@ -146,17 +146,75 @@
 <li>Calculate the sum of the elements of an interval</li>
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
-<p>Required snippets: <a href="../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
-<pre><code class="language-rust noplayground">struct Fenwick&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; {
+<p>A type of elements of \(A\) must be a primitive signed integer type, such as <code>i32</code> and <code>i64</code>, and floats such as <code>f64</code>. Unsigned integer types like <code>u64</code> do not work.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let mut fw: Fenwick&lt;i32&gt; = Fenwick::new(10);
+for i in 0..10 {
+    print!(&quot;{} &quot;, fw.get(i));
+}
+println!(); // 0 0 0 0 0 0 0 0 0 0
+
+fw.add(2, 10);
+fw.add(5, 100);
+fw.add(3, -1);
+for i in 0..10 {
+    print!(&quot;{} &quot;, fw.get(i));
+}
+println!(); // 0 0 10 -1 0 100 0 0 0 0
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">#[derive(Clone, Debug)]
+</span><span class="boring">struct Fenwick&lt;T&gt; {
+</span><span class="boring">    n: usize,
+</span><span class="boring">    data: Vec&lt;T&gt;,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
+</span><span class="boring">    fn new(n: usize) -&gt; Self {
+</span><span class="boring">        Self {
+</span><span class="boring">            n,
+</span><span class="boring">            data: vec![0.into(); n],
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn add(&amp;mut self, idx: usize, val: T) {
+</span><span class="boring">        let mut idx = idx + 1;
+</span><span class="boring">        while idx &lt;= self.n {
+</span><span class="boring">            self.data[idx - 1] += val;
+</span><span class="boring">            idx += idx &amp; (!idx + 1);
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn get(&amp;self, idx: usize) -&gt; T {
+</span><span class="boring">        self.sum(idx, idx + 1)
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn sum(&amp;self, l: usize, r: usize) -&gt; T {
+</span><span class="boring">        self.inner_sum(r) - self.inner_sum(l)
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn inner_sum(&amp;self, mut r: usize) -&gt; T {
+</span><span class="boring">        let mut s: T = 0.into();
+</span><span class="boring">        while r &gt; 0 {
+</span><span class="boring">            s += self.data[r - 1];
+</span><span class="boring">            r -= r &amp; (!r + 1);
+</span><span class="boring">        }
+</span><span class="boring">        s
+</span><span class="boring">    }
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground#[derive(Clone  Debug)]">struct Fenwick&lt;T&gt; {
     n: usize,
     data: Vec&lt;T&gt;,
 }
 
-impl&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
+impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
     fn new(n: usize) -&gt; Self {
         Self {
             n,
-            data: vec![T::zero(); n],
+            data: vec![0.into(); n],
         }
     }
 
@@ -168,12 +226,16 @@ impl&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; F
         }
     }
 
+    fn get(&amp;self, idx: usize) -&gt; T {
+        self.sum(idx, idx + 1)
+    }
+
     fn sum(&amp;self, l: usize, r: usize) -&gt; T {
         self.inner_sum(r) - self.inner_sum(l)
     }
 
     fn inner_sum(&amp;self, mut r: usize) -&gt; T {
-        let mut s: T = T::zero();
+        let mut s: T = 0.into();
         while r &gt; 0 {
             s += self.data[r - 1];
             r -= r &amp; (!r + 1);

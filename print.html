@@ -1754,17 +1754,75 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
 <li>Calculate the sum of the elements of an interval</li>
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
-<p>Required snippets: <a href="datastructure/segtree/../../misc/zero_one_trait.html#zero">Zero Trait</a></p>
-<pre><code class="language-rust noplayground">struct Fenwick&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; {
+<p>A type of elements of \(A\) must be a primitive signed integer type, such as <code>i32</code> and <code>i64</code>, and floats such as <code>f64</code>. Unsigned integer types like <code>u64</code> do not work.</p>
+<h2 id="example-8"><a class="header" href="#example-8">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let mut fw: Fenwick&lt;i32&gt; = Fenwick::new(10);
+for i in 0..10 {
+    print!(&quot;{} &quot;, fw.get(i));
+}
+println!(); // 0 0 0 0 0 0 0 0 0 0
+
+fw.add(2, 10);
+fw.add(5, 100);
+fw.add(3, -1);
+for i in 0..10 {
+    print!(&quot;{} &quot;, fw.get(i));
+}
+println!(); // 0 0 10 -1 0 100 0 0 0 0
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">#[derive(Clone, Debug)]
+</span><span class="boring">struct Fenwick&lt;T&gt; {
+</span><span class="boring">    n: usize,
+</span><span class="boring">    data: Vec&lt;T&gt;,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
+</span><span class="boring">    fn new(n: usize) -&gt; Self {
+</span><span class="boring">        Self {
+</span><span class="boring">            n,
+</span><span class="boring">            data: vec![0.into(); n],
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn add(&amp;mut self, idx: usize, val: T) {
+</span><span class="boring">        let mut idx = idx + 1;
+</span><span class="boring">        while idx &lt;= self.n {
+</span><span class="boring">            self.data[idx - 1] += val;
+</span><span class="boring">            idx += idx &amp; (!idx + 1);
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn get(&amp;self, idx: usize) -&gt; T {
+</span><span class="boring">        self.sum(idx, idx + 1)
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn sum(&amp;self, l: usize, r: usize) -&gt; T {
+</span><span class="boring">        self.inner_sum(r) - self.inner_sum(l)
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn inner_sum(&amp;self, mut r: usize) -&gt; T {
+</span><span class="boring">        let mut s: T = 0.into();
+</span><span class="boring">        while r &gt; 0 {
+</span><span class="boring">            s += self.data[r - 1];
+</span><span class="boring">            r -= r &amp; (!r + 1);
+</span><span class="boring">        }
+</span><span class="boring">        s
+</span><span class="boring">    }
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code-7"><a class="header" href="#code-7">Code</a></h2>
+<pre><code class="language-rust noplayground#[derive(Clone  Debug)]">struct Fenwick&lt;T&gt; {
     n: usize,
     data: Vec&lt;T&gt;,
 }
 
-impl&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
+impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; Fenwick&lt;T&gt; {
     fn new(n: usize) -&gt; Self {
         Self {
             n,
-            data: vec![T::zero(); n],
+            data: vec![0.into(); n],
         }
     }
 
@@ -1776,12 +1834,16 @@ impl&lt;T: ZeroOne + std::ops::AddAssign + std::ops::Sub&lt;Output = T&gt;&gt; F
         }
     }
 
+    fn get(&amp;self, idx: usize) -&gt; T {
+        self.sum(idx, idx + 1)
+    }
+
     fn sum(&amp;self, l: usize, r: usize) -&gt; T {
         self.inner_sum(r) - self.inner_sum(l)
     }
 
     fn inner_sum(&amp;self, mut r: usize) -&gt; T {
-        let mut s: T = T::zero();
+        let mut s: T = 0.into();
         while r &gt; 0 {
             s += self.data[r - 1];
             r -= r &amp; (!r + 1);
@@ -2241,7 +2303,7 @@ impl UnionFind {
     }
 }
 </code></pre>
-<h2 id="example-8"><a class="header" href="#example-8">Example</a></h2>
+<h2 id="example-9"><a class="header" href="#example-9">Example</a></h2>
 <pre><code class="language-rust noplayground">let mut uf = UnionFind::new(10);
 assert_eq!(uf.is_reachable(2, 6), false);
 uf.union(2, 6);
@@ -2460,7 +2522,7 @@ impl TwoSat {
 <p>Given a <code>KMPNeedle</code> instance <code>p</code> and an array target \(T\), <code>KMPMatcher::new(&amp;p, T)</code> returns an iterator yielding indicies where \(P\) appears within \(T\). Even if some ranges where \(P\) exists within \(T\) overlap with each other, they are still all yielded as shown in the second string from the example <code>&quot;ABCDABCDABCD&quot;</code>.</p>
 <p><code>KMPNeedle::new(P)</code> runs in a time complexity of \(O(\left| P \right|)\) and <code>KMPMatcher::new(T)</code> takes a time complexity of \(O(\left| T \right|)\) to be consumed. <code>KMPMatcher</code> searches for a pattern lazily, so it only takes time of total searched length in \(T\).</p>
 <p>A single <code>KMPNeedle</code> instance can be used to search \(P\) in multiple arrays as shown in the example.</p>
-<h2 id="example-9"><a class="header" href="#example-9">Example</a></h2>
+<h2 id="example-10"><a class="header" href="#example-10">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let pattern = &quot;ABCDABC&quot;;
 let targets = vec![&quot;ABDABCDABCE&quot;, &quot;ABCDABCDABCD&quot;, &quot;ABBCCABCDABDABCDABC&quot;];
@@ -2540,7 +2602,7 @@ for &amp;t in targets.iter() {
 </span><span class="boring">    }
 </span><span class="boring">}
 </span></code></pre></pre>
-<h2 id="code-7"><a class="header" href="#code-7">Code</a></h2>
+<h2 id="code-8"><a class="header" href="#code-8">Code</a></h2>
 <pre><code class="language-rust noplayground">struct KMPNeedle&lt;'a, T: PartialEq&gt; {
     p: &amp;'a [T],
     c: Vec&lt;usize&gt;,
@@ -2609,7 +2671,7 @@ impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; Iterator for KMPMatcher&lt;'a, 'b, 
 <div style="break-before: page; page-break-before: always;"></div><h1 id="manacher"><a class="header" href="#manacher">Manacher</a></h1>
 <p>For an array \(A\) of length \(n\), <code>manacher(A)</code> returns a vector \(M\) where, for every \(i \in \left[0, n\right)\), \(A_{i-j} = A_{i+j}\) holds for every \(j \in \left[0, M_i \right)\).</p>
 <p>Additional modification should be added by a user to use this function for finding every palindromes among subsequences of a string.</p>
-<h2 id="example-10"><a class="header" href="#example-10">Example</a></h2>
+<h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;abracadacabra&quot;.as_bytes();
 let man = manacher(s);
@@ -2653,7 +2715,7 @@ for i in 0..s.len() {
 </span><span class="boring">    mana
 </span><span class="boring">}
 </span></code></pre></pre>
-<h2 id="code-8"><a class="header" href="#code-8">Code</a></h2>
+<h2 id="code-9"><a class="header" href="#code-9">Code</a></h2>
 <pre><code class="language-rust noplayground">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;u32&gt; {
     let n = arr.len() as u32;
     let mut mana: Vec&lt;u32&gt; = vec![1; n as usize];
@@ -2695,7 +2757,7 @@ for i in 0..s.len() {
 </ul>
 <p>\(SA\) and \(LCP\) are called &quot;suffix array&quot; and &quot;LCP array&quot; of \(A\) respectively.</p>
 <p>For finding SA, Manber-Myers algorithm combined with counting sort is used, hence the time complexity is \(O(n\log{n})\). For LCP array, Kasai's algorithm is used, hence the time complexity is \(O(n)\). The total time complexity is \(O(n\log{n})\).</p>
-<h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
+<h2 id="example-12"><a class="header" href="#example-12">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;asdsdasd&quot;;
 let (sa, lcp) = sa_lcp(s.as_bytes());
@@ -2804,7 +2866,7 @@ println!(&quot;{:?}&quot;, lcp); // [x, 3, 0, 1, 1, 0, 2, 2]
 </span><span class="boring">    (sa, lcp)
 </span><span class="boring">}
 </span></code></pre></pre>
-<h2 id="code-9"><a class="header" href="#code-9">Code</a></h2>
+<h2 id="code-10"><a class="header" href="#code-10">Code</a></h2>
 <pre><code class="language-rust noplayground">// Suffix array and LCP array
 // Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
 
