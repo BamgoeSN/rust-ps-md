@@ -15,7 +15,7 @@ with minimum \\(n\\) under **prime** modulo \\(m\\). It is safe to have the leng
 let m: u64 = 1000000007;
 let mut vals: Vec<u64> = vec![1, 2, 3];
 for x in 3..20 {
-    vals.push(vals[x - 3] + 2 * vals[x - 2] + 3 * vals[x - 1]);
+    vals.push((vals[x - 3] + 2 * vals[x - 2] + 3 * vals[x - 1]) % m);
 }
 
 let rec = berlekamp_massey(&vals, m);
