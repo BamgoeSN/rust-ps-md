@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Primality Test - Rust Snippets for Competitive Programming</title>
+        <title>Deterministic Miller-Rabin Primality Test - Rust Snippets for Competitive Programming</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -77,7 +77,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html" class="active"><strong aria-hidden="true">4.</strong> Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Prime Factorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/matrix.html"><strong aria-hidden="true">8.</strong> Fast n-dimensional Array</a></li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">9.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">10.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">10.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">10.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">10.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html"><strong aria-hidden="true">11.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">12.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">13.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">14.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Strings</li><li class="chapter-item expanded "><a href="../strings/manacher.html"><strong aria-hidden="true">15.</strong> Manacher</a></li><li class="chapter-item expanded "><a href="../strings/salcp.html"><strong aria-hidden="true">16.</strong> Suffix Array and LCP Array</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">17.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html"><strong aria-hidden="true">18.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">19.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded "><a href="../unclass/mos.html"><strong aria-hidden="true">20.</strong> Mo's</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/psbase.html"><strong aria-hidden="true">21.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">22.</strong> Zero/One Trait</a></li><li class="chapter-item expanded "><a href="../misc/macro.html"><strong aria-hidden="true">23.</strong> Macros</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html" class="active"><strong aria-hidden="true">4.</strong> Deterministic Miller-Rabin Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Pollard's Rho Algorithm</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/matrix.html"><strong aria-hidden="true">8.</strong> Fast n-dimensional Array</a></li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">9.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">10.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">10.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">10.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">10.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html"><strong aria-hidden="true">11.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">12.</strong> Disjoint Set Union</a></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">13.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">14.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Strings</li><li class="chapter-item expanded "><a href="../strings/manacher.html"><strong aria-hidden="true">15.</strong> Manacher</a></li><li class="chapter-item expanded "><a href="../strings/salcp.html"><strong aria-hidden="true">16.</strong> Suffix Array and LCP Array</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">17.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html"><strong aria-hidden="true">18.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">19.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded "><a href="../unclass/mos.html"><strong aria-hidden="true">20.</strong> Mo's</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/psbase.html"><strong aria-hidden="true">21.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">22.</strong> Zero/One Trait</a></li><li class="chapter-item expanded "><a href="../misc/macro.html"><strong aria-hidden="true">23.</strong> Macros</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -139,127 +139,179 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="miller-rabin-primality-test"><a class="header" href="#miller-rabin-primality-test">Miller-Rabin Primality Test</a></h1>
-<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime or not within \(O(\log{n})\) time. This test only works for integers under \(2^{64}\).</p>
-<p>Required snippets: <a href="../misc/zero_one_trait.html#zeroone-trait">ZeroOne</a></p>
-<pre><code class="language-rust noplayground">use std::ops::{BitAnd, Mul, Rem, RemAssign, ShrAssign};
-
-trait Cast&lt;T&gt; {
-    fn cast_to(self) -&gt; T;
-}
-
-macro_rules! impl_primitive_cast {
-    ($t:ty, $u:ty) =&gt; {
-        impl Cast&lt;$t&gt; for $u {
-            #[inline(always)]
-            fn cast_to(self) -&gt; $t {
-                self as $t
-            }
-        }
-    };
-}
-
-#[inline(always)]
-fn rem_mul&lt;T, U&gt;(x: T, y: T, m: T) -&gt; T
-where
-    T: Copy + Cast&lt;U&gt;,
-    U: Copy + Mul&lt;Output = U&gt; + Rem&lt;Output = U&gt; + Cast&lt;T&gt;,
-{
-    let (x, y, m): (U, U, U) = (x.cast_to(), y.cast_to(), m.cast_to());
-    ((x * y) % m).cast_to()
-}
-
-#[inline]
-fn rem_pow&lt;T, U&gt;(mut base: T, mut exp: T, m: T) -&gt; T
-where
-    T: Copy + ZeroOne + Eq + RemAssign + BitAnd&lt;Output = T&gt; + ShrAssign + Cast&lt;U&gt;,
-    U: Copy + Mul&lt;Output = U&gt; + Rem&lt;Output = U&gt; + Cast&lt;T&gt;,
-{
-    exp %= m;
-    let mut r = T::one();
-    while exp != T::zero() {
-        if exp &amp; T::one() != T::zero() {
-            r = rem_mul::&lt;T, U&gt;(r, base, m);
-        }
-        exp &gt;&gt;= T::one();
-        base = rem_mul::&lt;T, U&gt;(base, base, m);
-    }
-    r
-}
-
-trait Miller {
+                        <h1 id="deterministic-miller-rabin-primality-test"><a class="header" href="#deterministic-miller-rabin-primality-test">Deterministic Miller-Rabin Primality Test</a></h1>
+<p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime in a time complexity of \(O(\log{n})\). This test only works for integers under \(2^{64}\).</p>
+<p><code>x.is_prime()</code> chooses a roughly faster algorithm among naive primality test and Miller-Rabin test, and returns <code>true</code> if <code>x</code> is a prime, <code>false</code> if not.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>println!(&quot;{}&quot;, 3284729387909u64.is_prime()); // true
+println!(&quot;{}&quot;, 3284729387911u64.is_prime()); // false 53×61976026187
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">trait MillerRabin: From&lt;u8&gt; + PartialOrd {
+</span><span class="boring">    const MR_THRES: Self;
+</span><span class="boring">    fn naive_primality(self) -&gt; bool;
+</span><span class="boring">    fn miller_rabin_test(self, a: Self) -&gt; bool;
+</span><span class="boring">    fn miller_primality(self) -&gt; bool;
+</span><span class="boring">    fn is_prime(self) -&gt; bool {
+</span><span class="boring">        if self &lt;= 1.into() {
+</span><span class="boring">            false
+</span><span class="boring">        } else if self &lt;= Self::MR_THRES {
+</span><span class="boring">            self.naive_primality()
+</span><span class="boring">        } else {
+</span><span class="boring">            self.miller_primality()
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">macro_rules! impl_millerrabin {
+</span><span class="boring">    ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
+</span><span class="boring">        impl MillerRabin for $t {
+</span><span class="boring">            const MR_THRES: Self = $thres;
+</span><span class="boring">
+</span><span class="boring">            #[inline(always)]
+</span><span class="boring">            fn naive_primality(self) -&gt; bool {
+</span><span class="boring">                for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
+</span><span class="boring">                    if self % i == 0 {
+</span><span class="boring">                        return false;
+</span><span class="boring">                    }
+</span><span class="boring">                }
+</span><span class="boring">                true
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            #[inline(always)]
+</span><span class="boring">            fn miller_rabin_test(self, a: Self) -&gt; bool {
+</span><span class="boring">                macro_rules! rem_pow {
+</span><span class="boring">                    ($base:expr, $exp:expr, $rem:expr, $tx:ty, $ux:ty) =&gt; {{
+</span><span class="boring">                        let mut base = $base as $ux;
+</span><span class="boring">                        let mut exp = $exp as $ux;
+</span><span class="boring">                        let rem = $rem as $ux;
+</span><span class="boring">                        let mut ret: $ux = 1;
+</span><span class="boring">                        while exp != 0 {
+</span><span class="boring">                            if exp &amp; 1 != 0 {
+</span><span class="boring">                                ret = ret * base % rem;
+</span><span class="boring">                            }
+</span><span class="boring">                            base = base * base % rem;
+</span><span class="boring">                            exp &gt;&gt;= 1;
+</span><span class="boring">                        }
+</span><span class="boring">                        ret as $tx
+</span><span class="boring">                    }};
+</span><span class="boring">                }
+</span><span class="boring">
+</span><span class="boring">                let d = self - 1;
+</span><span class="boring">                let mut p = d &gt;&gt; (d.trailing_zeros());
+</span><span class="boring">                let mut t = rem_pow!(a, p, self, $t, $u);
+</span><span class="boring">                let at_last = t == d || t == 1;
+</span><span class="boring">
+</span><span class="boring">                while p != d {
+</span><span class="boring">                    p &lt;&lt;= 1;
+</span><span class="boring">                    t = ((t as $u * t as $u) % self as $u) as $t;
+</span><span class="boring">                    if t == self - 1 {
+</span><span class="boring">                        return true;
+</span><span class="boring">                    }
+</span><span class="boring">                }
+</span><span class="boring">                at_last
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            fn miller_primality(self) -&gt; bool {
+</span><span class="boring">                $(
+</span><span class="boring">                    if !self.miller_rabin_test($x) {
+</span><span class="boring">                        return false;
+</span><span class="boring">                    }
+</span><span class="boring">                )*
+</span><span class="boring">                true
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    };
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl_millerrabin!(u8, u16, 254, 2);
+</span><span class="boring">impl_millerrabin!(u16, u32, 2000, 2, 3);
+</span><span class="boring">impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
+</span><span class="boring">impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">trait MillerRabin: From&lt;u8&gt; + PartialOrd {
+    const MR_THRES: Self;
     fn naive_primality(self) -&gt; bool;
-    fn miller_rabin(self, a: Self) -&gt; bool;
+    fn miller_rabin_test(self, a: Self) -&gt; bool;
     fn miller_primality(self) -&gt; bool;
-    fn is_prime(self) -&gt; bool;
+    fn is_prime(self) -&gt; bool {
+        if self &lt;= 1.into() {
+            false
+        } else if self &lt;= Self::MR_THRES {
+            self.naive_primality()
+        } else {
+            self.miller_primality()
+        }
+    }
 }
 
-macro_rules! miller_rabin_impl {
-    ($t:ty, $u:ty, $limit:expr,  $($x:expr),*) =&gt; {
-        impl_primitive_cast!($t, $u);
-        impl_primitive_cast!($u, $t);
+macro_rules! impl_millerrabin {
+    ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
+        impl MillerRabin for $t {
+            const MR_THRES: Self = $thres;
 
-        impl Miller for $t {
-            #[inline]
+            #[inline(always)]
             fn naive_primality(self) -&gt; bool {
-                let mut i: $t = 2;
-                while i * i &lt;= self {
+                for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
                     if self % i == 0 {
                         return false;
                     }
-                    i += 1;
                 }
                 true
             }
 
-            fn miller_rabin(self, a: $t) -&gt; bool {
-                let d = self - 1;
-                let mut p = d;
-                while p&amp;1==0 {
-                    p&gt;&gt;=1;
+            #[inline(always)]
+            fn miller_rabin_test(self, a: Self) -&gt; bool {
+                macro_rules! rem_pow {
+                    ($base:expr, $exp:expr, $rem:expr, $tx:ty, $ux:ty) =&gt; {{
+                        let mut base = $base as $ux;
+                        let mut exp = $exp as $ux;
+                        let rem = $rem as $ux;
+                        let mut ret: $ux = 1;
+                        while exp != 0 {
+                            if exp &amp; 1 != 0 {
+                                ret = ret * base % rem;
+                            }
+                            base = base * base % rem;
+                            exp &gt;&gt;= 1;
+                        }
+                        ret as $tx
+                    }};
                 }
-                let mut t = rem_pow::&lt;$t, $u&gt;(a, p, self);
+
+                let d = self - 1;
+                let mut p = d &gt;&gt; (d.trailing_zeros());
+                let mut t = rem_pow!(a, p, self, $t, $u);
                 let at_last = t == d || t == 1;
 
-                while p!=d {
+                while p != d {
                     p &lt;&lt;= 1;
-                    t = rem_mul::&lt;$t, $u&gt;(t, t, self);
-                    if t == self-1 {return true;}
+                    t = ((t as $u * t as $u) % self as $u) as $t;
+                    if t == self - 1 {
+                        return true;
+                    }
                 }
-
                 at_last
             }
 
             fn miller_primality(self) -&gt; bool {
                 $(
-                    if !self.miller_rabin($x) {
+                    if !self.miller_rabin_test($x) {
                         return false;
                     }
                 )*
                 true
             }
-
-            fn is_prime(self) -&gt; bool {
-                if self &lt;= 1 {
-                    false
-                } else if self &lt;= ($limit) {
-                    Self::naive_primality(self)
-                } else {
-                    Self::miller_primality(self)
-                }
-            }
         }
     };
 }
 
-miller_rabin_impl!(u8, u16, 254, 2);
-miller_rabin_impl!(u16, u32, 2000, 2, 3);
-miller_rabin_impl!(u32, u64, 10000, 2, 7, 61);
-miller_rabin_impl!(u64, u128, 1000000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
-</code></pre>
-<h2 id="example"><a class="header" href="#example">Example</a></h2>
-<pre><code class="language-rust noplayground">assert!(3284729387909u64.is_prime());
-assert!(!3284729387911u64.is_prime()); // 53×61976026187
+impl_millerrabin!(u8, u16, 254, 2);
+impl_millerrabin!(u16, u32, 2000, 2, 3);
+impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
+impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
 </code></pre>
 
                     </main>
