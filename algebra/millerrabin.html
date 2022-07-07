@@ -179,39 +179,37 @@ println!(&quot;{}&quot;, 3284729387911u64.is_prime()); // false 53×61976026187
 </span><span class="boring">                true
 </span><span class="boring">            }
 </span><span class="boring">
-</span><span class="boring">            #[inline(always)]
-</span><span class="boring">            fn miller_rabin_test(self, a: Self) -&gt; bool {
-</span><span class="boring">                macro_rules! rem_pow {
-</span><span class="boring">                    ($base:expr, $exp:expr, $rem:expr, $tx:ty, $ux:ty) =&gt; {{
-</span><span class="boring">                        let mut base = $base as $ux;
-</span><span class="boring">                        let mut exp = $exp as $ux;
-</span><span class="boring">                        let rem = $rem as $ux;
-</span><span class="boring">                        let mut ret: $ux = 1;
-</span><span class="boring">                        while exp != 0 {
-</span><span class="boring">                            if exp &amp; 1 != 0 {
-</span><span class="boring">                                ret = ret * base % rem;
-</span><span class="boring">                            }
-</span><span class="boring">                            base = base * base % rem;
-</span><span class="boring">                            exp &gt;&gt;= 1;
-</span><span class="boring">                        }
-</span><span class="boring">                        ret as $tx
-</span><span class="boring">                    }};
-</span><span class="boring">                }
+</span><span class="boring">               #[inline(always)]
+</span><span class="boring">               fn miller_rabin_test(self, a: Self) -&gt; bool {
+</span><span class="boring">                   let d = self - 1;
+</span><span class="boring">                   let mut p = d &gt;&gt; (d.trailing_zeros());
 </span><span class="boring">
-</span><span class="boring">                let d = self - 1;
-</span><span class="boring">                let mut p = d &gt;&gt; (d.trailing_zeros());
-</span><span class="boring">                let mut t = rem_pow!(a, p, self, $t, $u);
-</span><span class="boring">                let at_last = t == d || t == 1;
+</span><span class="boring">                   let mut t = {
+</span><span class="boring">                       let mut base = a as $u;
+</span><span class="boring">                       let mut exp = p as $u;
+</span><span class="boring">                       let rem = self as $u;
+</span><span class="boring">                       let mut ret: $u = 1;
+</span><span class="boring">                       while exp != 0 {
+</span><span class="boring">                           if exp &amp; 1 != 0 {
+</span><span class="boring">                               ret = ret * base % rem;
+</span><span class="boring">                           }
+</span><span class="boring">                           base = base*base%rem;
+</span><span class="boring">                           exp &gt;&gt;= 1;
+</span><span class="boring">                       }
+</span><span class="boring">                       ret as $t
+</span><span class="boring">                   };
 </span><span class="boring">
-</span><span class="boring">                while p != d {
-</span><span class="boring">                    p &lt;&lt;= 1;
-</span><span class="boring">                    t = ((t as $u * t as $u) % self as $u) as $t;
-</span><span class="boring">                    if t == self - 1 {
-</span><span class="boring">                        return true;
-</span><span class="boring">                    }
-</span><span class="boring">                }
-</span><span class="boring">                at_last
-</span><span class="boring">            }
+</span><span class="boring">                   let at_last = t == d || t == 1;
+</span><span class="boring">
+</span><span class="boring">                   while p != d {
+</span><span class="boring">                       p &lt;&lt;= 1;
+</span><span class="boring">                       t = ((t as $u * t as $u) % self as $u) as $t;
+</span><span class="boring">                       if t == self - 1 {
+</span><span class="boring">                           return true;
+</span><span class="boring">                       }
+</span><span class="boring">                   }
+</span><span class="boring">                   at_last
+</span><span class="boring">               }
 </span><span class="boring">
 </span><span class="boring">            fn miller_primality(self) -&gt; bool {
 </span><span class="boring">                $(
@@ -248,65 +246,63 @@ println!(&quot;{}&quot;, 3284729387911u64.is_prime()); // false 53×61976026187
 }
 
 macro_rules! impl_millerrabin {
-    ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
-        impl MillerRabin for $t {
-            const MR_THRES: Self = $thres;
+        ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
+            impl MillerRabin for $t {
+                const MR_THRES: Self = $thres;
 
-            #[inline(always)]
-            fn naive_primality(self) -&gt; bool {
-                for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
-                    if self % i == 0 {
-                        return false;
+                #[inline(always)]
+                fn naive_primality(self) -&gt; bool {
+                    for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
+                        if self % i == 0 {
+                            return false;
+                        }
                     }
+                    true
                 }
-                true
-            }
 
-            #[inline(always)]
-            fn miller_rabin_test(self, a: Self) -&gt; bool {
-                macro_rules! rem_pow {
-                    ($base:expr, $exp:expr, $rem:expr, $tx:ty, $ux:ty) =&gt; {{
-                        let mut base = $base as $ux;
-                        let mut exp = $exp as $ux;
-                        let rem = $rem as $ux;
-                        let mut ret: $ux = 1;
+                #[inline(always)]
+                fn miller_rabin_test(self, a: Self) -&gt; bool {
+                    let d = self - 1;
+                    let mut p = d &gt;&gt; (d.trailing_zeros());
+
+                    let mut t = {
+                        let mut base = a as $u;
+                        let mut exp = p as $u;
+                        let rem = self as $u;
+                        let mut ret: $u = 1;
                         while exp != 0 {
                             if exp &amp; 1 != 0 {
                                 ret = ret * base % rem;
                             }
-                            base = base * base % rem;
+                            base = base*base%rem;
                             exp &gt;&gt;= 1;
                         }
-                        ret as $tx
-                    }};
+                        ret as $t
+                    };
+
+                    let at_last = t == d || t == 1;
+
+                    while p != d {
+                        p &lt;&lt;= 1;
+                        t = ((t as $u * t as $u) % self as $u) as $t;
+                        if t == self - 1 {
+                            return true;
+                        }
+                    }
+                    at_last
                 }
 
-                let d = self - 1;
-                let mut p = d &gt;&gt; (d.trailing_zeros());
-                let mut t = rem_pow!(a, p, self, $t, $u);
-                let at_last = t == d || t == 1;
-
-                while p != d {
-                    p &lt;&lt;= 1;
-                    t = ((t as $u * t as $u) % self as $u) as $t;
-                    if t == self - 1 {
-                        return true;
-                    }
+                fn miller_primality(self) -&gt; bool {
+                    $(
+                        if !self.miller_rabin_test($x) {
+                            return false;
+                        }
+                    )*
+                    true
                 }
-                at_last
             }
-
-            fn miller_primality(self) -&gt; bool {
-                $(
-                    if !self.miller_rabin_test($x) {
-                        return false;
-                    }
-                )*
-                true
-            }
-        }
-    };
-}
+        };
+    }
 
 impl_millerrabin!(u8, u16, 254, 2);
 impl_millerrabin!(u16, u32, 2000, 2, 3);
