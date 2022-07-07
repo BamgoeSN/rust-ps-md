@@ -140,6 +140,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="suffix-array-and-lcp-array"><a class="header" href="#suffix-array-and-lcp-array">Suffix Array and LCP Array</a></h1>
+<p>For an array \(A\) of length \(n\), <code>suffix_and_lcp(A)</code> returns two vectors \(SA\) and \(LCP\) where,</p>
+<ul>
+<li>\(A[SA[i] \dots]\) is the \(i\)-th suffix in lexicographical order for every \(i \in \left[0, n\right)\)</li>
+</ul>
+<p>and</p>
+<ul>
+<li>\(LCP[i]\) is the length of the longest common prefix between \(A[SA[i-1] \dots]\) and \(A[SA[i] \dots]\) for every \(i \in \left[1, n \right)\).</li>
+</ul>
+<p>Each vectors are called &quot;suffix array&quot; and &quot;LCP array&quot; of \(A\) respectively. For example, if <code>A = [0, 1, 2, 1, 2, 0, 1, 2]</code>, in other words <code>A = &quot;asdsdasd&quot;</code>, then <code>SA = [5, 0, 7, 4, 2, 6, 3, 1]</code> and <code>LCP = [*, 3, 0, 1, 1, 0, 2, 2]</code>.</p>
+<p>For finding SA, Manber-Myers algorithm combined with counting sort is used, hence the time complexity is \(O(n\log{n})\). For LCP array, Kasai's algorithm is used, hence the time complexity is \(O(n)\).</p>
 <pre><code class="language-rust noplayground">// Suffix array and LCP array
 // Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
 
@@ -241,6 +251,115 @@ fn suffix_and_lcp&lt;T: Ord + std::hash::Hash&gt;(arr: &amp;[T]) -&gt; (Vec&lt;u
     (sa, lcp)
 }
 </code></pre>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let s = &quot;asdsdasd&quot;;
+let (sa, lcp) = suffix_and_lcp(s.as_bytes());
+println!(&quot;{:?}&quot;, sa);
+println!(&quot;{:?}&quot;, lcp);
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">// Suffix array and LCP array
+</span><span class="boring">// Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
+</span><span class="boring">
+</span><span class="boring">fn suffix_array&lt;T: Ord&gt;(s: &amp;[T]) -&gt; Vec&lt;usize&gt; {
+</span><span class="boring">    use std::collections::*;
+</span><span class="boring">
+</span><span class="boring">    if s.len() == 0 {
+</span><span class="boring">        return vec![];
+</span><span class="boring">    } else if s.len() == 1 {
+</span><span class="boring">        return vec![0];
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    let n = s.len();
+</span><span class="boring">
+</span><span class="boring">    let mut r: Vec&lt;usize&gt; = vec![0; n * 2];
+</span><span class="boring">    let map: BTreeMap&lt;_, _&gt; = {
+</span><span class="boring">        let mut sorted: Vec&lt;_&gt; = s.iter().collect();
+</span><span class="boring">        sorted.sort_unstable();
+</span><span class="boring">        sorted
+</span><span class="boring">            .into_iter()
+</span><span class="boring">            .enumerate()
+</span><span class="boring">            .map(|x| (x.1, x.0 + 1))
+</span><span class="boring">            .collect()
+</span><span class="boring">    };
+</span><span class="boring">    for i in 0..n {
+</span><span class="boring">        r[i] = *map.get(&amp;s[i]).unwrap();
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    let m = n.max(map.len()) + 1;
+</span><span class="boring">    let mut sa: Vec&lt;usize&gt; = (0..n).collect();
+</span><span class="boring">    let mut nr: Vec&lt;usize&gt; = vec![0; n * 2];
+</span><span class="boring">    let mut cnt: Vec&lt;usize&gt; = vec![0; m];
+</span><span class="boring">    let mut idx: Vec&lt;usize&gt; = vec![0; n];
+</span><span class="boring">
+</span><span class="boring">    for d in (0..).map(|x| 1 &lt;&lt; x).take_while(|&amp;d| d &lt; n) {
+</span><span class="boring">        macro_rules! key {
+</span><span class="boring">            ($i:expr) =&gt; {
+</span><span class="boring">                if $i + d &gt;= n {
+</span><span class="boring">                    (r[$i], 0)
+</span><span class="boring">                } else {
+</span><span class="boring">                    (r[$i], r[$i + d])
+</span><span class="boring">                }
+</span><span class="boring">            };
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        (0..m).for_each(|i| cnt[i] = 0);
+</span><span class="boring">        (0..n).for_each(|i| cnt[r[i + d]] += 1);
+</span><span class="boring">        (1..m).for_each(|i| cnt[i] += cnt[i - 1]);
+</span><span class="boring">        for i in (0..n).rev() {
+</span><span class="boring">            cnt[r[i + d]] -= 1;
+</span><span class="boring">            idx[cnt[r[i + d]]] = i;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        (0..m).for_each(|i| cnt[i] = 0);
+</span><span class="boring">        (0..n).for_each(|i| cnt[r[i]] += 1);
+</span><span class="boring">        (1..m).for_each(|i| cnt[i] += cnt[i - 1]);
+</span><span class="boring">        for i in (0..n).rev() {
+</span><span class="boring">            cnt[r[idx[i]]] -= 1;
+</span><span class="boring">            sa[cnt[r[idx[i]]]] = idx[i];
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        nr[sa[0]] = 1;
+</span><span class="boring">        for i in 1..n {
+</span><span class="boring">            nr[sa[i]] = nr[sa[i - 1]] + if key!(sa[i - 1]) &lt; key!(sa[i]) { 1 } else { 0 };
+</span><span class="boring">        }
+</span><span class="boring">        std::mem::swap(&amp;mut r, &amp;mut nr);
+</span><span class="boring">
+</span><span class="boring">        if r[sa[n - 1]] == n {
+</span><span class="boring">            break;
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    sa
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn suffix_and_lcp&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (Vec&lt;usize&gt;, Vec&lt;usize&gt;) {
+</span><span class="boring">    let n = arr.len();
+</span><span class="boring">    let sa = suffix_array(arr);
+</span><span class="boring">    let mut lcp: Vec&lt;usize&gt; = vec![0; n];
+</span><span class="boring">    let mut isa: Vec&lt;usize&gt; = vec![0; n];
+</span><span class="boring">    for i in 0..n {
+</span><span class="boring">        isa[sa[i]] = i;
+</span><span class="boring">    }
+</span><span class="boring">    let mut k = 0;
+</span><span class="boring">    for i in 0..n {
+</span><span class="boring">        if isa[i] != 0 {
+</span><span class="boring">            let j = sa[isa[i] - 1];
+</span><span class="boring">            while i + k &lt; n &amp;&amp; j + k &lt; n &amp;&amp; arr[i + k] == arr[j + k] {
+</span><span class="boring">                k += 1;
+</span><span class="boring">            }
+</span><span class="boring">            lcp[isa[i]] = if k != 0 {
+</span><span class="boring">                k -= 1;
+</span><span class="boring">                k + 1
+</span><span class="boring">            } else {
+</span><span class="boring">                0
+</span><span class="boring">            };
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">    (sa, lcp)
+</span><span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 
