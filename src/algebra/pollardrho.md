@@ -2,6 +2,8 @@
 
 Pollard rho algorithm is a randomized algorithm which factorizes a number in an average of \\(O(n^{1/4})\\) time.
 
+`x.factorize()` factorizes `x` and returns a vector with the factors. The order of factors in the vector is undefined.
+
 ```rust,noplayground
 trait PollardRho: MillerRabin + std::ops::ShrAssign + std::ops::BitAnd<Output = Self> + Clone {
     fn rho(self, arr: &mut Vec<Self>, rng: &mut rng::RNG);
