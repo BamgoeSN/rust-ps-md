@@ -140,7 +140,35 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<h2 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h2>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let arr: Vec&lt;i32&gt; = vec![1, 2, 4, 7, 9, 7, 4, 2, 1];
+
+let (compressor, reevaluator) = compress_value(&amp;arr);
+
+let compr: Vec&lt;usize&gt; = arr.iter().map(|x| *compressor.get(x).unwrap()).collect();
+println!(&quot;{:?}&quot;, compr);    // [0, 1, 2, 3, 4, 3, 2, 1, 0]
+
+let original: Vec&lt;i32&gt; = compr.iter().map(|&amp;i| *reevaluator[i]).collect();
+println!(&quot;{:?}&quot;, original); // [1, 2, 4, 7, 9, 7, 4, 2, 1]
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">/// compressor[original_value] = compressed_value
+</span><span class="boring">/// reevaluator[compressed_value] = original_value
+</span><span class="boring">fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
+</span><span class="boring">    use std::collections::*;
+</span><span class="boring">    let compressor: BTreeMap&lt;&amp;T, usize&gt; = {
+</span><span class="boring">        let mut sorted: Vec&lt;_&gt; = arr.iter().collect();
+</span><span class="boring">        sorted.sort_unstable();
+</span><span class="boring">        sorted.dedup();
+</span><span class="boring">        sorted.into_iter().enumerate().map(|x| (x.1, x.0)).collect()
+</span><span class="boring">    };
+</span><span class="boring">    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
+</span><span class="boring">    (compressor, reevaluator)
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<h3 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h3>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
 fn compress_value&lt;T: Ord + std::hash::Hash&gt;(
@@ -157,7 +185,7 @@ fn compress_value&lt;T: Ord + std::hash::Hash&gt;(
     (compressor, reevaluator)
 }
 </code></pre>
-<h2 id="w0-hashmap"><a class="header" href="#w0-hashmap">w/0 HashMap</a></h2>
+<h3 id="wo-hashmap"><a class="header" href="#wo-hashmap">w/o HashMap</a></h3>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
 fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {

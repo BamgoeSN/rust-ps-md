@@ -3096,7 +3096,35 @@ fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<h2 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h2>
+<h2 id="example-13"><a class="header" href="#example-13">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let arr: Vec&lt;i32&gt; = vec![1, 2, 4, 7, 9, 7, 4, 2, 1];
+
+let (compressor, reevaluator) = compress_value(&amp;arr);
+
+let compr: Vec&lt;usize&gt; = arr.iter().map(|x| *compressor.get(x).unwrap()).collect();
+println!(&quot;{:?}&quot;, compr);    // [0, 1, 2, 3, 4, 3, 2, 1, 0]
+
+let original: Vec&lt;i32&gt; = compr.iter().map(|&amp;i| *reevaluator[i]).collect();
+println!(&quot;{:?}&quot;, original); // [1, 2, 4, 7, 9, 7, 4, 2, 1]
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">/// compressor[original_value] = compressed_value
+</span><span class="boring">/// reevaluator[compressed_value] = original_value
+</span><span class="boring">fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
+</span><span class="boring">    use std::collections::*;
+</span><span class="boring">    let compressor: BTreeMap&lt;&amp;T, usize&gt; = {
+</span><span class="boring">        let mut sorted: Vec&lt;_&gt; = arr.iter().collect();
+</span><span class="boring">        sorted.sort_unstable();
+</span><span class="boring">        sorted.dedup();
+</span><span class="boring">        sorted.into_iter().enumerate().map(|x| (x.1, x.0)).collect()
+</span><span class="boring">    };
+</span><span class="boring">    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
+</span><span class="boring">    (compressor, reevaluator)
+</span><span class="boring">}
+</span></code></pre></pre>
+<h2 id="code-11"><a class="header" href="#code-11">Code</a></h2>
+<h3 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h3>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
 fn compress_value&lt;T: Ord + std::hash::Hash&gt;(
@@ -3113,7 +3141,7 @@ fn compress_value&lt;T: Ord + std::hash::Hash&gt;(
     (compressor, reevaluator)
 }
 </code></pre>
-<h2 id="w0-hashmap"><a class="header" href="#w0-hashmap">w/0 HashMap</a></h2>
+<h3 id="wo-hashmap"><a class="header" href="#wo-hashmap">w/o HashMap</a></h3>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
 fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
@@ -3272,7 +3300,7 @@ fn isqrt(s: u32) -&gt; u32 {
 <p>Both function has its &quot;Option&quot; equivalents. <code>sc.next_str_option()</code> returns the next token as <code>Some(&amp;str)</code>. This function returns <code>None</code> instead of panicing the whole program, compared to <code>sc.next_str()</code>. <code>sc.next_option()</code> works just like <code>sc.next()</code> except that it returns <code>Option&lt;T&gt;</code> so that the function returns <code>None</code> instead of panicing. These functions are useful when the code needs to detect <code>EOF</code>.</p>
 <p><code>next!</code> macros are for easy-typing for inputs. <code>next!()</code> is equivalent to <code>sc.next()</code>. You can specify the return type of it by using <code>next!(T)</code>. Multiple types can also be used as arguments, delimited by spaces: <code>next!(T U V)</code> returns a tuple <code>(T, U, V)</code>. Lastly, <code>next!(str)</code> is equivalent to <code>sc.next_str()</code>.</p>
 <p><code>out!</code> and <code>outln!</code> are just the same with <code>print!</code> and <code>println!</code>, but the stdout flush is buffered for faster output.</p>
-<h3 id="example-13"><a class="header" href="#example-13">Example</a></h3>
+<h3 id="example-14"><a class="header" href="#example-14">Example</a></h3>
 <pre><code class="language-rust noplayground">// Main
 let n: usize = next!();
 let m = next!(usize);
@@ -3285,7 +3313,7 @@ out!(&quot;{} &quot;, a);
 outln!(&quot;{}&quot;, b);
 outln!(&quot;{:?}&quot;, [n, m]);
 </code></pre>
-<h3 id="code-11"><a class="header" href="#code-11">Code</a></h3>
+<h3 id="code-12"><a class="header" href="#code-12">Code</a></h3>
 <pre><code class="language-rust noplayground">fn main() {
     // FastIO
     use {fastio::*, std::io::*};
