@@ -36,6 +36,7 @@
 
 # Strings
 
+- [KMP](./strings/kmp.md)
 - [Manacher](./strings/manacher.md)
 - [Suffix Array and LCP Array](./strings/salcp.md)
 
