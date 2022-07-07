@@ -1,5 +1,17 @@
 # Suffix Array and LCP Array
 
+For an array \\(A\\) of length \\(n\\), `suffix_and_lcp(A)` returns two vectors \\(SA\\) and \\(LCP\\) where,
+
+- \\(A[SA[i] \dots]\\) is the \\(i\\)-th suffix in lexicographical order for every \\(i \in \left[0, n\right)\\)
+
+and
+
+- \\(LCP[i]\\) is the length of the longest common prefix between \\(A[SA[i-1] \dots]\\) and \\(A[SA[i] \dots]\\) for every \\(i \in \left[1, n \right)\\).
+
+Each vectors are called "suffix array" and "LCP array" of \\(A\\) respectively. For example, if `A = [0, 1, 2, 1, 2, 0, 1, 2]`, in other words `A = "asdsdasd"`, then `SA = [5, 0, 7, 4, 2, 6, 3, 1]` and `LCP = [*, 3, 0, 1, 1, 0, 2, 2]`.
+
+For finding SA, Manber-Myers algorithm combined with counting sort is used, hence the time complexity is \\(O(n\log{n})\\). For LCP array, Kasai's algorithm is used, hence the time complexity is \\(O(n)\\).
+
 ```rust,noplayground
 // Suffix array and LCP array
 // Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
