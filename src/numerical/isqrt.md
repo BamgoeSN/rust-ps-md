@@ -1,4 +1,5 @@
 # Integer Square Root
+Returns \\( \left\lfloor \sqrt{n} \right\rfloor \\).
 
 `isqrt(s)` returns \\( \left\lfloor \sqrt{s} \right\rfloor \\). It runs much faster than the typical binary search method.
 
