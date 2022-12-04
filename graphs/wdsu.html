@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Adjacency List Graph Representation - Rust Snippets for Competitive Programming</title>
+        <title>Weighted DSU - Rust Snippets for Competitive Programming</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -77,7 +77,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Deterministic Miller-Rabin Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Pollard's Rho Algorithm</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/matrix.html"><strong aria-hidden="true">8.</strong> Fast n-dimensional Array</a></li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">9.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">10.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">10.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">10.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">10.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html" class="active"><strong aria-hidden="true">11.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dijkstra.html"><strong aria-hidden="true">12.</strong> Dijkstra</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">13.</strong> Disjoint Set Union</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphs/wdsu.html"><strong aria-hidden="true">13.1.</strong> Weighted DSU</a></li></ol></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">14.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">15.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Strings</li><li class="chapter-item expanded "><a href="../strings/kmp.html"><strong aria-hidden="true">16.</strong> KMP</a></li><li class="chapter-item expanded "><a href="../strings/manacher.html"><strong aria-hidden="true">17.</strong> Manacher</a></li><li class="chapter-item expanded "><a href="../strings/salcp.html"><strong aria-hidden="true">18.</strong> Suffix Array and LCP Array</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">19.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html"><strong aria-hidden="true">20.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">21.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded "><a href="../unclass/mos.html"><strong aria-hidden="true">22.</strong> Mo's</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/fastio.html"><strong aria-hidden="true">23.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="../misc/macro.html"><strong aria-hidden="true">24.</strong> Macros</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">25.</strong> Zero/One Trait (Deprecated)</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Deterministic Miller-Rabin Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Pollard's Rho Algorithm</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/matrix.html"><strong aria-hidden="true">8.</strong> Fast n-dimensional Array</a></li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">9.</strong> Bit Array</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">10.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">10.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">10.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">10.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html"><strong aria-hidden="true">11.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dijkstra.html"><strong aria-hidden="true">12.</strong> Dijkstra</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">13.</strong> Disjoint Set Union</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphs/wdsu.html" class="active"><strong aria-hidden="true">13.1.</strong> Weighted DSU</a></li></ol></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">14.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">15.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Strings</li><li class="chapter-item expanded "><a href="../strings/kmp.html"><strong aria-hidden="true">16.</strong> KMP</a></li><li class="chapter-item expanded "><a href="../strings/manacher.html"><strong aria-hidden="true">17.</strong> Manacher</a></li><li class="chapter-item expanded "><a href="../strings/salcp.html"><strong aria-hidden="true">18.</strong> Suffix Array and LCP Array</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">19.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html"><strong aria-hidden="true">20.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">21.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded "><a href="../unclass/mos.html"><strong aria-hidden="true">22.</strong> Mo's</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/fastio.html"><strong aria-hidden="true">23.</strong> Base Template</a></li><li class="chapter-item expanded "><a href="../misc/macro.html"><strong aria-hidden="true">24.</strong> Macros</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">25.</strong> Zero/One Trait (Deprecated)</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -139,49 +139,71 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="adjacency-list-graph-representation"><a class="header" href="#adjacency-list-graph-representation">Adjacency List Graph Representation</a></h1>
-<p>Credits to kiwiyou</p>
-<pre><code class="language-rust noplayground">#[derive(Debug)]
-struct Graph&lt;T&gt; {
+                        <h1 id="weighted-dsu"><a class="header" href="#weighted-dsu">Weighted DSU</a></h1>
+<p>Disjoint set union where vertices have their own &quot;potential value&quot;.</p>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">struct WeightDSU {
     n: usize,
-    first: Vec&lt;usize&gt;,
-    edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
+    group_num: usize,
+    parent: Vec&lt;usize&gt;,
+    group_size: Vec&lt;usize&gt;,
+    potdiff: Vec&lt;i64&gt;,
 }
 
-impl&lt;T&gt; Graph&lt;T&gt; {
-    fn new(n: usize, e: usize) -&gt; Self {
+impl WeightDSU {
+    fn new(n: usize) -&gt; Self {
         Self {
             n,
-            first: vec![usize::MAX; n],
-            edge: Vec::with_capacity(e),
+            group_num: n,
+            parent: vec![n; n],
+            group_size: vec![1; n],
+            potdiff: vec![0; n],
         }
     }
 
-    fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
-        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
-        self.edge.push((to, prev, data));
+    /// Returns the root of u, and pot[u]-pot[root]
+    fn find(&amp;mut self, u: usize) -&gt; (usize, i64) {
+        let par = self.parent[u];
+        if par == self.n {
+            return (u, 0);
+        }
+        let (root, parpoten) = self.find(par);
+        self.potdiff[u] += parpoten;
+        self.parent[u] = root;
+        (root, self.potdiff[u])
     }
 
-    fn neighbor(&amp;self, of: usize) -&gt; Neighbor&lt;T&gt; {
-        Neighbor {
-            graph: self,
-            next_edge: self.first[of],
+    /// Returns pot[u]-pot[v]. Returns None if u and v aren't in the same group.
+    fn pot_differ(&amp;mut self, u: usize, v: usize) -&gt; Option&lt;i64&gt; {
+        let (ur, udiff) = self.find(u);
+        let (vr, vdiff) = self.find(v);
+        if ur != vr {
+            None
+        } else {
+            Some(udiff - vdiff)
         }
     }
-}
 
-struct Neighbor&lt;'g, T&gt; {
-    graph: &amp;'g Graph&lt;T&gt;,
-    next_edge: usize,
-}
+    /// Unions u and v, with setting pot[u]-pot[v] = w.
+    /// Also puts the root of v under the root of u.
+    /// Returns false if u and v are already unioned and the relation is not consistent.
+    fn union(&amp;mut self, u: usize, v: usize, w: i64) -&gt; bool {
+        let (ur, udiff) = self.find(u);
+        let (vr, vdiff) = self.find(v);
+        if ur == vr {
+            udiff - vdiff == w
+        } else {
+            self.parent[vr] = ur;
+            self.potdiff[vr] = udiff - vdiff - w;
+            self.group_size[ur] += self.group_size[vr];
+            self.group_num -= 1;
+            true
+        }
+    }
 
-impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
-    type Item = (usize, &amp;'g T);
-
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
-        let (to, next_edge, data) = self.graph.edge.get(self.next_edge)?;
-        self.next_edge = *next_edge;
-        Some((*to, data))
+    fn get_group_size(&amp;mut self, u: usize) -&gt; usize {
+        let r = self.find(u).0;
+        self.group_size[r]
     }
 }</code></pre>
 
@@ -189,10 +211,10 @@ impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../datastructure/segtree/lazyseg.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../graphs/dsu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../graphs/dijkstra.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../graphs/scc.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -201,10 +223,10 @@ impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../datastructure/segtree/lazyseg.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../graphs/dsu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../graphs/dijkstra.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../graphs/scc.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
