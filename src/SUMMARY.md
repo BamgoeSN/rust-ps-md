@@ -32,6 +32,7 @@
 - [Adjacency List Graph Representation](./graphs/adjlist.md)
 - [Dijkstra](./graphs/dijkstra.md)
 - [Disjoint Set Union](./graphs/dsu.md)
+  - [Weighted DSU](./graphs/wdsu.md)
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
 
