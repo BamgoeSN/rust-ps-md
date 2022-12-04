@@ -1,77 +1,103 @@
 # Disjoint Set Union
-Disjoint set union (a.k.a Union-Find) processes the following queries on a graph with \\(n\\) nodes without any edges:
-- Add an undirected edge between two nodes (`union`)
-- Determine if there exist a path between two nodes (`is_reachable`)
+Disjoint set union data structure.
+
+## Example
+```rust
+# struct UnionFind {
+#     n: usize,
+#     parent: Vec<usize>,
+#     group_num: usize,
+#     group_size: Vec<usize>,
+# }
+# impl UnionFind {
+#     fn new(n: usize) -> Self {
+#         Self {
+#             n,
+#             parent: vec![n; n],
+#             group_num: n,
+#             group_size: vec![1; n],
+#         }
+#     }
+#     fn find(&mut self, u: usize) -> usize {
+#         let par = self.parent[u];
+#         if par == self.n {
+#             return u;
+#         }
+#         self.parent[u] = self.find(par);
+#         self.parent[u]
+#     }
+#     fn is_differ(&mut self, u: usize, v: usize) -> bool {
+#         self.find(u) != self.find(v)
+#     }
+#     fn union(&mut self, u: usize, v: usize) {
+#         let (ur, vr) = (self.find(u), self.find(v));
+#         if ur != vr {
+#             self.parent[vr] = ur;
+#             self.group_size[ur] += self.group_size[vr];
+#             self.group_num -= 1;
+#         }
+#     }
+#     fn get_group_size(&mut self, u: usize) -> usize {
+#         let r = self.find(u);
+#         self.group_size[r]
+#     }
+# }
+# fn main() {
+let mut uf = UnionFind::new(10);
+println!("{}", uf.is_differ(2, 6)); // true
+uf.union(2, 6);
+println!("{}", uf.is_differ(2, 6)); // false
+# }
+```
+
+## Code
 
 ```rust,noplayground
 struct UnionFind {
-    size: usize,
-    parents: Vec<usize>,
-    group_size: Vec<usize>,
+    n: usize,
+    parent: Vec<usize>,
     group_num: usize,
+    group_size: Vec<usize>,
 }
 
 impl UnionFind {
-    /// Returns a new UnionFind instance where `size` number of elements are in their own disjoint set.
-    fn new(size: usize) -> Self {
+    fn new(n: usize) -> Self {
         Self {
-            size,
-            parents: vec![size; size],
-            group_size: vec![1; size],
-            group_num: size,
+            n,
+            parent: vec![n; n],
+            group_num: n,
+            group_size: vec![1; n],
         }
     }
 
-    /// Returns the number of nodes which can be reached from x.
-    fn get_group_size(&mut self, x: usize) -> usize {
-        let root = self.find_root(x);
-        self.group_size[root]
-    }
-
-    /// Returns the number of connected components.
-    fn get_group_num(&self) -> usize {
-        self.group_num
-    }
-
-    fn find_root(&mut self, x: usize) -> usize {
-        if self.parents[x] == self.size {
-            return x;
+    /// Returns the root of a group u is in
+    fn find(&mut self, u: usize) -> usize {
+        let par = self.parent[u];
+        if par == self.n {
+            return u;
         }
-        let root = self.find_root(self.parents[x]);
-        self.parents[x] = root;
-        root
+        self.parent[u] = self.find(par);
+        self.parent[u]
     }
 
-    /// Returns true if there exists a path from a to b.
-    fn is_reachable(&mut self, a: usize, b: usize) -> bool {
-        self.find_root(a) == self.find_root(b)
+    /// Returns true if u and v are in different groups, false otherwise.
+    fn is_differ(&mut self, u: usize, v: usize) -> bool {
+        self.find(u) != self.find(v)
     }
 
-    /// Add an edge between a and b.
-    fn union(&mut self, a: usize, b: usize) {
-        let a_root = self.find_root(a);
-        let b_root = self.find_root(b);
-
-        if a_root != b_root {
+    /// The group of v is merged into the group of u
+    fn union(&mut self, u: usize, v: usize) {
+        let (ur, vr) = (self.find(u), self.find(v));
+        if ur != vr {
+            self.parent[vr] = ur;
+            self.group_size[ur] += self.group_size[vr];
             self.group_num -= 1;
-            let a_size = self.group_size[a_root];
-            let b_size = self.group_size[b_root];
-            if a_size < b_size {
-                self.parents[a_root] = b_root;
-                self.group_size[b_root] += a_size;
-            } else {
-                self.parents[b_root] = a_root;
-                self.group_size[a_root] += b_size;
-            }
         }
+    }
+
+    fn get_group_size(&mut self, u: usize) -> usize {
+        let r = self.find(u);
+        self.group_size[r]
     }
 }
-```
-
-## Example
-```rust,noplayground
-let mut uf = UnionFind::new(10);
-assert_eq!(uf.is_reachable(2, 6), false);
-uf.union(2, 6);
-assert_eq!(uf.is_reachable(2, 6), true);
 ```
