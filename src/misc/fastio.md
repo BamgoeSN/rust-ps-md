@@ -1,7 +1,5 @@
 # Fast IO
 
-## Normal
-
 `get_input()` returns every text read from the standard input, using `mmap`. Because of this, the input must be read by file redirection as `cargo run --release < input.txt`. THIS FUNCTION DOESN'T WORK ON WINDOWS. THE FUNCTION MUST BE REWRITTEN MANUALLY TO BE USED FOR <u>**CODEFORCES**</u>, WHICH RUNS CODES ON WINDOWS.
 
 `Scanner` is a structure which can read either lines or tokens out of a string. `Scanner::tokenize(str)` tokenizes `str` by whitespaces, such as ` ` spaces, `\t` tabs, and `\n` newlines.
@@ -18,9 +16,9 @@ Both function has its "Option" equivalents. `sc.next_str_option()` returns the n
 
 ```rust,noplayground
 // Main
-let n: usize = next!();
-let m = next!(usize);
-let (a, b) = next!(u32 i64);
+let n: usize = next!();      // Identical to `let n: usize = sc.next();`
+let m = next!(usize);        // Identical to `let m = sc.next::<usize>();`
+let (a, b) = next!(u32 i64); // Identical to `let (a, b): (u32, i64) = (sc.next(), sc.next());`
 let arr: Vec<u64> = (0..n).map(|_| next!()).collect();
 
 let word = next!(str);
@@ -30,30 +28,41 @@ outln!("{}", b);
 outln!("{:?}", [n, m]);
 ```
 
-### Code
+## Code
+
+### For Linux (Almost every OJs including AtCoder)
 
 ```rust,noplayground
-fn main() {
+#![no_main]
+use std::io::*;
+
+#[no_mangle]
+fn main() -> i32 {
     // FastIO
-    use {fastio::*, std::io::*};
+    use fastio::*;
     let input_str = get_input();
-    let mut sc: Scanner<_> = Scanner::tokenize(input_str);
+    let mut sc: Splitter<_> = Splitter::new(input_str, |s| s.split_ascii_whitespace());
     let stdout = stdout();
     let wr = &mut BufWriter::new(stdout.lock());
 
     // FastIO Macros
     macro_rules! next {
         () => { sc.next() };
-        (str) => { sc.next_str() };
         ($($t:ty) +) => { ($(sc.next::<$t>()),+) };
     }
     macro_rules! out { ($($arg:tt)*) => { write!(wr, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) => { writeln!(wr, $($arg)*).ok(); }; }
 
     // Main
+
+    wr.flush().unwrap();
+    0
 }
 
 mod fastio {
+    use core::{slice::*, str::*};
+
+    #[link(name = "c")]
     extern "C" {
         fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -> *mut u8;
         fn fstat(fd: i32, stat: *mut usize) -> i32;
@@ -61,75 +70,69 @@ mod fastio {
 
     pub fn get_input() -> &'static str {
         let mut stat = [0; 20];
-        unsafe { fstat(0, (&mut stat).as_mut_ptr()) };
+        unsafe { fstat(0, stat.as_mut_ptr()) };
         let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
-        unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(buffer, stat[6])) }
+        unsafe { from_utf8_unchecked(from_raw_parts(buffer, stat[6])) }
     }
 
-    pub struct Scanner<'a, I: Iterator<Item = &'a str>> {
+    pub struct Splitter<I: Iterator> {
         it: I,
     }
 
-    impl<'a> Scanner<'a, std::str::SplitAsciiWhitespace<'a>> {
-        pub fn tokenize(s: &'a str) -> Self {
-            Self {
-                it: s.split_ascii_whitespace(),
-            }
+    impl<'a, 'b: 'a, T: Iterator> Splitter<T> {
+        pub fn new(s: &'b str, split: impl FnOnce(&'a str) -> T) -> Self {
+            Self { it: split(s) }
         }
     }
 
-    impl<'a> Scanner<'a, std::str::Lines<'a>> {
-        pub fn lines(s: &'a str) -> Self {
-            Self { it: s.lines() }
-        }
-    }
-
-    impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
-        #[inline(always)]
-        pub fn next<T: std::str::FromStr>(&mut self) -> T {
+    impl<'a, I: Iterator<Item = &'a str>> Splitter<I> {
+        pub fn next<T: FromStr>(&mut self) -> T {
             self.it.next().unwrap().parse().ok().unwrap()
         }
-        #[inline(always)]
         pub fn next_str(&mut self) -> &'a str {
             self.it.next().unwrap()
         }
-        #[inline(always)]
-        pub fn next_option<T: std::str::FromStr>(&mut self) -> Option<T> {
+        pub fn next_opt<T: FromStr>(&mut self) -> Option<T> {
             self.it.next().and_then(|s| s.parse().ok())
         }
-        #[inline(always)]
-        pub fn next_str_option(&mut self) -> Option<&'a str> {
+        pub fn next_str_opt(&mut self) -> Option<&'a str> {
             self.it.next()
         }
     }
 }
 ```
 
-### Template for Windows(Codeforces)
+### For Windows (Codeforces)
 
 ```rust,noplayground
-fn main() {
+#![no_main]
+use std::io::*;
+
+#[no_mangle]
+fn main() -> i32 {
     // FastIO
-    use {fastio::*, std::io::*};
+    use fastio::*;
     let input_str = get_input();
-    let mut sc: Scanner<_> = Scanner::tokenize(&input_str);
+    let mut sc: Splitter<_> = Splitter::new(&input_str, |s| s.split_ascii_whitespace());
     let stdout = stdout();
     let wr = &mut BufWriter::new(stdout.lock());
 
     // FastIO Macros
     macro_rules! next {
         () => { sc.next() };
-        (str) => { sc.next_str() };
         ($($t:ty) +) => { ($(sc.next::<$t>()),+) };
     }
     macro_rules! out { ($($arg:tt)*) => { write!(wr, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) => { writeln!(wr, $($arg)*).ok(); }; }
 
     // Main
+
+    wr.flush().unwrap();
+    0
 }
 
 mod fastio {
-    use std::io::{stdin, Read};
+    use std::{io::*, str::*};
 
     pub fn get_input() -> String {
         let mut buf = String::new();
@@ -137,46 +140,34 @@ mod fastio {
         buf
     }
 
-    pub struct Scanner<'a, I: Iterator<Item = &'a str>> {
+    pub struct Splitter<I: Iterator> {
         it: I,
     }
 
-    impl<'a> Scanner<'a, std::str::SplitAsciiWhitespace<'a>> {
-        pub fn tokenize(s: &'a str) -> Self {
-            Self {
-                it: s.split_ascii_whitespace(),
-            }
+    impl<'a, 'b: 'a, T: Iterator> Splitter<T> {
+        pub fn new(s: &'b str, split: impl FnOnce(&'a str) -> T) -> Self {
+            Self { it: split(s) }
         }
     }
 
-    impl<'a> Scanner<'a, std::str::Lines<'a>> {
-        pub fn lines(s: &'a str) -> Self {
-            Self { it: s.lines() }
-        }
-    }
-
-    impl<'a, I: Iterator<Item = &'a str>> Scanner<'a, I> {
-        #[inline(always)]
-        pub fn next<T: std::str::FromStr>(&mut self) -> T {
+    impl<'a, I: Iterator<Item = &'a str>> Splitter<I> {
+        pub fn next<T: FromStr>(&mut self) -> T {
             self.it.next().unwrap().parse().ok().unwrap()
         }
-        #[inline(always)]
         pub fn next_str(&mut self) -> &'a str {
             self.it.next().unwrap()
         }
-        #[inline(always)]
-        pub fn next_option<T: std::str::FromStr>(&mut self) -> Option<T> {
+        pub fn next_opt<T: FromStr>(&mut self) -> Option<T> {
             self.it.next().and_then(|s| s.parse().ok())
         }
-        #[inline(always)]
-        pub fn next_str_option(&mut self) -> Option<&'a str> {
+        pub fn next_str_opt(&mut self) -> Option<&'a str> {
             self.it.next()
         }
     }
 }
 ```
 
-## With faster print
+### With faster print (Old)
 
 ```rust,noplayground
 fn main() {
