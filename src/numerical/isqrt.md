@@ -1,7 +1,6 @@
 # Integer Square Root
-Returns \\( \left\lfloor \sqrt{n} \right\rfloor \\).
 
-`isqrt(s)` returns \\( \left\lfloor \sqrt{s} \right\rfloor \\). It runs much faster than the typical binary search method.
+`isqrt(s)` returns \\( \left\lfloor \sqrt{s} \right\rfloor \\). It runs much faster than the typical binary search method, but slower than casting the result from `std::f64::sqrt`. If the value can be perfectly represented with `f64` and the memory limit isn't too short, it's better to use the `f64` square root function from `std`.
 
 ## Example
 
