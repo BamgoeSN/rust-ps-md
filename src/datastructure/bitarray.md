@@ -1,10 +1,10 @@
-# Bit Array
+# Bitset
 ```rust,noplayground
-struct BitArray {
+struct Bitset {
     bytes: Vec<u8>,
 }
 
-impl BitArray {
+impl Bitset {
     #[inline(always)]
     fn new(size: usize) -> Self {
         Self {

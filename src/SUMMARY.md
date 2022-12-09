@@ -21,7 +21,7 @@
 # Data Structures
 
 - [Fast n-dimensional Array](./datastructure/matrix.md)
-- [Bit Array](./datastructure/bitarray.md)
+- [Bitset](./datastructure/bitarray.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
   - [Segment Tree](./datastructure/segtree/segtree.md)
   - [Fenwick Tree](./datastructure/segtree/fenwick.md)
