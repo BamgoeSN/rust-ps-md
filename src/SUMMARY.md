@@ -52,6 +52,7 @@
 - [Value Compression](./unclass/valcomp.md)
 - [Longest Increasing Subsequence](./unclass/lis.md)
 - [Mo's](./unclass/mos.md)
+- [Arbitrary-Precision Integer](./unclass/bigint.md)
 
 # Misc
 
