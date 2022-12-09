@@ -26,6 +26,7 @@
   - [Segment Tree](./datastructure/segtree/segtree.md)
   - [Fenwick Tree](./datastructure/segtree/fenwick.md)
   - [Lazy Segment Tree](./datastructure/segtree/lazyseg.md)
+- [Rope](./datastructure/rope.md)
 
 # Graphs
 
