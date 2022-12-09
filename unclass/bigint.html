@@ -1,0 +1,831 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js nord_light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Arbitrary-Precision Integer - Rust Snippets for Competitive Programming</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "nord_dark" : "nord_light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('nord_light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Deterministic Miller-Rabin Primality Test</a></li><li class="chapter-item expanded "><a href="../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Pollard's Rho Algorithm</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../numerical/isqrt.html"><strong aria-hidden="true">6.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/intro.html"><strong aria-hidden="true">7.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../numerical/linrec/berlekamp.html"><strong aria-hidden="true">7.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/kitamasa.html"><strong aria-hidden="true">7.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../numerical/linrec/bostanmori.html"><strong aria-hidden="true">7.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../datastructure/matrix.html"><strong aria-hidden="true">8.</strong> Fast n-dimensional Array</a></li><li class="chapter-item expanded "><a href="../datastructure/bitarray.html"><strong aria-hidden="true">9.</strong> Bitset</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/intro.html"><strong aria-hidden="true">10.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../datastructure/segtree/segtree.html"><strong aria-hidden="true">10.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/fenwick.html"><strong aria-hidden="true">10.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">10.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><a href="../datastructure/rope.html"><strong aria-hidden="true">11.</strong> Rope</a></li><li class="chapter-item expanded affix "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../graphs/adjlist.html"><strong aria-hidden="true">12.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../graphs/dijkstra.html"><strong aria-hidden="true">13.</strong> Dijkstra</a></li><li class="chapter-item expanded "><a href="../graphs/dsu.html"><strong aria-hidden="true">14.</strong> Disjoint Set Union</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphs/wdsu.html"><strong aria-hidden="true">14.1.</strong> Weighted DSU</a></li></ol></li><li class="chapter-item expanded "><a href="../graphs/scc.html"><strong aria-hidden="true">15.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../graphs/2sat.html"><strong aria-hidden="true">16.</strong> 2-SAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Strings</li><li class="chapter-item expanded "><a href="../strings/kmp.html"><strong aria-hidden="true">17.</strong> KMP</a></li><li class="chapter-item expanded "><a href="../strings/manacher.html"><strong aria-hidden="true">18.</strong> Manacher</a></li><li class="chapter-item expanded "><a href="../strings/salcp.html"><strong aria-hidden="true">19.</strong> Suffix Array and LCP Array</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../geometry/convexhull.html"><strong aria-hidden="true">20.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../unclass/valcomp.html"><strong aria-hidden="true">21.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../unclass/lis.html"><strong aria-hidden="true">22.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded "><a href="../unclass/mos.html"><strong aria-hidden="true">23.</strong> Mo's</a></li><li class="chapter-item expanded "><a href="../unclass/bigint.html" class="active"><strong aria-hidden="true">24.</strong> Arbitrary-Precision Integer</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../misc/fastio.html"><strong aria-hidden="true">25.</strong> Fast IO</a></li><li class="chapter-item expanded "><a href="../misc/macro.html"><strong aria-hidden="true">26.</strong> Macros</a></li><li class="chapter-item expanded "><a href="../misc/zero_one_trait.html"><strong aria-hidden="true">27.</strong> Zero/One Trait (Deprecated)</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="nord_light">Nord Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="nord_dark">Nord Dark</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust Snippets for Competitive Programming</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/BamgoeSN/rust-ps-md" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="arbitrary-precision-integer"><a class="header" href="#arbitrary-precision-integer">Arbitrary-Precision Integer</a></h1>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><code class="language-rust noplayground">use bigint::*;
+
+let _a = Int::from(0i8);
+let b = Int::from(4i16);
+let c = Int::from(11i32);
+
+let mut x = Int::from(30i64);
+x *= &amp;b;
+println!(&quot;{}&quot;, x);
+
+let mut y = Int::from_str(&quot;123456789123456789123456789123456789&quot;).unwrap();
+let z = &amp;y * &amp;c;
+println!(&quot;{}&quot;, y);</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">mod bigint {
+    use core::{
+        fmt::Display,
+        num::ParseIntError,
+        ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
+        str::FromStr,
+    };
+
+    const CHUNK: usize = 5;
+    const TENS: i64 = 100000;
+
+    #[derive(Clone, Default, Debug, PartialEq, Eq)]
+    pub struct Uint(Vec&lt;i64&gt;);
+
+    macro_rules! flatten {
+        ($uint:expr) =&gt; {
+            let mut carry: i64 = 0;
+            for i in 0..$uint.0.len() {
+                $uint.0[i] += carry;
+                carry = $uint.0[i].div_euclid(TENS);
+                $uint.0[i] -= carry * TENS;
+            }
+            while carry != 0 {
+                $uint.0.push(carry.rem_euclid(TENS));
+                carry = carry.div_euclid(TENS);
+            }
+            while let Some(&amp;x) = $uint.0.last() {
+                if x != 0 {
+                    break;
+                }
+                $uint.0.pop();
+            }
+        };
+    }
+
+    macro_rules! impl_from_for_uint {
+        ($($t:ty),*) =&gt; {
+            $(
+                impl From&lt;$t&gt; for Uint {
+                    fn from(x: $t) -&gt; Self {
+                        let mut x = Self(vec![x as i64]);
+                        flatten!(x);
+                        x
+                    }
+                }
+            )*
+        };
+    }
+    impl_from_for_uint!(u8, u16, u32, u64, u128, usize);
+
+    impl FromStr for Uint {
+        type Err = ParseIntError;
+        fn from_str(s: &amp;str) -&gt; Result&lt;Self, Self::Err&gt; {
+            let s = s.trim_start_matches(&quot;0&quot;);
+            if s.is_empty() {
+                return Ok(Self(vec![]));
+            }
+            let mut arr: Vec&lt;i64&gt; = Vec::with_capacity(s.len() / CHUNK + 2);
+            let mut s = s;
+            while s.len() &gt; CHUNK {
+                let (l, r) = s.split_at(s.len() - CHUNK);
+                arr.push(r.parse()?);
+                s = l;
+            }
+            arr.push(s.parse()?);
+            Ok(Self(arr))
+        }
+    }
+
+    impl Display for Uint {
+        fn fmt(&amp;self, f: &amp;mut core::fmt::Formatter&lt;'_&gt;) -&gt; core::fmt::Result {
+            write!(f, &quot;{}&quot;, *self.0.last().unwrap_or(&amp;0))?;
+            for &amp;v in self.0.iter().rev().skip(1) {
+                write!(f, &quot;{:0CHUNK$}&quot;, v)?;
+            }
+            Ok(())
+        }
+    }
+
+    impl PartialOrd for Uint {
+        fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;core::cmp::Ordering&gt; {
+            use core::cmp::Ordering;
+            match self.0.len().cmp(&amp;other.0.len()) {
+                Ordering::Equal =&gt; {
+                    for i in (0..self.0.len()).rev() {
+                        let x = self.0[i].cmp(&amp;other.0[i]);
+                        if x != Ordering::Equal {
+                            return Some(x);
+                        }
+                    }
+                    Some(Ordering::Equal)
+                }
+                x =&gt; Some(x),
+            }
+        }
+    }
+
+    impl Ord for Uint {
+        fn cmp(&amp;self, other: &amp;Self) -&gt; core::cmp::Ordering {
+            use core::cmp::Ordering;
+            match self.0.len().cmp(&amp;other.0.len()) {
+                Ordering::Equal =&gt; {
+                    for i in (0..self.0.len()).rev() {
+                        let x = self.0[i].cmp(&amp;other.0[i]);
+                        if x != Ordering::Equal {
+                            return x;
+                        }
+                    }
+                    Ordering::Equal
+                }
+                x =&gt; x,
+            }
+        }
+    }
+
+    impl AddAssign&lt;&amp;Uint&gt; for Uint {
+        fn add_assign(&amp;mut self, rhs: &amp;Uint) {
+            if self.0.len() &lt; rhs.0.len() {
+                for i in 0..self.0.len() {
+                    self.0[i] += rhs.0[i];
+                }
+                self.0.extend_from_slice(&amp;rhs.0[self.0.len()..]);
+            } else {
+                for i in 0..rhs.0.len() {
+                    self.0[i] += rhs.0[i];
+                }
+            }
+
+            flatten!(self);
+        }
+    }
+
+    impl Add for &amp;Uint {
+        type Output = Uint;
+        fn add(self, rhs: Self) -&gt; Self::Output {
+            let mut c = self.clone();
+            c += rhs;
+            c
+        }
+    }
+
+    impl SubAssign&lt;&amp;Uint&gt; for Uint {
+        fn sub_assign(&amp;mut self, rhs: &amp;Uint) {
+            // Panics if self.len() &lt; rhs.len(): Think it as a underflow error
+            for (i, &amp;v) in rhs.0.iter().enumerate() {
+                self.0[i] -= v;
+            }
+
+            flatten!(self);
+        }
+    }
+
+    impl Sub for &amp;Uint {
+        type Output = Uint;
+        fn sub(self, rhs: Self) -&gt; Self::Output {
+            let mut c = self.clone();
+            c -= rhs;
+            c
+        }
+    }
+
+    const NTT_THRES: usize = 5000;
+    const KARAT_THRES: usize = 30;
+
+    impl Mul for &amp;Uint {
+        type Output = Uint;
+        fn mul(self, rhs: Self) -&gt; Self::Output {
+            let max_len = self.0.len().max(rhs.0.len());
+            let max_2len = polymul::ceil_pow2(max_len);
+
+            // For performance reasons regarding vector copying, we determine whether to use
+            // NTT or not here.
+            let mut ans = Uint(if max_2len &gt; NTT_THRES {
+                polymul::convolute(&amp;self.0, &amp;rhs.0)
+            } else {
+                let f: Vec&lt;i64&gt; = self
+                    .0
+                    .iter()
+                    .copied()
+                    .chain(core::iter::repeat(0))
+                    .take(max_2len)
+                    .collect();
+
+                let g: Vec&lt;i64&gt; = rhs
+                    .0
+                    .iter()
+                    .copied()
+                    .chain(core::iter::repeat(0))
+                    .take(max_2len)
+                    .collect();
+
+                polymul::mult_2pow(&amp;f, &amp;g)
+            });
+
+            flatten!(ans);
+            ans
+        }
+    }
+
+    impl MulAssign&lt;&amp;Uint&gt; for Uint {
+        fn mul_assign(&amp;mut self, rhs: &amp;Uint) {
+            let x = &amp;*self * rhs;
+            *self = x;
+        }
+    }
+
+    mod polymul {
+        pub fn ceil_pow2(n: usize) -&gt; usize {
+            if n == 0 {
+                return 0;
+            }
+            let mut m = n;
+            while m != m &amp; (!m + 1) {
+                m -= m &amp; (!m + 1);
+            }
+            if n == m {
+                n
+            } else {
+                m * 2
+            }
+        }
+
+        pub fn mult_2pow(f: &amp;[i64], g: &amp;[i64]) -&gt; Vec&lt;i64&gt; {
+            if f.len() &gt; super::KARAT_THRES {
+                return karatsuba(f, g);
+            }
+
+            let mut ans = vec![0; 2 * f.len()];
+            for (i, &amp;a) in f.iter().enumerate() {
+                for (j, &amp;b) in g.iter().enumerate() {
+                    ans[i + j] += a * b;
+                }
+            }
+
+            ans
+        }
+
+        // Length of f = Length of g = 2n = 2^(k+1)
+        fn karatsuba(f: &amp;[i64], g: &amp;[i64]) -&gt; Vec&lt;i64&gt; {
+            if f.len() == 1 {
+                return vec![f[0] * g[0]];
+            }
+            let n = f.len() / 2;
+            let k = n.trailing_zeros();
+            debug_assert_eq!(n, 1 &lt;&lt; k);
+
+            let (fl, fr) = (&amp;f[..n], &amp;f[n..]);
+            let (gl, gr) = (&amp;g[..n], &amp;g[n..]);
+
+            let flgl = mult_2pow(fl, gl);
+            let frgr = mult_2pow(fr, gr);
+
+            let fsum: Vec&lt;_&gt; = fl.iter().zip(fr.iter()).map(|(&amp;a, &amp;b)| (a + b)).collect();
+            let gsum: Vec&lt;_&gt; = gl.iter().zip(gr.iter()).map(|(&amp;a, &amp;b)| (a + b)).collect();
+            let fsgs = mult_2pow(&amp;fsum, &amp;gsum);
+
+            let mut ans: Vec&lt;_&gt; = flgl.iter().copied().chain(frgr.iter().copied()).collect();
+            for i in 0..fsgs.len() {
+                ans[i + n] += fsgs[i];
+            }
+            for (i, v) in flgl
+                .iter()
+                .zip(frgr.iter())
+                .map(|(&amp;a, &amp;b)| (a + b))
+                .enumerate()
+            {
+                ans[i + n] -= v;
+            }
+
+            ans
+        }
+
+        const P2INV: i64 = 253522377;
+
+        pub fn convolute(a: &amp;[i64], b: &amp;[i64]) -&gt; Vec&lt;i64&gt; {
+            let c1 = ntt1::convolute(a, b);
+            let c2 = ntt2::convolute(a, b);
+
+            c1.into_iter()
+                .zip(c2.into_iter())
+                .map(|(a1, a2)| {
+                    let j = ((a1 + ntt1::NTT_P as i64 - a2) * P2INV) % ntt1::NTT_P as i64;
+                    ntt2::NTT_P as i64 * j + a2
+                })
+                .collect()
+        }
+
+        // FFT_constname convention following https://algoshitpo.github.io/2020/05/20/fft-ntt/
+        macro_rules! impl_ntt {
+            ($modname:ident, $nttp:expr, $ntta:expr, $nttb:expr, $nttw:expr) =&gt; {
+                mod $modname {
+                    pub const NTT_P: u64 = $nttp;
+                    const NTT_A: u64 = $ntta;
+                    const NTT_B: u32 = $nttb;
+                    const NTT_W: u64 = $nttw;
+
+                    fn ceil_pow2(n: usize) -&gt; usize {
+                        let mut x: usize = 0;
+                        while (1 &lt;&lt; x) &lt; n {
+                            x += 1;
+                        }
+                        x
+                    }
+
+                    pub fn convolute(a: &amp;[i64], b: &amp;[i64]) -&gt; Vec&lt;i64&gt; {
+                        let nlen = 1 &lt;&lt; ceil_pow2(a.len() + b.len());
+                        let mut arr = vec![0; nlen];
+                        let mut brr = vec![0; nlen];
+                        for (i, &amp;a) in a.iter().enumerate() {
+                            arr[i] = a as u64;
+                        }
+                        for (i, &amp;b) in b.iter().enumerate() {
+                            brr[i] = b as u64;
+                        }
+
+                        inplace_ntt(&amp;mut arr);
+                        inplace_ntt(&amp;mut brr);
+                        let mut crr: Vec&lt;_&gt; =
+                            arr.iter().zip(brr.iter()).map(|(&amp;a, &amp;b)| a * b).collect();
+                        inplace_intt(&amp;mut crr);
+                        crr.iter().map(|&amp;x| x as i64).collect()
+                    }
+
+                    #[inline(always)]
+                    fn rem_pow(mut base: u64, exp: u64) -&gt; u64 {
+                        let mut result = 1u64;
+                        for exp in core::iter::successors(Some(exp), |x| Some(x &gt;&gt; 1))
+                            .take_while(|&amp;v| v != 0)
+                        {
+                            if exp &amp; 1 != 0 {
+                                result *= base;
+                                result %= NTT_P;
+                            }
+                            base *= base;
+                            base %= NTT_P;
+                        }
+                        result
+                    }
+
+                    // unity(n, 1) ** (1&lt;&lt;n) = 1
+                    fn unity(n: u32, k: u64) -&gt; u64 {
+                        rem_pow(rem_pow(NTT_W, NTT_A), k &lt;&lt; (NTT_B - n))
+                    }
+
+                    fn recip(x: u64) -&gt; u64 {
+                        rem_pow(x, NTT_P - 2)
+                    }
+
+                    // Reverses k trailing bits of n
+                    fn reverse_trailing_bits(n: usize, k: u32) -&gt; usize {
+                        let mut r: usize = 0;
+                        for i in 0..k {
+                            r |= ((n &gt;&gt; i) &amp; 1) &lt;&lt; (k - i - 1);
+                        }
+                        r
+                    }
+
+                    fn inplace_ntt(arr: &amp;mut [u64]) {
+                        let n: usize = arr.len();
+                        let k = n.trailing_zeros();
+                        assert_eq!(n, 1 &lt;&lt; k);
+
+                        for i in 0..n {
+                            let j = reverse_trailing_bits(i, k);
+                            if i &lt; j {
+                                arr.swap(i, j);
+                            }
+                        }
+
+                        for x in 0..k {
+                            let base: u64 = unity(x + 1, 1);
+                            let s = 1 &lt;&lt; x;
+                            for i in (0..n).step_by(s &lt;&lt; 1) {
+                                let mut mult: u64 = 1;
+                                for j in 0..s {
+                                    let tmp = (arr[i + j + s] * mult) % NTT_P;
+                                    arr[i + j + s] = (arr[i + j] + NTT_P - tmp) % NTT_P;
+                                    arr[i + j] = (arr[i + j] + tmp) % NTT_P;
+                                    mult *= base;
+                                    mult %= NTT_P;
+                                }
+                            }
+                        }
+                    }
+
+                    fn inplace_intt(arr: &amp;mut [u64]) {
+                        let n: usize = arr.len();
+                        let k = n.trailing_zeros();
+                        assert_eq!(n, 1 &lt;&lt; k);
+
+                        for i in 0..n {
+                            let j = reverse_trailing_bits(i, k);
+                            if i &lt; j {
+                                arr.swap(i, j);
+                            }
+                        }
+
+                        for x in 0..k {
+                            let base: u64 = recip(unity(x + 1, 1));
+                            let s = 1 &lt;&lt; x;
+                            for i in (0..n).step_by(s &lt;&lt; 1) {
+                                let mut mult: u64 = 1;
+                                for j in 0..s {
+                                    let tmp = (arr[i + j + s] * mult) % NTT_P;
+                                    arr[i + j + s] = (arr[i + j] + NTT_P - tmp) % NTT_P;
+                                    arr[i + j] = (arr[i + j] + tmp) % NTT_P;
+                                    mult *= base;
+                                    mult %= NTT_P;
+                                }
+                            }
+                        }
+
+                        let r = recip(n as u64);
+                        for f in arr.iter_mut() {
+                            *f *= r;
+                            *f %= NTT_P;
+                        }
+                    }
+                }
+            };
+        }
+
+        impl_ntt!(ntt1, 2281701377, 17, 27, 3);
+        impl_ntt!(ntt2, 998244353, 119, 23, 3);
+    }
+
+    #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+    enum Sign {
+        Neg,
+        Pos, // Includes 0
+    }
+    use Sign::*;
+
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    pub struct Int {
+        sign: Sign,
+        nat: Uint,
+    }
+
+    macro_rules! impl_from_for_int {
+        ($($u:ty, $s:ty);*) =&gt; {
+            $(
+                impl From&lt;$u&gt; for Int {
+                    fn from(x: $u) -&gt; Self {
+                        Self { sign: Pos, nat: x.into() }
+                    }
+                }
+                impl From&lt;$s&gt; for Int {
+                    fn from(x: $s) -&gt; Self {
+                        if x &lt; 0 {
+                            Self { sign: Neg, nat: ((-x) as $u).into() }
+                        } else {
+                            Self { sign: Pos, nat: (x as $u).into() }
+                        }
+                    }
+                }
+            )*
+        };
+    }
+
+    impl_from_for_int!(u8, i8; u16, i16; u32, i32; u64, i64; u128, i128; usize, isize);
+
+    impl FromStr for Int {
+        type Err = ParseIntError;
+        fn from_str(s: &amp;str) -&gt; Result&lt;Self, Self::Err&gt; {
+            if s.len() == 0 {
+                panic!(&quot;Empty string - TODO: Add a proper error propagation&quot;);
+            }
+            let mut x = match s.strip_prefix(&quot;-&quot;) {
+                Some(t) =&gt; Self {
+                    sign: Neg,
+                    nat: t.parse()?,
+                },
+                None =&gt; Self {
+                    sign: Pos,
+                    nat: s.parse()?,
+                },
+            };
+            if x.sign == Neg &amp;&amp; x.nat.0.len() == 0 {
+                x.sign = Pos;
+            }
+            Ok(x)
+        }
+    }
+
+    impl Display for Int {
+        fn fmt(&amp;self, f: &amp;mut core::fmt::Formatter&lt;'_&gt;) -&gt; core::fmt::Result {
+            if let Neg = self.sign {
+                write!(f, &quot;-&quot;)?;
+            }
+            write!(f, &quot;{}&quot;, self.nat)
+        }
+    }
+
+    impl PartialOrd for Int {
+        fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;core::cmp::Ordering&gt; {
+            use core::cmp::Ordering;
+            match (self.sign, other.sign) {
+                (Neg, Neg) =&gt; other.nat.partial_cmp(&amp;self.nat),
+                (Neg, Pos) =&gt; Some(Ordering::Less),
+                (Pos, Neg) =&gt; Some(Ordering::Greater),
+                (Pos, Pos) =&gt; self.nat.partial_cmp(&amp;other.nat),
+            }
+        }
+    }
+
+    impl Ord for Int {
+        fn cmp(&amp;self, other: &amp;Self) -&gt; core::cmp::Ordering {
+            use core::cmp::Ordering;
+            match (self.sign, other.sign) {
+                (Neg, Neg) =&gt; other.nat.cmp(&amp;self.nat),
+                (Neg, Pos) =&gt; Ordering::Less,
+                (Pos, Neg) =&gt; Ordering::Greater,
+                (Pos, Pos) =&gt; self.nat.cmp(&amp;other.nat),
+            }
+        }
+    }
+
+    impl AddAssign&lt;&amp;Int&gt; for Int {
+        fn add_assign(&amp;mut self, rhs: &amp;Int) {
+            match (self.sign, rhs.sign) {
+                (Neg, Neg) =&gt; {
+                    self.nat += &amp;rhs.nat;
+                }
+                (Neg, Pos) =&gt; {
+                    if self.nat &gt;= rhs.nat {
+                        self.nat -= &amp;rhs.nat;
+                    } else {
+                        let c = &amp;rhs.nat - &amp;self.nat;
+                        self.nat = c;
+                        self.sign = Pos;
+                    }
+                    if self.nat.0.len() == 0 {
+                        self.sign = Pos;
+                    }
+                }
+                (Pos, Neg) =&gt; {
+                    if self.nat &gt;= rhs.nat {
+                        self.nat -= &amp;rhs.nat;
+                    } else {
+                        let c = &amp;rhs.nat - &amp;self.nat;
+                        self.nat = c;
+                        self.sign = Neg;
+                    }
+                    if self.nat.0.len() == 0 {
+                        self.sign = Pos;
+                    }
+                }
+                (Pos, Pos) =&gt; {
+                    self.nat += &amp;rhs.nat;
+                }
+            }
+        }
+    }
+
+    impl Add for &amp;Int {
+        type Output = Int;
+        fn add(self, rhs: Self) -&gt; Self::Output {
+            let mut ans = self.clone();
+            ans += rhs;
+            ans
+        }
+    }
+
+    impl SubAssign&lt;&amp;Int&gt; for Int {
+        fn sub_assign(&amp;mut self, rhs: &amp;Int) {
+            match (self.sign, rhs.sign) {
+                (Neg, Pos) =&gt; {
+                    self.nat += &amp;rhs.nat;
+                }
+                (Neg, Neg) =&gt; {
+                    if self.nat &gt;= rhs.nat {
+                        self.nat -= &amp;rhs.nat;
+                    } else {
+                        let c = &amp;rhs.nat - &amp;self.nat;
+                        self.nat = c;
+                        self.sign = Pos;
+                    }
+                    if self.nat.0.len() == 0 {
+                        self.sign = Pos;
+                    }
+                }
+                (Pos, Pos) =&gt; {
+                    if self.nat &gt;= rhs.nat {
+                        self.nat -= &amp;rhs.nat;
+                    } else {
+                        let c = &amp;rhs.nat - &amp;self.nat;
+                        self.nat = c;
+                        self.sign = Neg;
+                    }
+                    if self.nat.0.len() == 0 {
+                        self.sign = Pos;
+                    }
+                }
+                (Pos, Neg) =&gt; {
+                    self.nat += &amp;rhs.nat;
+                }
+            }
+        }
+    }
+
+    impl Sub for &amp;Int {
+        type Output = Int;
+        fn sub(self, rhs: Self) -&gt; Self::Output {
+            let mut ans = self.clone();
+            ans -= &amp;rhs;
+            ans
+        }
+    }
+
+    impl Mul for &amp;Int {
+        type Output = Int;
+        fn mul(self, rhs: Self) -&gt; Self::Output {
+            let x = &amp;self.nat * &amp;rhs.nat;
+            if x.0.len() == 0 || self.sign == rhs.sign {
+                Int { sign: Pos, nat: x }
+            } else {
+                Int { sign: Neg, nat: x }
+            }
+        }
+    }
+
+    impl MulAssign&lt;&amp;Int&gt; for Int {
+        fn mul_assign(&amp;mut self, rhs: &amp;Int) {
+            let x = &amp;self.nat * &amp;rhs.nat;
+            self.nat = x;
+            if self.nat.0.len() == 0 || self.sign == rhs.sign {
+                self.sign = Pos;
+            } else {
+                self.sign = Neg;
+            }
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../unclass/mos.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../misc/fastio.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../unclass/mos.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../misc/fastio.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
