@@ -675,53 +675,6 @@ mod rope {
         ptr::{self, NonNull},
     };
 
-    pub struct Node<T> {
-        data: T,
-        subt: usize,
-        l: Link<T>,
-        r: Link<T>,
-        p: Link<T>,
-    }
-
-    type Link<T> = Option<NonNull<Node<T>>>;
-
-    impl<T> Node<T> {
-        fn new(data: T) -> Self {
-            Node {
-                data,
-                subt: 1,
-                l: None,
-                r: None,
-                p: None,
-            }
-        }
-        fn left_size(&self) -> usize {
-            unsafe { self.l.map_or(0, |l| (*l.as_ptr()).subt) }
-        }
-        fn right_size(&self) -> usize {
-            unsafe { self.r.map_or(0, |r| (*r.as_ptr()).subt) }
-        }
-        fn upd_subtree(&mut self) {
-            self.subt = 1 + self.left_size() + self.right_size();
-        }
-
-        // Option<(is_left, parent)>
-        unsafe fn is_left_child(x: NonNull<Self>) -> Option<(bool, NonNull<Self>)> {
-            if let Some(p) = (*x.as_ptr()).p {
-                if (*p.as_ptr())
-                    .l
-                    .map_or(false, |pl| ptr::eq(x.as_ptr(), pl.as_ptr()))
-                {
-                    Some((true, p))
-                } else {
-                    Some((false, p))
-                }
-            } else {
-                None
-            }
-        }
-    }
-
     pub struct Rope<T> {
         root: Link<T>,
         size: usize,
@@ -743,6 +696,16 @@ mod rope {
 
         pub fn len(&self) -> usize {
             self.size
+        }
+
+        pub fn clear(&mut self) {
+            let drop_tree = Self {
+                root: self.root,
+                size: self.size,
+            };
+            drop(drop_tree);
+            self.root = None;
+            self.size = 0;
         }
 
         pub fn insert(&mut self, idx: usize, data: T) {
@@ -939,6 +902,26 @@ mod rope {
             lhs.root = None;
             lhs.size = 0;
         }
+
+        /// Inserts rope into self at self.
+        /// After the operation, rope[0] becomes self[at].
+        /// Returns false if the specified index is invalid, true otherwise.
+        pub fn insert_rope(&mut self, rope: Self, at: usize) -> bool {
+            let rhs = self.take_right(at);
+            if let Some(rhs) = rhs {
+                self.merge_right(rope);
+                self.merge_right(rhs);
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    impl<T: Clone> Clone for Rope<T> {
+        fn clone(&self) -> Self {
+            self.iter().cloned().collect()
+        }
     }
 
     impl<T: Debug> Debug for Rope<T> {
@@ -1006,7 +989,7 @@ mod rope {
                         if let Some(r) = v.r {
                             st.push(r.as_ptr());
                         }
-                        // retrieve.drop()
+                        drop(v);
                     }
                 }
             }
@@ -1017,8 +1000,8 @@ mod rope {
         type Output = T;
         fn index(&self, idx: usize) -> &Self::Output {
             unsafe {
-                let p = self.kth_ptr(idx);
-                &(*p.unwrap().as_ptr()).data
+                let p = self.kth_ptr(idx).unwrap();
+                &(*p.as_ptr()).data
             }
         }
     }
@@ -1026,8 +1009,9 @@ mod rope {
     impl<T> IndexMut<usize> for Rope<T> {
         fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
             unsafe {
-                let p = self.kth_ptr(idx);
-                &mut (*p.unwrap().as_ptr()).data
+                let p = self.kth_ptr(idx).unwrap();
+                self.splay(p);
+                &mut (*p.as_ptr()).data
             }
         }
     }
@@ -1042,9 +1026,160 @@ mod rope {
         }
     }
 
+    impl<T> Rope<T> {
+        pub fn iter(&self) -> Iter<T> {
+            Iter::new(self)
+        }
+
+        pub fn iter_mut(&mut self) -> IterMut<T> {
+            IterMut::new(self)
+        }
+    }
+
+    pub struct Iter<'a, T> {
+        rope: &'a Rope<T>,
+        stack: Vec<NonNull<Node<T>>>,
+        curr: Link<T>,
+    }
+
+    impl<'a, T> Iter<'a, T> {
+        fn new(rope: &'a Rope<T>) -> Self {
+            let root = rope.root;
+            Self {
+                rope,
+                stack: Vec::new(),
+                curr: root,
+            }
+        }
+    }
+
+    impl<'a, T> IntoIterator for &'a Rope<T> {
+        type Item = &'a T;
+        type IntoIter = Iter<'a, T>;
+        fn into_iter(self) -> Self::IntoIter {
+            Self::IntoIter::new(self)
+        }
+    }
+
+    impl<'a, T> Iterator for Iter<'a, T> {
+        type Item = &'a T;
+        fn next(&mut self) -> Option<Self::Item> {
+            unsafe {
+                while let Some(x) = self.curr {
+                    self.stack.push(x);
+                    self.curr = (*x.as_ptr()).l;
+                }
+                if let Some(x) = self.stack.pop() {
+                    self.curr = (*x.as_ptr()).r;
+                    Some(&x.as_ref().data)
+                } else {
+                    None
+                }
+            }
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            (self.rope.len(), Some(self.rope.len()))
+        }
+    }
+
+    pub struct IterMut<'a, T> {
+        rope: &'a mut Rope<T>,
+        stack: Vec<NonNull<Node<T>>>,
+        curr: Link<T>,
+    }
+
+    impl<'a, T> IterMut<'a, T> {
+        fn new(rope: &'a mut Rope<T>) -> Self {
+            let root = rope.root;
+            Self {
+                rope,
+                stack: Vec::new(),
+                curr: root,
+            }
+        }
+    }
+
+    impl<'a, T> IntoIterator for &'a mut Rope<T> {
+        type Item = &'a mut T;
+        type IntoIter = IterMut<'a, T>;
+        fn into_iter(self) -> Self::IntoIter {
+            Self::IntoIter::new(self)
+        }
+    }
+
+    impl<'a, T> Iterator for IterMut<'a, T> {
+        type Item = &'a mut T;
+        fn next(&mut self) -> Option<Self::Item> {
+            unsafe {
+                while let Some(x) = self.curr {
+                    self.stack.push(x);
+                    self.curr = (*x.as_ptr()).l;
+                }
+                if let Some(mut x) = self.stack.pop() {
+                    self.curr = (*x.as_ptr()).r;
+                    Some(&mut x.as_mut().data)
+                } else {
+                    None
+                }
+            }
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            (self.rope.len(), Some(self.rope.len()))
+        }
+    }
+
     //------------------------
     // Helper implementations
     //------------------------
+
+    struct Node<T> {
+        data: T,
+        subt: usize,
+        l: Link<T>,
+        r: Link<T>,
+        p: Link<T>,
+    }
+
+    type Link<T> = Option<NonNull<Node<T>>>;
+
+    impl<T> Node<T> {
+        fn new(data: T) -> Self {
+            Node {
+                data,
+                subt: 1,
+                l: None,
+                r: None,
+                p: None,
+            }
+        }
+        fn left_size(&self) -> usize {
+            unsafe { self.l.map_or(0, |l| (*l.as_ptr()).subt) }
+        }
+        fn right_size(&self) -> usize {
+            unsafe { self.r.map_or(0, |r| (*r.as_ptr()).subt) }
+        }
+        fn upd_subtree(&mut self) {
+            self.subt = 1 + self.left_size() + self.right_size();
+        }
+
+        // Option<(is_left, parent)>
+        unsafe fn is_left_child(x: NonNull<Self>) -> Option<(bool, NonNull<Self>)> {
+            if let Some(p) = (*x.as_ptr()).p {
+                if (*p.as_ptr())
+                    .l
+                    .map_or(false, |pl| ptr::eq(x.as_ptr(), pl.as_ptr()))
+                {
+                    Some((true, p))
+                } else {
+                    Some((false, p))
+                }
+            } else {
+                None
+            }
+        }
+    }
 
     impl<T> Rope<T> {
         /// Adds data as a new root of a rope, and putting the original root
@@ -1250,114 +1385,6 @@ mod rope {
                     sw
                 }
             }
-        }
-    }
-
-    //-----------
-    // Iterators
-    //-----------
-
-    impl<T> Rope<T> {
-        pub fn iter(&self) -> Iter<T> {
-            Iter::new(self)
-        }
-
-        pub fn iter_mut(&mut self) -> IterMut<T> {
-            IterMut::new(self)
-        }
-    }
-
-    pub struct Iter<'a, T> {
-        rope: &'a Rope<T>,
-        stack: Vec<NonNull<Node<T>>>,
-        curr: Link<T>,
-    }
-
-    impl<'a, T> Iter<'a, T> {
-        fn new(rope: &'a Rope<T>) -> Self {
-            let root = rope.root;
-            Self {
-                rope,
-                stack: Vec::new(),
-                curr: root,
-            }
-        }
-    }
-
-    impl<'a, T> IntoIterator for &'a Rope<T> {
-        type Item = &'a T;
-        type IntoIter = Iter<'a, T>;
-        fn into_iter(self) -> Self::IntoIter {
-            Self::IntoIter::new(self)
-        }
-    }
-
-    impl<'a, T> Iterator for Iter<'a, T> {
-        type Item = &'a T;
-        fn next(&mut self) -> Option<Self::Item> {
-            unsafe {
-                while let Some(x) = self.curr {
-                    self.stack.push(x);
-                    self.curr = (*x.as_ptr()).l;
-                }
-                if let Some(x) = self.stack.pop() {
-                    self.curr = (*x.as_ptr()).r;
-                    Some(&x.as_ref().data)
-                } else {
-                    None
-                }
-            }
-        }
-
-        fn size_hint(&self) -> (usize, Option<usize>) {
-            (self.rope.len(), Some(self.rope.len()))
-        }
-    }
-
-    pub struct IterMut<'a, T> {
-        rope: &'a mut Rope<T>,
-        stack: Vec<NonNull<Node<T>>>,
-        curr: Link<T>,
-    }
-
-    impl<'a, T> IterMut<'a, T> {
-        fn new(rope: &'a mut Rope<T>) -> Self {
-            let root = rope.root;
-            Self {
-                rope,
-                stack: Vec::new(),
-                curr: root,
-            }
-        }
-    }
-
-    impl<'a, T> IntoIterator for &'a mut Rope<T> {
-        type Item = &'a mut T;
-        type IntoIter = IterMut<'a, T>;
-        fn into_iter(self) -> Self::IntoIter {
-            Self::IntoIter::new(self)
-        }
-    }
-
-    impl<'a, T> Iterator for IterMut<'a, T> {
-        type Item = &'a mut T;
-        fn next(&mut self) -> Option<Self::Item> {
-            unsafe {
-                while let Some(x) = self.curr {
-                    self.stack.push(x);
-                    self.curr = (*x.as_ptr()).l;
-                }
-                if let Some(mut x) = self.stack.pop() {
-                    self.curr = (*x.as_ptr()).r;
-                    Some(&mut x.as_mut().data)
-                } else {
-                    None
-                }
-            }
-        }
-
-        fn size_hint(&self) -> (usize, Option<usize>) {
-            (self.rope.len(), Some(self.rope.len()))
         }
     }
 }
