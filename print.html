@@ -1586,16 +1586,11 @@ println!(&quot;{}&quot;, l);             // 0
 </span><span class="boring">    use std::ops::{Index, RangeBounds};
 </span><span class="boring">
 </span><span class="boring">    fn ceil_pow2(n: usize) -&gt; u32 {
-</span><span class="boring">        if n == 0 {
-</span><span class="boring">            return 0;
+</span><span class="boring">        let mut x = 0;
+</span><span class="boring">        while 1 &lt;&lt; x &lt; n {
+</span><span class="boring">            x += 1;
 </span><span class="boring">        }
-</span><span class="boring">        let dig = usize::BITS - n.leading_zeros();
-</span><span class="boring">        let x = 1 &lt;&lt; (dig - 1);
-</span><span class="boring">        if n == x {
-</span><span class="boring">            dig - 1
-</span><span class="boring">        } else {
-</span><span class="boring">            dig
-</span><span class="boring">        }
+</span><span class="boring">        x
 </span><span class="boring">    }
 </span><span class="boring">
 </span><span class="boring">    pub trait Monoid: Sized {
@@ -1783,16 +1778,11 @@ println!(&quot;{}&quot;, l);             // 0
     use std::ops::{Index, RangeBounds};
 
     fn ceil_pow2(n: usize) -&gt; u32 {
-        if n == 0 {
-            return 0;
+        let mut x = 0;
+        while 1 &lt;&lt; x &lt; n {
+            x += 1;
         }
-        let dig = usize::BITS - n.leading_zeros();
-        let x = 1 &lt;&lt; (dig - 1);
-        if n == x {
-            dig - 1
-        } else {
-            dig
-        }
+        x
     }
 
     pub trait Monoid: Sized {
