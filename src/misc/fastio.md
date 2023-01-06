@@ -34,7 +34,6 @@ outln!("{:?}", [n, m]);
 
 ```rust,noplayground
 #![no_main]
-use std::io::*;
 
 #[no_mangle]
 fn main() -> i32 {
@@ -42,6 +41,7 @@ fn main() -> i32 {
     use fastio::*;
     let input_str = get_input();
     let mut sc: Splitter<_> = Splitter::new(input_str, |s| s.split_ascii_whitespace());
+    use std::io::*;
     let stdout = stdout();
     let wr = &mut BufWriter::new(stdout.lock());
 
@@ -106,7 +106,6 @@ mod fastio {
 
 ```rust,noplayground
 #![no_main]
-use std::io::*;
 
 #[no_mangle]
 fn main() -> i32 {
@@ -114,6 +113,7 @@ fn main() -> i32 {
     use fastio::*;
     let input_str = get_input();
     let mut sc: Splitter<_> = Splitter::new(&input_str, |s| s.split_ascii_whitespace());
+    use std::io::*;
     let stdout = stdout();
     let wr = &mut BufWriter::new(stdout.lock());
 
