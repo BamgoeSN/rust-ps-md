@@ -453,6 +453,6 @@ Represents a monoid \\(S\\) explained above. Three methods `e`, `opr_lhs`, `opr_
 - `fn prod(&self, range: impl RangeBounds<usize>) -> S` returns the product of values of the segment tree within the given range.
   + Example: `let v = st.prod(3..10);` `let u = st.prod(..7);`
 
-- `fn max_right(&self, l: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `r` such that `(r == l || f(self.prod(l..r)) && (r == n || !f(self.prod(l..=r)))`. If `f` is monotone, this is the maximum `r` that makes `f(self.prod(l..r)` true. It should be guaranteed that `f(S::e())` is true, and `0 <= l <= n`. This method is basically equivalent to `partition_point` of a slice type, but with set left bound.
+- `fn max_right(&self, l: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `r` such that `(r == l || f(self.prod(l..r)) && (r == n || !f(self.prod(l..=r)))`. If `f` is monotone, this is the maximum `r` that makes `f(self.prod(l..r)` true. It must be guaranteed that `f(S::e())` is true, and `0 <= l <= n`. This method is basically equivalent to `partition_point` of a slice type, but with a set left bound.
 
-- `fn min_left(&self, r: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `l` such that `(l == r || f(self.prod(l..r))) && (l == 0 || !f(self.prod(l-1..r)))`. If `f` is monotone, this is the minimum `l` that makes `f(self.prod(l..r))` true. It should be guaranteed that `f(S::e())` is true, and `0 <= r <= n`.
+- `fn min_left(&self, r: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `l` such that `(l == r || f(self.prod(l..r))) && (l == 0 || !f(self.prod(l-1..r)))`. If `f` is monotone, this is the minimum `l` that makes `f(self.prod(l..r))` true. It must be guaranteed that `f(S::e())` is true, and `0 <= r <= n`.
