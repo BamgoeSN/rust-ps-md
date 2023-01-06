@@ -4,7 +4,10 @@
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Segment Tree - Rust Snippets for Competitive Programming</title>
+
+
         <!-- Custom HTML head -->
+        
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,15 +19,18 @@
         <link rel="stylesheet" href="../../css/general.css">
         <link rel="stylesheet" href="../../css/chrome.css">
         <link rel="stylesheet" href="../../css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="../../fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../../highlight.css">
         <link rel="stylesheet" href="../../tomorrow-night.css">
         <link rel="stylesheet" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+
         <!-- MathJax -->
         <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     </head>
@@ -85,7 +91,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -115,6 +121,7 @@
                         <a href="https://github.com/BamgoeSN/rust-ps-md" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -128,6 +135,7 @@
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script type="text/javascript">
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -152,182 +160,462 @@
 <li>Calculate the product of the elements of an interval</li>
 </ul>
 <p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
-<pre><code class="language-rust noplayground">use std::ops::Index;
-
-fn ceil_pow2(n: usize) -&gt; usize {
-    let mut x: usize = 0;
-    while (1 &lt;&lt; x) &lt; n {
-        x += 1;
-    }
-    x
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">use segtree::*;
+</span><span class="boring">
+</span>// Interval sum segment tree
+impl Monoid for i32 {
+    fn e() -&gt; Self { 0 }
+    fn opr_lhs(&amp;mut self, rhs: &amp;Self) { *self += rhs; }
+    fn opr_rhs(&amp;mut self, lhs: &amp;Self) { *self += lhs; }
 }
 
-/// Represents each element of a segment tree, which should be a monoid $(S, \cdot)$.
-trait Monoid {
-    fn opr(&amp;self, other: &amp;Self) -&gt; Self;
-    fn e() -&gt; Self;
-}
+<span class="boring">fn main() {
+</span>let mut st = SegTree::new(vec![0i32, 4, 0, 0, 0, 0, 0, 0, 0]);
+st.set(2, 5);
+st.set(4, 8);
 
-/// Segment tree.
-struct SegTree&lt;S: Monoid&gt; {
-    n: usize,
-    size: usize,
-    log: usize,
-    data: Vec&lt;S&gt;,
-}
+println!(&quot;{}&quot;, st[2]);         // 5
+println!(&quot;{}&quot;, st.prod(0..3)); // 9
+println!(&quot;{}&quot;, st.prod(..));   // 17
 
-impl&lt;S: Monoid + Clone&gt; SegTree&lt;S&gt; {
-    fn update(&amp;mut self, k: usize) {
-        self.data[k] = self.data[k &lt;&lt; 1].opr(&amp;self.data[(k &lt;&lt; 1) + 1])
-    }
+let r = st.max_right(2, |&amp;x| x &lt; 13);
+println!(&quot;{}&quot;, r);             // 4
+let l = st.min_left(st.len(), |&amp;x| x &lt; 100);
+println!(&quot;{}&quot;, l);             // 0
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod segtree {
+</span><span class="boring">    use std::ops::{Index, RangeBounds};
+</span><span class="boring">
+</span><span class="boring">    fn ceil_pow2(n: usize) -&gt; u32 {
+</span><span class="boring">        if n == 0 {
+</span><span class="boring">            return 0;
+</span><span class="boring">        }
+</span><span class="boring">        let dig = usize::BITS - n.leading_zeros();
+</span><span class="boring">        let x = 1 &lt;&lt; (dig - 1);
+</span><span class="boring">        if n == x {
+</span><span class="boring">            dig - 1
+</span><span class="boring">        } else {
+</span><span class="boring">            dig
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub trait Monoid: Sized {
+</span><span class="boring">        fn e() -&gt; Self;
+</span><span class="boring">        fn opr_lhs(&amp;mut self, rhs: &amp;Self);
+</span><span class="boring">        fn opr_rhs(&amp;mut self, lhs: &amp;Self);
+</span><span class="boring">        fn opr(lhs: &amp;Self, rhs: &amp;Self) -&gt; Self {
+</span><span class="boring">            let mut ret = Self::e();
+</span><span class="boring">            ret.opr_rhs(lhs);
+</span><span class="boring">            ret.opr_lhs(rhs);
+</span><span class="boring">            ret
+</span><span class="boring">        }
+</span><span class="boring">        fn opr_set(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self) {
+</span><span class="boring">            *self = Self::opr(lhs, rhs);
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub struct SegTree&lt;S&gt; {
+</span><span class="boring">        n: usize,
+</span><span class="boring">        size: usize,
+</span><span class="boring">        log: u32,
+</span><span class="boring">        data: Vec&lt;S&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl&lt;S: Monoid&gt; SegTree&lt;S&gt; {
+</span><span class="boring">        fn update(&amp;mut self, k: usize) {
+</span><span class="boring">            let mut ret = S::e();
+</span><span class="boring">            ret.opr_set(&amp;self.data[k &lt;&lt; 1], &amp;self.data[(k &lt;&lt; 1) + 1]);
+</span><span class="boring">            self.data[k] = ret;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn new(arr: Vec&lt;S&gt;) -&gt; Self {
+</span><span class="boring">            let n = arr.len();
+</span><span class="boring">            let log = ceil_pow2(n);
+</span><span class="boring">            let size = 1 &lt;&lt; log;
+</span><span class="boring">            let stsize = 1 &lt;&lt; (log + 1);
+</span><span class="boring">
+</span><span class="boring">            let mut data = Vec::with_capacity(stsize);
+</span><span class="boring">            data.extend((0..size).map(|_| S::e()));
+</span><span class="boring">            data.extend(arr.into_iter());
+</span><span class="boring">            data.extend((data.len()..stsize).map(|_| S::e()));
+</span><span class="boring">
+</span><span class="boring">            let mut st = Self { n, size, log, data };
+</span><span class="boring">            for i in (1..size).rev() {
+</span><span class="boring">                st.update(i);
+</span><span class="boring">            }
+</span><span class="boring">            st
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn len(&amp;self) -&gt; usize {
+</span><span class="boring">            self.n
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn set(&amp;mut self, i: usize, v: S) {
+</span><span class="boring">            let i = i + self.size;
+</span><span class="boring">            self.data[i] = v;
+</span><span class="boring">            for j in 1..=self.log {
+</span><span class="boring">                self.update(i &gt;&gt; j);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn get(&amp;self, i: usize) -&gt; &amp;S {
+</span><span class="boring">            &amp;self.data[i + self.size]
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn prod(&amp;self, range: impl RangeBounds&lt;usize&gt;) -&gt; S {
+</span><span class="boring">            use std::ops::Bound::*;
+</span><span class="boring">            let (mut sml, mut smr) = (S::e(), S::e());
+</span><span class="boring">            let mut l = match range.start_bound() {
+</span><span class="boring">                Included(&amp;v) =&gt; v,
+</span><span class="boring">                Excluded(&amp;v) =&gt; v - 1,
+</span><span class="boring">                Unbounded =&gt; 0,
+</span><span class="boring">            } + self.size;
+</span><span class="boring">            let mut r = match range.end_bound() {
+</span><span class="boring">                Included(&amp;v) =&gt; v + 1,
+</span><span class="boring">                Excluded(&amp;v) =&gt; v,
+</span><span class="boring">                Unbounded =&gt; self.n,
+</span><span class="boring">            } + self.size;
+</span><span class="boring">
+</span><span class="boring">            if (l, r) == (0, self.n) {
+</span><span class="boring">                let mut ret = S::e();
+</span><span class="boring">                ret.opr_lhs(&amp;self.data[1]);
+</span><span class="boring">                return ret;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            while l &lt; r {
+</span><span class="boring">                if l &amp; 1 == 1 {
+</span><span class="boring">                    sml.opr_lhs(&amp;self.data[l]);
+</span><span class="boring">                    l += 1;
+</span><span class="boring">                }
+</span><span class="boring">                if r &amp; 1 == 1 {
+</span><span class="boring">                    r -= 1;
+</span><span class="boring">                    smr.opr_rhs(&amp;self.data[r]);
+</span><span class="boring">                }
+</span><span class="boring">                l &gt;&gt;= 1;
+</span><span class="boring">                r &gt;&gt;= 1;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            sml.opr_lhs(&amp;smr);
+</span><span class="boring">            sml
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Given an index l and a check function f, max_right finds an index r that satisfies
+</span><span class="boring">        ///   (r == l || f(self.prod(l..r)) &amp;&amp; (r == n || !f(self.prod(l..=r)))
+</span><span class="boring">        /// If f is monotone, this is the maximum r that satisfies f(self.prod(l..r)).
+</span><span class="boring">        /// It should be guaranteed that f(S::e()) is true, 0 &lt;= l and l &lt;= n.
+</span><span class="boring">        pub fn max_right(&amp;self, l: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+</span><span class="boring">            if l == self.n {
+</span><span class="boring">                return self.n;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let mut l = l + self.size;
+</span><span class="boring">            let mut sm = S::e();
+</span><span class="boring">
+</span><span class="boring">            loop {
+</span><span class="boring">                l &gt;&gt;= l.trailing_zeros();
+</span><span class="boring">                if !f(&amp;S::opr(&amp;sm, &amp;self.data[l])) {
+</span><span class="boring">                    while l &lt; self.size {
+</span><span class="boring">                        l &lt;&lt;= 1;
+</span><span class="boring">                        let tmp = S::opr(&amp;sm, &amp;self.data[l]);
+</span><span class="boring">                        if f(&amp;tmp) {
+</span><span class="boring">                            sm = tmp;
+</span><span class="boring">                            l += 1;
+</span><span class="boring">                        }
+</span><span class="boring">                    }
+</span><span class="boring">                    return l - self.size;
+</span><span class="boring">                }
+</span><span class="boring">                sm.opr_lhs(&amp;self.data[l]);
+</span><span class="boring">                l += 1;
+</span><span class="boring">
+</span><span class="boring">                if l &amp; ((!l) + 1) == l {
+</span><span class="boring">                    break;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">            self.n
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Given an index r and a check function f, min_left finds an index l that satisfies
+</span><span class="boring">        ///   (l == r || f(self.prod(l..r))) &amp;&amp; (l == 0 || !f(self.prod(l-1..r)))
+</span><span class="boring">        /// If f is monotone, this is the minimum l that satisfies f(self.prod(l..r)).
+</span><span class="boring">        /// It should be guaranteed that f(S::e()) is true, 0 &lt;= r and r &lt;= n.
+</span><span class="boring">        pub fn min_left(&amp;self, r: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+</span><span class="boring">            if r == 0 {
+</span><span class="boring">                return 0;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let mut r = r + self.size;
+</span><span class="boring">            let mut sm = S::e();
+</span><span class="boring">
+</span><span class="boring">            loop {
+</span><span class="boring">                r -= 1;
+</span><span class="boring">                while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+</span><span class="boring">                    r &gt;&gt;= 1;
+</span><span class="boring">                }
+</span><span class="boring">                if !f(&amp;S::opr(&amp;self.data[r], &amp;sm)) {
+</span><span class="boring">                    while r &lt; self.size {
+</span><span class="boring">                        r = (r &lt;&lt; 1) + 1;
+</span><span class="boring">                        let tmp = S::opr(&amp;self.data[r], &amp;sm);
+</span><span class="boring">                        if f(&amp;tmp) {
+</span><span class="boring">                            sm = tmp;
+</span><span class="boring">                            r -= 1;
+</span><span class="boring">                        }
+</span><span class="boring">                    }
+</span><span class="boring">                    return r + 1 - self.size;
+</span><span class="boring">                }
+</span><span class="boring">                sm.opr_rhs(&amp;self.data[r]);
+</span><span class="boring">
+</span><span class="boring">                if r &amp; ((!r) + 1) == r {
+</span><span class="boring">                    break;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">            0
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl&lt;S: Monoid&gt; Index&lt;usize&gt; for SegTree&lt;S&gt; {
+</span><span class="boring">        type Output = S;
+</span><span class="boring">        fn index(&amp;self, index: usize) -&gt; &amp;Self::Output {
+</span><span class="boring">            self.get(index)
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">mod segtree {
+    use std::ops::{Index, RangeBounds};
 
-    /// Initializes a segment tree from an array.
-    fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
-        let log = ceil_pow2(arr.len());
-        let mut st: Self = SegTree {
-            n: arr.len(),
-            log,
-            size: 1 &lt;&lt; log,
-            data: vec![S::e(); 1 &lt;&lt; (log + 1)],
-        };
-        for (i, v) in arr.into_iter().enumerate() {
-            st.data[st.size + i] = (*v).clone();
-        }
-        for i in (1..st.size).rev() {
-            st.update(i);
-        }
-        st
-    }
-
-    /// Sets a value at index `i` to a value `v`.
-    fn set(&amp;mut self, i: usize, v: &amp;S) {
-        let i = i + self.size;
-        self.data[i] = v.clone();
-        for j in 1..=self.log {
-            self.update(i &gt;&gt; j);
-        }
-    }
-
-    /// Gets a reference of a value at index `i`.
-    fn get(&amp;self, i: usize) -&gt; &amp;S {
-        &amp;self[i]
-    }
-
-    /// Returns $A_l \cdot A_{l+1} \cdot \cdots \cdot A_{r-1}$. If $l=r$, then returns $e$.
-    fn prod(&amp;self, l: usize, r: usize) -&gt; S {
-        let (mut sml, mut smr) = (S::e(), S::e());
-        let (mut l, mut r) = (l + self.size, r + self.size);
-
-        while l &lt; r {
-            if l &amp; 1 == 1 {
-                sml = sml.opr(&amp;self.data[l]);
-                l += 1;
-            }
-            if r &amp; 1 == 1 {
-                r -= 1;
-                smr = self.data[r].opr(&amp;smr);
-            }
-            l &gt;&gt;= 1;
-            r &gt;&gt;= 1;
-        }
-        sml.opr(&amp;smr)
-    }
-
-    /// Returns $A_0 \cdot A_1 \cdot \cdots A_{n-1}$.
-    fn all_prod(&amp;self) -&gt; S {
-        self.data[1].clone()
-    }
-
-    fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, l: usize, f: C) -&gt; usize {
-        if l == self.n {
-            return self.n;
-        }
-
-        let mut l = l + self.size;
-        let mut sm = S::e();
-
-        loop {
-            while l &amp; 1 == 0 {
-                l &gt;&gt;= 1;
-            }
-            if !f(&amp;sm.opr(&amp;self.data[l])) {
-                while l &lt; self.size {
-                    l &lt;&lt;= 1;
-                    if f(&amp;sm.opr(&amp;self.data[l])) {
-                        sm = sm.opr(&amp;self.data[l]);
-                        l += 1;
-                    }
-                }
-                return l - self.size;
-            }
-            sm = sm.opr(&amp;self.data[l]);
-            l += 1;
-            if l &amp; ((!l) + 1) == l {
-                break;
-            }
-        }
-        self.n
-    }
-    
-    fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;self, r: usize, f: C) -&gt; usize {
-        if r == 0 {
+    fn ceil_pow2(n: usize) -&gt; u32 {
+        if n == 0 {
             return 0;
         }
+        let dig = usize::BITS - n.leading_zeros();
+        let x = 1 &lt;&lt; (dig - 1);
+        if n == x {
+            dig - 1
+        } else {
+            dig
+        }
+    }
 
-        let mut r = r + self.size;
-        let mut sm = S::e();
+    pub trait Monoid: Sized {
+        fn e() -&gt; Self;
+        fn opr_lhs(&amp;mut self, rhs: &amp;Self);
+        fn opr_rhs(&amp;mut self, lhs: &amp;Self);
+        fn opr(lhs: &amp;Self, rhs: &amp;Self) -&gt; Self {
+            let mut ret = Self::e();
+            ret.opr_rhs(lhs);
+            ret.opr_lhs(rhs);
+            ret
+        }
+        fn opr_set(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self) {
+            *self = Self::opr(lhs, rhs);
+        }
+    }
 
-        loop {
-            r -= 1;
-            while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
-                r &gt;&gt;= 1;
+    pub struct SegTree&lt;S&gt; {
+        n: usize,
+        size: usize,
+        log: u32,
+        data: Vec&lt;S&gt;,
+    }
+
+    impl&lt;S: Monoid&gt; SegTree&lt;S&gt; {
+        fn update(&amp;mut self, k: usize) {
+            let mut ret = S::e();
+            ret.opr_set(&amp;self.data[k &lt;&lt; 1], &amp;self.data[(k &lt;&lt; 1) + 1]);
+            self.data[k] = ret;
+        }
+
+        pub fn new(arr: Vec&lt;S&gt;) -&gt; Self {
+            let n = arr.len();
+            let log = ceil_pow2(n);
+            let size = 1 &lt;&lt; log;
+            let stsize = 1 &lt;&lt; (log + 1);
+
+            let mut data = Vec::with_capacity(stsize);
+            data.extend((0..size).map(|_| S::e()));
+            data.extend(arr.into_iter());
+            data.extend((data.len()..stsize).map(|_| S::e()));
+
+            let mut st = Self { n, size, log, data };
+            for i in (1..size).rev() {
+                st.update(i);
             }
-            if !f(&amp;self.data[r].opr(&amp;sm)) {
-                while r &lt; self.size {
-                    r = (r &lt;&lt; 1) + 1;
-                    if f(&amp;self.data[r].opr(&amp;sm)) {
-                        sm = self.data[r].opr(&amp;sm);
-                        r -= 1;
-                    }
-                }
-                return r + 1 - self.size;
-            }
-            sm = self.data[r].opr(&amp;sm);
+            st
+        }
 
-            if r &amp; ((!r) + 1) == r {
-                break;
+        pub fn len(&amp;self) -&gt; usize {
+            self.n
+        }
+
+        pub fn get(&amp;self, i: usize) -&gt; &amp;S {
+            &amp;self.data[i + self.size]
+        }
+
+        pub fn set(&amp;mut self, i: usize, v: S) {
+            let i = i + self.size;
+            self.data[i] = v;
+            for j in 1..=self.log {
+                self.update(i &gt;&gt; j);
             }
         }
-        0
+
+        pub fn prod(&amp;self, range: impl RangeBounds&lt;usize&gt;) -&gt; S {
+            use std::ops::Bound::*;
+            let (mut sml, mut smr) = (S::e(), S::e());
+            let mut l = match range.start_bound() {
+                Included(&amp;v) =&gt; v,
+                Excluded(&amp;v) =&gt; v - 1,
+                Unbounded =&gt; 0,
+            } + self.size;
+            let mut r = match range.end_bound() {
+                Included(&amp;v) =&gt; v + 1,
+                Excluded(&amp;v) =&gt; v,
+                Unbounded =&gt; self.n,
+            } + self.size;
+
+            if (l, r) == (0, self.n) {
+                let mut ret = S::e();
+                ret.opr_lhs(&amp;self.data[1]);
+                return ret;
+            }
+
+            while l &lt; r {
+                if l &amp; 1 == 1 {
+                    sml.opr_lhs(&amp;self.data[l]);
+                    l += 1;
+                }
+                if r &amp; 1 == 1 {
+                    r -= 1;
+                    smr.opr_rhs(&amp;self.data[r]);
+                }
+                l &gt;&gt;= 1;
+                r &gt;&gt;= 1;
+            }
+
+            sml.opr_lhs(&amp;smr);
+            sml
+        }
+
+        /// Given an index l and a check function f, max_right finds an index r that satisfies
+        ///   (r == l || f(self.prod(l..r)) &amp;&amp; (r == n || !f(self.prod(l..=r)))
+        /// If f is monotone, this is the maximum r that satisfies f(self.prod(l..r)).
+        /// It should be guaranteed that f(S::e()) is true, 0 &lt;= l and l &lt;= n.
+        pub fn max_right(&amp;self, l: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+            if l == self.n {
+                return self.n;
+            }
+
+            let mut l = l + self.size;
+            let mut sm = S::e();
+
+            loop {
+                l &gt;&gt;= l.trailing_zeros();
+                if !f(&amp;S::opr(&amp;sm, &amp;self.data[l])) {
+                    while l &lt; self.size {
+                        l &lt;&lt;= 1;
+                        let tmp = S::opr(&amp;sm, &amp;self.data[l]);
+                        if f(&amp;tmp) {
+                            sm = tmp;
+                            l += 1;
+                        }
+                    }
+                    return l - self.size;
+                }
+                sm.opr_lhs(&amp;self.data[l]);
+                l += 1;
+
+                if l &amp; ((!l) + 1) == l {
+                    break;
+                }
+            }
+            self.n
+        }
+
+        /// Given an index r and a check function f, min_left finds an index l that satisfies
+        ///   (l == r || f(self.prod(l..r))) &amp;&amp; (l == 0 || !f(self.prod(l-1..r)))
+        /// If f is monotone, this is the minimum l that satisfies f(self.prod(l..r)).
+        /// It should be guaranteed that f(S::e()) is true, 0 &lt;= r and r &lt;= n.
+        pub fn min_left(&amp;self, r: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+            if r == 0 {
+                return 0;
+            }
+
+            let mut r = r + self.size;
+            let mut sm = S::e();
+
+            loop {
+                r -= 1;
+                while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+                    r &gt;&gt;= 1;
+                }
+                if !f(&amp;S::opr(&amp;self.data[r], &amp;sm)) {
+                    while r &lt; self.size {
+                        r = (r &lt;&lt; 1) + 1;
+                        let tmp = S::opr(&amp;self.data[r], &amp;sm);
+                        if f(&amp;tmp) {
+                            sm = tmp;
+                            r -= 1;
+                        }
+                    }
+                    return r + 1 - self.size;
+                }
+                sm.opr_rhs(&amp;self.data[r]);
+
+                if r &amp; ((!r) + 1) == r {
+                    break;
+                }
+            }
+            0
+        }
     }
-}
 
-impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
-    type Output = T;
-
-    fn index(&amp;self, index: usize) -&gt; &amp;Self::Output {
-        &amp;self.data[index + self.size]
+    impl&lt;S: Monoid&gt; Index&lt;usize&gt; for SegTree&lt;S&gt; {
+        type Output = S;
+        fn index(&amp;self, index: usize) -&gt; &amp;Self::Output {
+            self.get(index)
+        }
     }
 }</code></pre>
-<h2 id="using-max_right-and-min_left"><a class="header" href="#using-max_right-and-min_left">Using max_right and min_left</a></h2>
-<h3 id="max_right"><a class="header" href="#max_right">max_right</a></h3>
-<p>Given an index \(l\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<h2 id="apis"><a class="header" href="#apis">APIs</a></h2>
 <ul>
-<li>\(r=l\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
-<li>\(r=n\) or \( f \left( A_l \cdot A_{l+1} \cdots A_r \right) = false \)</li>
-</ul>
-<p>If \(f\) is monotone, this is the maximum \(r\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
-<p>It should be guaranteed that \(f(e)\) is true, \(0 \leq l \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
-<p>The search for \(r\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
-<h3 id="min_left"><a class="header" href="#min_left">min_left</a></h3>
-<p>Given an index \(r\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<li>
+<p><code>trait Monoid</code>
+Represents a monoid \(S\) explained above. Three methods <code>e</code>, <code>opr_lhs</code>, <code>opr_rhs</code> are required to be implemented. Implementing <code>opr</code> and <code>opr_set</code> is optional.</p>
 <ul>
-<li>\(l=r\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
-<li>\(l=0\) or \( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \)</li>
+<li><code>fn e() -&gt; Self</code> returns an identity element of the monoid.</li>
+<li><code>fn opr_lhs(&amp;mut self, rhs: &amp;Self)</code> calculates the product of <code>self</code> and <code>rhs</code> in this order, and sets <code>self</code> with it.</li>
+<li><code>fn opr_rhs(&amp;mut self, lhs: &amp;Self)</code> calculates the product of <code>lhs</code> and <code>self</code> in this order, and sets <code>self</code> with it.</li>
+<li>(Optional) <code>fn opr(lhs: &amp;Self, rhs: &amp;Self)</code> calculates the product of <code>lhs</code> and <code>rhs</code> and returns it.</li>
+<li>(Optional) <code>fn opr_set(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self)</code> calculates the product of <code>lhs</code> and <code>rhs</code> and sets <code>self</code> with it.</li>
 </ul>
-<p>If \(f\) is monotone, this is the minimum \(l\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
-<p>It should be guaranteed that \(f(e)\) is true, \(0 \leq r \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
-<p>The search for \(l\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
+</li>
+<li>
+<p><code>fn new(arr: Vec&lt;S&gt;) -&gt; Self</code> generates a segment tree from <code>arr</code>.</p>
+</li>
+<li>
+<p><code>fn len(&amp;self) -&gt; usize</code> returns the length of the segment tree, which is equal to the length of the array used for constructing the segment tree.</p>
+</li>
+<li>
+<p><code>fn get(&amp;self, i: usize) -&gt; &amp;S</code> returns the reference to the <code>i</code>th element of the segment tree.</p>
+</li>
+<li>
+<p><code>fn set(&amp;mut self, i: usize, v: S)</code> sets the <code>i</code>th element of the segment tree with <code>v</code>.</p>
+</li>
+<li>
+<p><code>fn prod(&amp;self, range: impl RangeBounds&lt;usize&gt;) -&gt; S</code> returns the product of values of the segment tree within the given range.</p>
+<ul>
+<li>Example: <code>let v = st.prod(3..10);</code> <code>let u = st.prod(..7);</code></li>
+</ul>
+</li>
+<li>
+<p><code>fn max_right(&amp;self, l: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize</code> returns an index <code>r</code> such that <code>(r == l || f(self.prod(l..r)) &amp;&amp; (r == n || !f(self.prod(l..=r)))</code>. If <code>f</code> is monotone, this is the maximum <code>r</code> that makes <code>f(self.prod(l..r)</code> true. It should be guaranteed that <code>f(S::e())</code> is true, and <code>0 &lt;= l &lt;= n</code>. This method is basically equivalent to <code>partition_point</code> of a slice type, but with set left bound.</p>
+</li>
+<li>
+<p><code>fn min_left(&amp;self, r: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize</code> returns an index <code>l</code> such that <code>(l == r || f(self.prod(l..r))) &amp;&amp; (l == 0 || !f(self.prod(l-1..r)))</code>. If <code>f</code> is monotone, this is the minimum <code>l</code> that makes <code>f(self.prod(l..r))</code> true. It should be guaranteed that <code>f(S::e())</code> is true, and <code>0 &lt;= r &lt;= n</code>.</p>
+</li>
+</ul>
 
                     </main>
 
@@ -336,9 +624,11 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
                             <a rel="prev" href="../../datastructure/segtree/intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
+
                             <a rel="next" href="../../datastructure/segtree/fenwick.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
@@ -348,6 +638,7 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
                     <a rel="prev" href="../../datastructure/segtree/intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
+
                     <a rel="next" href="../../datastructure/segtree/fenwick.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
@@ -355,16 +646,24 @@ impl&lt;T: Monoid + Clone&gt; Index&lt;usize&gt; for SegTree&lt;T&gt; {
 
         </div>
 
+
+
+
         <script type="text/javascript">
             window.playground_copyable = true;
         </script>
+
+
         <script src="../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="../../mark.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="../../searcher.js" type="text/javascript" charset="utf-8"></script>
+
         <script src="../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="../../highlight.js" type="text/javascript" charset="utf-8"></script>
         <script src="../../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+
+
     </body>
 </html>
