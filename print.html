@@ -5776,7 +5776,6 @@ outln!(&quot;{:?}&quot;, [n, m]);</code></pre>
 <h2 id="code-18"><a class="header" href="#code-18">Code</a></h2>
 <h3 id="for-linux-almost-every-ojs-including-atcoder"><a class="header" href="#for-linux-almost-every-ojs-including-atcoder">For Linux (Almost every OJs including AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
-use std::io::*;
 
 #[no_mangle]
 fn main() -&gt; i32 {
@@ -5784,6 +5783,7 @@ fn main() -&gt; i32 {
     use fastio::*;
     let input_str = get_input();
     let mut sc: Splitter&lt;_&gt; = Splitter::new(input_str, |s| s.split_ascii_whitespace());
+    use std::io::*;
     let stdout = stdout();
     let wr = &amp;mut BufWriter::new(stdout.lock());
 
@@ -5844,7 +5844,6 @@ mod fastio {
 }</code></pre>
 <h3 id="for-windows-codeforces"><a class="header" href="#for-windows-codeforces">For Windows (Codeforces)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
-use std::io::*;
 
 #[no_mangle]
 fn main() -&gt; i32 {
@@ -5852,6 +5851,7 @@ fn main() -&gt; i32 {
     use fastio::*;
     let input_str = get_input();
     let mut sc: Splitter&lt;_&gt; = Splitter::new(&amp;input_str, |s| s.split_ascii_whitespace());
+    use std::io::*;
     let stdout = stdout();
     let wr = &amp;mut BufWriter::new(stdout.lock());
 
