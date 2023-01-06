@@ -42,16 +42,11 @@ println!("{}", l);             // 0
 #     use std::ops::{Index, RangeBounds};
 # 
 #     fn ceil_pow2(n: usize) -> u32 {
-#         if n == 0 {
-#             return 0;
+#         let mut x = 0;
+#         while 1 << x < n {
+#             x += 1;
 #         }
-#         let dig = usize::BITS - n.leading_zeros();
-#         let x = 1 << (dig - 1);
-#         if n == x {
-#             dig - 1
-#         } else {
-#             dig
-#         }
+#         x
 #     }
 # 
 #     pub trait Monoid: Sized {
@@ -243,16 +238,11 @@ mod segtree {
     use std::ops::{Index, RangeBounds};
 
     fn ceil_pow2(n: usize) -> u32 {
-        if n == 0 {
-            return 0;
+        let mut x = 0;
+        while 1 << x < n {
+            x += 1;
         }
-        let dig = usize::BITS - n.leading_zeros();
-        let x = 1 << (dig - 1);
-        if n == x {
-            dig - 1
-        } else {
-            dig
-        }
+        x
     }
 
     pub trait Monoid: Sized {
