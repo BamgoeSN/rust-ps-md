@@ -429,8 +429,7 @@ mod segtree {
 
 ## APIs
 
-- `trait Monoid`
-Represents a monoid \\(S\\) explained above. Three methods `e`, `opr_lhs`, `opr_rhs` are required to be implemented. Implementing `opr` and `opr_set` is optional.
+- `trait Monoid` represents a monoid \\(S\\) explained above. Three methods `e`, `opr_lhs`, `opr_rhs` are required to be implemented. Implementing `opr` and `opr_set` is optional.
   + `fn e() -> Self` returns an identity element of the monoid.
   + `fn opr_lhs(&mut self, rhs: &Self)` calculates the product of `self` and `rhs` in this order, and sets `self` with it.
   + `fn opr_rhs(&mut self, lhs: &Self)` calculates the product of `lhs` and `self` in this order, and sets `self` with it.
