@@ -2007,10 +2007,10 @@ Represents a monoid \(S\) explained above. Three methods <code>e</code>, <code>o
 </ul>
 </li>
 <li>
-<p><code>fn max_right(&amp;self, l: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize</code> returns an index <code>r</code> such that <code>(r == l || f(self.prod(l..r)) &amp;&amp; (r == n || !f(self.prod(l..=r)))</code>. If <code>f</code> is monotone, this is the maximum <code>r</code> that makes <code>f(self.prod(l..r)</code> true. It should be guaranteed that <code>f(S::e())</code> is true, and <code>0 &lt;= l &lt;= n</code>. This method is basically equivalent to <code>partition_point</code> of a slice type, but with set left bound.</p>
+<p><code>fn max_right(&amp;self, l: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize</code> returns an index <code>r</code> such that <code>(r == l || f(self.prod(l..r)) &amp;&amp; (r == n || !f(self.prod(l..=r)))</code>. If <code>f</code> is monotone, this is the maximum <code>r</code> that makes <code>f(self.prod(l..r)</code> true. It must be guaranteed that <code>f(S::e())</code> is true, and <code>0 &lt;= l &lt;= n</code>. This method is basically equivalent to <code>partition_point</code> of a slice type, but with a set left bound.</p>
 </li>
 <li>
-<p><code>fn min_left(&amp;self, r: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize</code> returns an index <code>l</code> such that <code>(l == r || f(self.prod(l..r))) &amp;&amp; (l == 0 || !f(self.prod(l-1..r)))</code>. If <code>f</code> is monotone, this is the minimum <code>l</code> that makes <code>f(self.prod(l..r))</code> true. It should be guaranteed that <code>f(S::e())</code> is true, and <code>0 &lt;= r &lt;= n</code>.</p>
+<p><code>fn min_left(&amp;self, r: usize, f: impl Fn(&amp;S) -&gt; bool) -&gt; usize</code> returns an index <code>l</code> such that <code>(l == r || f(self.prod(l..r))) &amp;&amp; (l == 0 || !f(self.prod(l-1..r)))</code>. If <code>f</code> is monotone, this is the minimum <code>l</code> that makes <code>f(self.prod(l..r))</code> true. It must be guaranteed that <code>f(S::e())</code> is true, and <code>0 &lt;= r &lt;= n</code>.</p>
 </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fenwick-tree"><a class="header" href="#fenwick-tree">Fenwick Tree</a></h1>
