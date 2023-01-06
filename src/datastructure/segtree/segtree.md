@@ -185,7 +185,7 @@ It should be guaranteed that \\(f(e)\\) is true, \\(0 \leq l \leq n\\), and \\(f
 The search for \\(r\\) is done by binary search, so the time complexity of this function is \\( O(\log{n}) \\).
 
 ### min_left
-Given an index \\(r\\) and a check function \\( f : S \rightarrow bool \\), `max_right` finds an index \\(r\\) such that satisfies both of the following conditions:
+Given an index \\(r\\) and a check function \\( f : S \rightarrow bool \\), `min_left` finds an index \\(l\\) such that satisfies both of the following conditions:
 - \\(l=r\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\)
 - \\(l=0\\) or \\( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \\)
 
