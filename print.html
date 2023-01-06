@@ -1968,8 +1968,7 @@ println!(&quot;{}&quot;, l);             // 0
 <h2 id="apis"><a class="header" href="#apis">APIs</a></h2>
 <ul>
 <li>
-<p><code>trait Monoid</code>
-Represents a monoid \(S\) explained above. Three methods <code>e</code>, <code>opr_lhs</code>, <code>opr_rhs</code> are required to be implemented. Implementing <code>opr</code> and <code>opr_set</code> is optional.</p>
+<p><code>trait Monoid</code> represents a monoid \(S\) explained above. Three methods <code>e</code>, <code>opr_lhs</code>, <code>opr_rhs</code> are required to be implemented. Implementing <code>opr</code> and <code>opr_set</code> is optional.</p>
 <ul>
 <li><code>fn e() -&gt; Self</code> returns an identity element of the monoid.</li>
 <li><code>fn opr_lhs(&amp;mut self, rhs: &amp;Self)</code> calculates the product of <code>self</code> and <code>rhs</code> in this order, and sets <code>self</code> with it.</li>
