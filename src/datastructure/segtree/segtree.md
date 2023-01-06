@@ -12,185 +12,447 @@ Given an array \\(A\\) of length \\(n\\) consists of the monoid \\(S\\) as descr
 
 assuming that calculating the product of two elements takes \\(O(1)\\) time.
 
+## Example
+```rust
+# use segtree::*;
+# 
+// Interval sum segment tree
+impl Monoid for i32 {
+    fn e() -> Self { 0 }
+    fn opr_lhs(&mut self, rhs: &Self) { *self += rhs; }
+    fn opr_rhs(&mut self, lhs: &Self) { *self += lhs; }
+}
+
+# fn main() {
+let mut st = SegTree::new(vec![0i32, 4, 0, 0, 0, 0, 0, 0, 0]);
+st.set(2, 5);
+st.set(4, 8);
+
+println!("{}", st[2]);         // 5
+println!("{}", st.prod(0..3)); // 9
+println!("{}", st.prod(..));   // 17
+
+let r = st.max_right(2, |&x| x < 13);
+println!("{}", r);             // 4
+let l = st.min_left(st.len(), |&x| x < 100);
+println!("{}", l);             // 0
+# }
+# 
+# mod segtree {
+#     use std::ops::{Index, RangeBounds};
+# 
+#     fn ceil_pow2(n: usize) -> u32 {
+#         if n == 0 {
+#             return 0;
+#         }
+#         let dig = usize::BITS - n.leading_zeros();
+#         let x = 1 << (dig - 1);
+#         if n == x {
+#             dig - 1
+#         } else {
+#             dig
+#         }
+#     }
+# 
+#     pub trait Monoid: Sized {
+#         fn e() -> Self;
+#         fn opr_lhs(&mut self, rhs: &Self);
+#         fn opr_rhs(&mut self, lhs: &Self);
+#         fn opr(lhs: &Self, rhs: &Self) -> Self {
+#             let mut ret = Self::e();
+#             ret.opr_rhs(lhs);
+#             ret.opr_lhs(rhs);
+#             ret
+#         }
+#         fn opr_set(&mut self, lhs: &Self, rhs: &Self) {
+#             *self = Self::opr(lhs, rhs);
+#         }
+#     }
+# 
+#     pub struct SegTree<S> {
+#         n: usize,
+#         size: usize,
+#         log: u32,
+#         data: Vec<S>,
+#     }
+# 
+#     impl<S: Monoid> SegTree<S> {
+#         fn update(&mut self, k: usize) {
+#             let mut ret = S::e();
+#             ret.opr_set(&self.data[k << 1], &self.data[(k << 1) + 1]);
+#             self.data[k] = ret;
+#         }
+# 
+#         pub fn new(arr: Vec<S>) -> Self {
+#             let n = arr.len();
+#             let log = ceil_pow2(n);
+#             let size = 1 << log;
+#             let stsize = 1 << (log + 1);
+# 
+#             let mut data = Vec::with_capacity(stsize);
+#             data.extend((0..size).map(|_| S::e()));
+#             data.extend(arr.into_iter());
+#             data.extend((data.len()..stsize).map(|_| S::e()));
+# 
+#             let mut st = Self { n, size, log, data };
+#             for i in (1..size).rev() {
+#                 st.update(i);
+#             }
+#             st
+#         }
+# 
+#         pub fn len(&self) -> usize {
+#             self.n
+#         }
+# 
+#         pub fn set(&mut self, i: usize, v: S) {
+#             let i = i + self.size;
+#             self.data[i] = v;
+#             for j in 1..=self.log {
+#                 self.update(i >> j);
+#             }
+#         }
+# 
+#         pub fn get(&self, i: usize) -> &S {
+#             &self.data[i + self.size]
+#         }
+# 
+#         pub fn prod(&self, range: impl RangeBounds<usize>) -> S {
+#             use std::ops::Bound::*;
+#             let (mut sml, mut smr) = (S::e(), S::e());
+#             let mut l = match range.start_bound() {
+#                 Included(&v) => v,
+#                 Excluded(&v) => v - 1,
+#                 Unbounded => 0,
+#             } + self.size;
+#             let mut r = match range.end_bound() {
+#                 Included(&v) => v + 1,
+#                 Excluded(&v) => v,
+#                 Unbounded => self.n,
+#             } + self.size;
+# 
+#             if (l, r) == (0, self.n) {
+#                 let mut ret = S::e();
+#                 ret.opr_lhs(&self.data[1]);
+#                 return ret;
+#             }
+# 
+#             while l < r {
+#                 if l & 1 == 1 {
+#                     sml.opr_lhs(&self.data[l]);
+#                     l += 1;
+#                 }
+#                 if r & 1 == 1 {
+#                     r -= 1;
+#                     smr.opr_rhs(&self.data[r]);
+#                 }
+#                 l >>= 1;
+#                 r >>= 1;
+#             }
+# 
+#             sml.opr_lhs(&smr);
+#             sml
+#         }
+# 
+#         /// Given an index l and a check function f, max_right finds an index r that satisfies
+#         ///   (r == l || f(self.prod(l..r)) && (r == n || !f(self.prod(l..=r)))
+#         /// If f is monotone, this is the maximum r that satisfies f(self.prod(l..r)).
+#         /// It should be guaranteed that f(S::e()) is true, 0 <= l and l <= n.
+#         pub fn max_right(&self, l: usize, f: impl Fn(&S) -> bool) -> usize {
+#             if l == self.n {
+#                 return self.n;
+#             }
+# 
+#             let mut l = l + self.size;
+#             let mut sm = S::e();
+# 
+#             loop {
+#                 l >>= l.trailing_zeros();
+#                 if !f(&S::opr(&sm, &self.data[l])) {
+#                     while l < self.size {
+#                         l <<= 1;
+#                         let tmp = S::opr(&sm, &self.data[l]);
+#                         if f(&tmp) {
+#                             sm = tmp;
+#                             l += 1;
+#                         }
+#                     }
+#                     return l - self.size;
+#                 }
+#                 sm.opr_lhs(&self.data[l]);
+#                 l += 1;
+# 
+#                 if l & ((!l) + 1) == l {
+#                     break;
+#                 }
+#             }
+#             self.n
+#         }
+# 
+#         /// Given an index r and a check function f, min_left finds an index l that satisfies
+#         ///   (l == r || f(self.prod(l..r))) && (l == 0 || !f(self.prod(l-1..r)))
+#         /// If f is monotone, this is the minimum l that satisfies f(self.prod(l..r)).
+#         /// It should be guaranteed that f(S::e()) is true, 0 <= r and r <= n.
+#         pub fn min_left(&self, r: usize, f: impl Fn(&S) -> bool) -> usize {
+#             if r == 0 {
+#                 return 0;
+#             }
+# 
+#             let mut r = r + self.size;
+#             let mut sm = S::e();
+# 
+#             loop {
+#                 r -= 1;
+#                 while r > 1 && r & 1 == 1 {
+#                     r >>= 1;
+#                 }
+#                 if !f(&S::opr(&self.data[r], &sm)) {
+#                     while r < self.size {
+#                         r = (r << 1) + 1;
+#                         let tmp = S::opr(&self.data[r], &sm);
+#                         if f(&tmp) {
+#                             sm = tmp;
+#                             r -= 1;
+#                         }
+#                     }
+#                     return r + 1 - self.size;
+#                 }
+#                 sm.opr_rhs(&self.data[r]);
+# 
+#                 if r & ((!r) + 1) == r {
+#                     break;
+#                 }
+#             }
+#             0
+#         }
+#     }
+# 
+#     impl<S: Monoid> Index<usize> for SegTree<S> {
+#         type Output = S;
+#         fn index(&self, index: usize) -> &Self::Output {
+#             self.get(index)
+#         }
+#     }
+# }
+```
+
+## Code
+
 ```rust,noplayground
-use std::ops::Index;
+mod segtree {
+    use std::ops::{Index, RangeBounds};
 
-fn ceil_pow2(n: usize) -> usize {
-    let mut x: usize = 0;
-    while (1 << x) < n {
-        x += 1;
-    }
-    x
-}
-
-/// Represents each element of a segment tree, which should be a monoid $(S, \cdot)$.
-trait Monoid {
-    fn opr(&self, other: &Self) -> Self;
-    fn e() -> Self;
-}
-
-/// Segment tree.
-struct SegTree<S: Monoid> {
-    n: usize,
-    size: usize,
-    log: usize,
-    data: Vec<S>,
-}
-
-impl<S: Monoid + Clone> SegTree<S> {
-    fn update(&mut self, k: usize) {
-        self.data[k] = self.data[k << 1].opr(&self.data[(k << 1) + 1])
-    }
-
-    /// Initializes a segment tree from an array.
-    fn new(arr: &Vec<S>) -> Self {
-        let log = ceil_pow2(arr.len());
-        let mut st: Self = SegTree {
-            n: arr.len(),
-            log,
-            size: 1 << log,
-            data: vec![S::e(); 1 << (log + 1)],
-        };
-        for (i, v) in arr.into_iter().enumerate() {
-            st.data[st.size + i] = (*v).clone();
-        }
-        for i in (1..st.size).rev() {
-            st.update(i);
-        }
-        st
-    }
-
-    /// Sets a value at index `i` to a value `v`.
-    fn set(&mut self, i: usize, v: &S) {
-        let i = i + self.size;
-        self.data[i] = v.clone();
-        for j in 1..=self.log {
-            self.update(i >> j);
-        }
-    }
-
-    /// Gets a reference of a value at index `i`.
-    fn get(&self, i: usize) -> &S {
-        &self[i]
-    }
-
-    /// Returns $A_l \cdot A_{l+1} \cdot \cdots \cdot A_{r-1}$. If $l=r$, then returns $e$.
-    fn prod(&self, l: usize, r: usize) -> S {
-        let (mut sml, mut smr) = (S::e(), S::e());
-        let (mut l, mut r) = (l + self.size, r + self.size);
-
-        while l < r {
-            if l & 1 == 1 {
-                sml = sml.opr(&self.data[l]);
-                l += 1;
-            }
-            if r & 1 == 1 {
-                r -= 1;
-                smr = self.data[r].opr(&smr);
-            }
-            l >>= 1;
-            r >>= 1;
-        }
-        sml.opr(&smr)
-    }
-
-    /// Returns $A_0 \cdot A_1 \cdot \cdots A_{n-1}$.
-    fn all_prod(&self) -> S {
-        self.data[1].clone()
-    }
-
-    fn max_right<C: Fn(&S) -> bool>(&self, l: usize, f: C) -> usize {
-        if l == self.n {
-            return self.n;
-        }
-
-        let mut l = l + self.size;
-        let mut sm = S::e();
-
-        loop {
-            while l & 1 == 0 {
-                l >>= 1;
-            }
-            if !f(&sm.opr(&self.data[l])) {
-                while l < self.size {
-                    l <<= 1;
-                    if f(&sm.opr(&self.data[l])) {
-                        sm = sm.opr(&self.data[l]);
-                        l += 1;
-                    }
-                }
-                return l - self.size;
-            }
-            sm = sm.opr(&self.data[l]);
-            l += 1;
-            if l & ((!l) + 1) == l {
-                break;
-            }
-        }
-        self.n
-    }
-    
-    fn min_left<C: Fn(&S) -> bool>(&self, r: usize, f: C) -> usize {
-        if r == 0 {
+    fn ceil_pow2(n: usize) -> u32 {
+        if n == 0 {
             return 0;
         }
+        let dig = usize::BITS - n.leading_zeros();
+        let x = 1 << (dig - 1);
+        if n == x {
+            dig - 1
+        } else {
+            dig
+        }
+    }
 
-        let mut r = r + self.size;
-        let mut sm = S::e();
+    pub trait Monoid: Sized {
+        fn e() -> Self;
+        fn opr_lhs(&mut self, rhs: &Self);
+        fn opr_rhs(&mut self, lhs: &Self);
+        fn opr(lhs: &Self, rhs: &Self) -> Self {
+            let mut ret = Self::e();
+            ret.opr_rhs(lhs);
+            ret.opr_lhs(rhs);
+            ret
+        }
+        fn opr_set(&mut self, lhs: &Self, rhs: &Self) {
+            *self = Self::opr(lhs, rhs);
+        }
+    }
 
-        loop {
-            r -= 1;
-            while r > 1 && r & 1 == 1 {
-                r >>= 1;
+    pub struct SegTree<S> {
+        n: usize,
+        size: usize,
+        log: u32,
+        data: Vec<S>,
+    }
+
+    impl<S: Monoid> SegTree<S> {
+        fn update(&mut self, k: usize) {
+            let mut ret = S::e();
+            ret.opr_set(&self.data[k << 1], &self.data[(k << 1) + 1]);
+            self.data[k] = ret;
+        }
+
+        pub fn new(arr: Vec<S>) -> Self {
+            let n = arr.len();
+            let log = ceil_pow2(n);
+            let size = 1 << log;
+            let stsize = 1 << (log + 1);
+
+            let mut data = Vec::with_capacity(stsize);
+            data.extend((0..size).map(|_| S::e()));
+            data.extend(arr.into_iter());
+            data.extend((data.len()..stsize).map(|_| S::e()));
+
+            let mut st = Self { n, size, log, data };
+            for i in (1..size).rev() {
+                st.update(i);
             }
-            if !f(&self.data[r].opr(&sm)) {
-                while r < self.size {
-                    r = (r << 1) + 1;
-                    if f(&self.data[r].opr(&sm)) {
-                        sm = self.data[r].opr(&sm);
-                        r -= 1;
-                    }
-                }
-                return r + 1 - self.size;
-            }
-            sm = self.data[r].opr(&sm);
+            st
+        }
 
-            if r & ((!r) + 1) == r {
-                break;
+        pub fn len(&self) -> usize {
+            self.n
+        }
+
+        pub fn get(&self, i: usize) -> &S {
+            &self.data[i + self.size]
+        }
+
+        pub fn set(&mut self, i: usize, v: S) {
+            let i = i + self.size;
+            self.data[i] = v;
+            for j in 1..=self.log {
+                self.update(i >> j);
             }
         }
-        0
+
+        pub fn prod(&self, range: impl RangeBounds<usize>) -> S {
+            use std::ops::Bound::*;
+            let (mut sml, mut smr) = (S::e(), S::e());
+            let mut l = match range.start_bound() {
+                Included(&v) => v,
+                Excluded(&v) => v - 1,
+                Unbounded => 0,
+            } + self.size;
+            let mut r = match range.end_bound() {
+                Included(&v) => v + 1,
+                Excluded(&v) => v,
+                Unbounded => self.n,
+            } + self.size;
+
+            if (l, r) == (0, self.n) {
+                let mut ret = S::e();
+                ret.opr_lhs(&self.data[1]);
+                return ret;
+            }
+
+            while l < r {
+                if l & 1 == 1 {
+                    sml.opr_lhs(&self.data[l]);
+                    l += 1;
+                }
+                if r & 1 == 1 {
+                    r -= 1;
+                    smr.opr_rhs(&self.data[r]);
+                }
+                l >>= 1;
+                r >>= 1;
+            }
+
+            sml.opr_lhs(&smr);
+            sml
+        }
+
+        /// Given an index l and a check function f, max_right finds an index r that satisfies
+        ///   (r == l || f(self.prod(l..r)) && (r == n || !f(self.prod(l..=r)))
+        /// If f is monotone, this is the maximum r that satisfies f(self.prod(l..r)).
+        /// It should be guaranteed that f(S::e()) is true, 0 <= l and l <= n.
+        pub fn max_right(&self, l: usize, f: impl Fn(&S) -> bool) -> usize {
+            if l == self.n {
+                return self.n;
+            }
+
+            let mut l = l + self.size;
+            let mut sm = S::e();
+
+            loop {
+                l >>= l.trailing_zeros();
+                if !f(&S::opr(&sm, &self.data[l])) {
+                    while l < self.size {
+                        l <<= 1;
+                        let tmp = S::opr(&sm, &self.data[l]);
+                        if f(&tmp) {
+                            sm = tmp;
+                            l += 1;
+                        }
+                    }
+                    return l - self.size;
+                }
+                sm.opr_lhs(&self.data[l]);
+                l += 1;
+
+                if l & ((!l) + 1) == l {
+                    break;
+                }
+            }
+            self.n
+        }
+
+        /// Given an index r and a check function f, min_left finds an index l that satisfies
+        ///   (l == r || f(self.prod(l..r))) && (l == 0 || !f(self.prod(l-1..r)))
+        /// If f is monotone, this is the minimum l that satisfies f(self.prod(l..r)).
+        /// It should be guaranteed that f(S::e()) is true, 0 <= r and r <= n.
+        pub fn min_left(&self, r: usize, f: impl Fn(&S) -> bool) -> usize {
+            if r == 0 {
+                return 0;
+            }
+
+            let mut r = r + self.size;
+            let mut sm = S::e();
+
+            loop {
+                r -= 1;
+                while r > 1 && r & 1 == 1 {
+                    r >>= 1;
+                }
+                if !f(&S::opr(&self.data[r], &sm)) {
+                    while r < self.size {
+                        r = (r << 1) + 1;
+                        let tmp = S::opr(&self.data[r], &sm);
+                        if f(&tmp) {
+                            sm = tmp;
+                            r -= 1;
+                        }
+                    }
+                    return r + 1 - self.size;
+                }
+                sm.opr_rhs(&self.data[r]);
+
+                if r & ((!r) + 1) == r {
+                    break;
+                }
+            }
+            0
+        }
     }
-}
 
-impl<T: Monoid + Clone> Index<usize> for SegTree<T> {
-    type Output = T;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.data[index + self.size]
+    impl<S: Monoid> Index<usize> for SegTree<S> {
+        type Output = S;
+        fn index(&self, index: usize) -> &Self::Output {
+            self.get(index)
+        }
     }
 }
 ```
 
-## Using max_right and min_left
-### max_right
-Given an index \\(l\\) and a check function \\( f : S \rightarrow bool \\), `max_right` finds an index \\(r\\) such that satisfies both of the following conditions:
-- \\(r=l\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\)
-- \\(r=n\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_r \right) = false \\)
+## APIs
 
-If \\(f\\) is monotone, this is the maximum \\(r\\) that satisfies \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\).
+- `trait Monoid`
+Represents a monoid \\(S\\) explained above. Three methods `e`, `opr_lhs`, `opr_rhs` are required to be implemented. Implementing `opr` and `opr_set` is optional.
+  + `fn e() -> Self` returns an identity element of the monoid.
+  + `fn opr_lhs(&mut self, rhs: &Self)` calculates the product of `self` and `rhs` in this order, and sets `self` with it.
+  + `fn opr_rhs(&mut self, lhs: &Self)` calculates the product of `lhs` and `self` in this order, and sets `self` with it.
+  + (Optional) `fn opr(lhs: &Self, rhs: &Self)` calculates the product of `lhs` and `rhs` and returns it.
+  + (Optional) `fn opr_set(&mut self, lhs: &Self, rhs: &Self)` calculates the product of `lhs` and `rhs` and sets `self` with it.
+- `fn new(arr: Vec<S>) -> Self` generates a segment tree from `arr`.
+- `fn len(&self) -> usize` returns the length of the segment tree, which is equal to the length of the array used for constructing the segment tree.
+- `fn get(&self, i: usize) -> &S` returns the reference to the `i`th element of the segment tree.
+- `fn set(&mut self, i: usize, v: S)` sets the `i`th element of the segment tree with `v`.
+- `fn prod(&self, range: impl RangeBounds<usize>) -> S` returns the product of values of the segment tree within the given range.
+  + Example: `let v = st.prod(3..10);` `let u = st.prod(..7);`
 
-It should be guaranteed that \\(f(e)\\) is true, \\(0 \leq l \leq n\\), and \\(f\\) has no side effects i.e. calling \\(f\\) for the same value should always return the same result.
+- `fn max_right(&self, l: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `r` such that `(r == l || f(self.prod(l..r)) && (r == n || !f(self.prod(l..=r)))`. If `f` is monotone, this is the maximum `r` that makes `f(self.prod(l..r)` true. It should be guaranteed that `f(S::e())` is true, and `0 <= l <= n`. This method is basically equivalent to `partition_point` of a slice type, but with set left bound.
 
-The search for \\(r\\) is done by binary search, so the time complexity of this function is \\( O(\log{n}) \\).
-
-### min_left
-Given an index \\(r\\) and a check function \\( f : S \rightarrow bool \\), `min_left` finds an index \\(l\\) such that satisfies both of the following conditions:
-- \\(l=r\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\)
-- \\(l=0\\) or \\( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \\)
-
-If \\(f\\) is monotone, this is the minimum \\(l\\) that satisfies \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\).
-
-It should be guaranteed that \\(f(e)\\) is true, \\(0 \leq r \leq n\\), and \\(f\\) has no side effects i.e. calling \\(f\\) for the same value should always return the same result.
-
-The search for \\(l\\) is done by binary search, so the time complexity of this function is \\( O(\log{n}) \\).
+- `fn min_left(&self, r: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `l` such that `(l == r || f(self.prod(l..r))) && (l == 0 || !f(self.prod(l-1..r)))`. If `f` is monotone, this is the minimum `l` that makes `f(self.prod(l..r))` true. It should be guaranteed that `f(S::e())` is true, and `0 <= r <= n`.
