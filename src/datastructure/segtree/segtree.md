@@ -3,16 +3,19 @@
 Reference: AtCoder library <https://atcoder.github.io/ac-library/production/document_en/index.html>
 
 A segment tree is a data structure for monoids \\( (S, \cdot : S \times S \rightarrow S, e \in S) \\). A monoid is an algebraic structure which follows the following conditions:
+
 - \\(\cdot\\) is associative. That is, \\( (a \cdot b) \cdot c = a \cdot (b \cdot c) \\) for all \\( a, b, c \in S \\).
 - There is the identity element \\(e\\) such that \\( a \cdot e = e \cdot a = a \\) for all \\( a \in S \\).
   
 Given an array \\(A\\) of length \\(n\\) consists of the monoid \\(S\\) as described above, a segment tree on it can process the following queries in \\(O (\log{n})\\) time:
+
 - Update an element
 - Calculate the product of the elements of an interval
 
 assuming that calculating the product of two elements takes \\(O(1)\\) time.
 
 ## Example
+
 ```rust
 # use segtree::*;
 # 
@@ -430,17 +433,17 @@ mod segtree {
 ## APIs
 
 - `trait Monoid` represents a monoid \\(S\\) explained above. Three methods `e`, `opr_lhs`, `opr_rhs` are required to be implemented. Implementing `opr` and `opr_set` is optional.
-  + `fn e() -> Self` returns an identity element of the monoid.
-  + `fn opr_lhs(&mut self, rhs: &Self)` calculates the product of `self` and `rhs` in this order, and sets `self` with it.
-  + `fn opr_rhs(&mut self, lhs: &Self)` calculates the product of `lhs` and `self` in this order, and sets `self` with it.
-  + (Optional) `fn opr(lhs: &Self, rhs: &Self)` calculates the product of `lhs` and `rhs` and returns it.
-  + (Optional) `fn opr_set(&mut self, lhs: &Self, rhs: &Self)` calculates the product of `lhs` and `rhs` and sets `self` with it.
+  - `fn e() -> Self` returns an identity element of the monoid.
+  - `fn opr_lhs(&mut self, rhs: &Self)` calculates the product of `self` and `rhs` in this order, and sets `self` with it.
+  - `fn opr_rhs(&mut self, lhs: &Self)` calculates the product of `lhs` and `self` in this order, and sets `self` with it.
+  - (Optional) `fn opr(lhs: &Self, rhs: &Self)` calculates the product of `lhs` and `rhs` and returns it.
+  - (Optional) `fn opr_set(&mut self, lhs: &Self, rhs: &Self)` calculates the product of `lhs` and `rhs` and sets `self` with it.
 - `fn new(arr: Vec<S>) -> Self` generates a segment tree from `arr`.
 - `fn len(&self) -> usize` returns the length of the segment tree, which is equal to the length of the array used for constructing the segment tree.
 - `fn get(&self, i: usize) -> &S` returns the reference to the `i`th element of the segment tree.
 - `fn set(&mut self, i: usize, v: S)` sets the `i`th element of the segment tree with `v`.
 - `fn prod(&self, range: impl RangeBounds<usize>) -> S` returns the product of values of the segment tree within the given range.
-  + Example: `let v = st.prod(3..10);` `let u = st.prod(..7);`
+  - Example: `let v = st.prod(3..10);` `let u = st.prod(..7);`
 
 - `fn max_right(&self, l: usize, f: impl Fn(&S) -> bool) -> usize` returns an index `r` such that `(r == l || f(self.prod(l..r)) && (r == n || !f(self.prod(l..=r)))`. If `f` is monotone, this is the maximum `r` that makes `f(self.prod(l..r)` true. It must be guaranteed that `f(S::e())` is true, and `0 <= l <= n`. This method is basically equivalent to `partition_point` of a slice type, but with a set left bound.
 
