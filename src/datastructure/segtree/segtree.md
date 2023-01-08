@@ -120,7 +120,7 @@ println!("{}", l);             // 0
 #             let (mut sml, mut smr) = (S::e(), S::e());
 #             let mut l = match range.start_bound() {
 #                 Included(&v) => v,
-#                 Excluded(&v) => v - 1,
+#                 Excluded(&v) => v + 1,
 #                 Unbounded => 0,
 #             } + self.size;
 #             let mut r = match range.end_bound() {
@@ -316,7 +316,7 @@ mod segtree {
             let (mut sml, mut smr) = (S::e(), S::e());
             let mut l = match range.start_bound() {
                 Included(&v) => v,
-                Excluded(&v) => v - 1,
+                Excluded(&v) => v + 1,
                 Unbounded => 0,
             } + self.size;
             let mut r = match range.end_bound() {
