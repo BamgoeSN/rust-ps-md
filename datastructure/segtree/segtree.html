@@ -264,7 +264,7 @@ println!(&quot;{}&quot;, l);             // 0
 </span><span class="boring">            let (mut sml, mut smr) = (S::e(), S::e());
 </span><span class="boring">            let mut l = match range.start_bound() {
 </span><span class="boring">                Included(&amp;v) =&gt; v,
-</span><span class="boring">                Excluded(&amp;v) =&gt; v - 1,
+</span><span class="boring">                Excluded(&amp;v) =&gt; v + 1,
 </span><span class="boring">                Unbounded =&gt; 0,
 </span><span class="boring">            } + self.size;
 </span><span class="boring">            let mut r = match range.end_bound() {
@@ -456,7 +456,7 @@ println!(&quot;{}&quot;, l);             // 0
             let (mut sml, mut smr) = (S::e(), S::e());
             let mut l = match range.start_bound() {
                 Included(&amp;v) =&gt; v,
-                Excluded(&amp;v) =&gt; v - 1,
+                Excluded(&amp;v) =&gt; v + 1,
                 Unbounded =&gt; 0,
             } + self.size;
             let mut r = match range.end_bound() {
