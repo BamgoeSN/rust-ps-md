@@ -4850,42 +4850,42 @@ impl&lt;'a, T: PartialEq&gt; KMPNeedle&lt;'a, T&gt; {
     }
 }
 
-struct KMPMatcher&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; {
-    needle: &amp;'c KMPNeedle&lt;'b, T&gt;,
-    t: &amp;'a [T],
-    i: usize,
-    j: usize,
+struct KMPMatcher&lt;'h, 'n: 'h, 'a: 'n, T: PartialEq&gt; {
+    needle: &amp;'a KMPNeedle&lt;'n, T&gt;,
+    haystack: &amp;'h [T],
+    hp: usize,
+    np: usize,
 }
 
-impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; KMPMatcher&lt;'a, 'b, 'c, T&gt; {
-    fn new(needle: &amp;'c KMPNeedle&lt;'b, T&gt;, t: &amp;'a [T]) -&gt; Self {
+impl&lt;'h, 'n: 'h, 'a: 'n, T: PartialEq&gt; KMPMatcher&lt;'h, 'n, 'a, T&gt; {
+    fn new(needle: &amp;'a KMPNeedle&lt;'n, T&gt;, haystack: &amp;'h [T]) -&gt; Self {
         Self {
             needle,
-            t,
-            i: 0,
-            j: 0,
+            haystack,
+            hp: 0,
+            np: 0,
         }
     }
 }
 
-impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; Iterator for KMPMatcher&lt;'a, 'b, 'c, T&gt; {
+impl&lt;'h, 'n: 'h, 'a: 'n, T: PartialEq&gt; Iterator for KMPMatcher&lt;'h, 'n, 'a, T&gt; {
     type Item = usize;
 
     fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
-        while self.i &lt; self.t.len() {
-            while self.j &gt; 0 &amp;&amp; self.t[self.i] != self.needle.p[self.j] {
-                self.j = self.needle.c[self.j];
+        while self.hp &lt; self.haystack.len() {
+            while self.np &gt; 0 &amp;&amp; self.haystack[self.hp] != self.needle.p[self.np] {
+                self.np = self.needle.c[self.np];
             }
-            if self.t[self.i] == self.needle.p[self.j] {
-                if self.j == self.needle.p.len() - 1 {
-                    self.j = self.needle.c[self.j + 1];
-                    self.i += 1;
-                    return Some(self.i - self.needle.p.len());
+            if self.haystack[self.hp] == self.needle.p[self.np] {
+                if self.np == self.needle.p.len() - 1 {
+                    self.np = self.needle.c[self.np + 1];
+                    self.hp += 1;
+                    return Some(self.hp - self.needle.p.len());
                 } else {
-                    self.j += 1;
+                    self.np += 1;
                 }
             }
-            self.i += 1;
+            self.hp += 1;
         }
         None
     }
