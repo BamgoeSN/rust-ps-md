@@ -1560,7 +1560,7 @@ impl Bitset {
 <h2 id="example-8"><a class="header" href="#example-8">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">use segtree::*;
 </span><span class="boring">
-</span>// Interval sum segment tree
+</span>// Range sum segment tree
 impl Monoid for i32 {
     fn e() -&gt; Self { 0 }
     fn opr_lhs(&amp;mut self, rhs: &amp;Self) { *self += rhs; }
@@ -2107,7 +2107,7 @@ impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="lazy-segment-tree"><a class="header" href="#lazy-segment-tree">Lazy Segment Tree</a></h1>
 <p>Reference: AtCoder library <a href="https://atcoder.github.io/ac-library/production/document_en/index.html">https://atcoder.github.io/ac-library/production/document_en/index.html</a></p>
-<p>A lazy segment tree is a data struture for a pair of a monoid \( (S, \cdot : S \times S \rightarrow S, e \in S) \) and a set \(F\) of \(S \rightarrow S\) mappings that satisfies the following properties:</p>
+<p>A lazy segment tree is a data struture for a pair of <a href="datastructure/segtree/./segtree.html">a monoid</a> \( (S, \cdot : S \times S \rightarrow S, e \in S) \) and a set \(F\) of \(S \rightarrow S\) mappings that satisfies the following properties:</p>
 <ul>
 <li>\(F\) contains the identity mapping \(Id\) such that \( Id(x) = x \) for all \(x\in S\).</li>
 <li>\(F\) is closed under composition. That is, \( f \circ g \in F \) for all \( f, g \in F \).</li>
@@ -2119,266 +2119,686 @@ impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output
 <li>Calculate the product of the elements of an interval</li>
 </ul>
 <p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
-<pre><code class="language-rust noplayground">fn ceil_pow2(n: usize) -&gt; usize {
-    let mut x: usize = 0;
-    while (1 &lt;&lt; x) &lt; n {
-        x += 1;
+<h2 id="example-10"><a class="header" href="#example-10">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">use lazyseg::*;
+</span><span class="boring">
+</span>// ax+b lazy segment tree
+type P = (i64, i64);
+
+// P = (sum, len)
+impl LzMonoid for P {
+    fn e() -&gt; Self { (0, 0) }
+    fn opr_lhs(&amp;mut self, rhs: &amp;Self) {
+        self.0 += rhs.0; self.1 += rhs.1;
     }
-    x
-}
-
-/// Represents a monoid in a lazy segment tree $(S, \cdot)$.
-trait Monoid {
-    fn opr(&amp;self, other: &amp;Self) -&gt; Self;
-    fn e() -&gt; Self;
-}
-
-/// Represents a map $F$ acting on the monoid $(S, \cdot)$.
-trait Mapping&lt;T: Monoid&gt; {
-    fn map(&amp;self, apply: &amp;T) -&gt; T;
-    fn compos(&amp;self, other: &amp;Self) -&gt; Self;
-    fn id() -&gt; Self;
-}
-
-/// Lazy segment tree for the monoid $(S, \cdot)$ and the map $F$.
-struct LazySeg&lt;S: Monoid, F: Mapping&lt;S&gt;&gt; {
-    n: usize,
-    size: usize,
-    log: usize,
-    data: Vec&lt;S&gt;,
-    lazy: Vec&lt;F&gt;,
-}
-
-impl&lt;S, F&gt; LazySeg&lt;S, F&gt;
-where
-    S: Monoid + Clone,
-    F: Mapping&lt;S&gt; + Clone,
-{
-    fn update(&amp;mut self, k: usize) {
-        self.data[k] = self.data[k &lt;&lt; 1].opr(&amp;self.data[(k &lt;&lt; 1) + 1]);
+    fn opr_rhs(&amp;mut self, lhs: &amp;Self) {
+        self.0 += lhs.0; self.1 += lhs.1;
     }
+}
 
-    fn all_apply(&amp;mut self, k: usize, f: &amp;F) {
-        self.data[k] = f.map(&amp;self.data[k]);
-        if k &lt; self.size {
-            self.lazy[k] = f.compos(&amp;self.lazy[k]);
+// P = (a, b) equiv. to applying ax+b on LzMonoids
+impl LzMap&lt;P&gt; for P {
+    fn id() -&gt; Self { (1, 0) }
+    fn map(&amp;self, apply: &amp;mut P) {
+        apply.0 = self.0 * apply.0 + self.1 * apply.1;
+    }
+    fn compos_lhs(&amp;mut self, rhs: &amp;Self) {
+        let (a, b, c, d) = (self.0, self.1, rhs.0, rhs.1);
+        *self = (a * c, a * d + b);
+    }
+    fn compos_rhs(&amp;mut self, lhs: &amp;Self) {
+        let (a, b, c, d) = (lhs.0, lhs.1, self.0, self.1);
+        *self = (a * c, a * d + b);
+    }
+}
+
+<span class="boring">fn main() {
+</span>let mut st: LazySeg&lt;_, P&gt; = LazySeg::new((0..10).map(|v| (v, 1)).collect());
+println!(&quot;{}&quot;, st.get(3).0); // 3
+println!(&quot;{}&quot;, st.prod(2..6).0); // 14
+
+// Add 5 to 1..6
+st.apply_range(1..6, &amp;(1, 5));
+// Multiply 6.. by 4
+st.apply_range(6.., &amp;(4, 0));
+// 0 6 7 8 9 10 24 28 32 36
+
+let r = st.max_right(4, |&amp;(v, _)| v &lt; 43);
+println!(&quot;{}&quot;, r); // 6
+let l = st.min_left(6, |&amp;(v, _)| v &lt; 32);
+println!(&quot;{}&quot;, l); // 3
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod lazyseg {
+</span><span class="boring">    use std::ops::RangeBounds;
+</span><span class="boring">
+</span><span class="boring">    fn ceil_pow2(n: usize) -&gt; u32 {
+</span><span class="boring">        let mut x = 0;
+</span><span class="boring">        while 1 &lt;&lt; x &lt; n {
+</span><span class="boring">            x += 1;
+</span><span class="boring">        }
+</span><span class="boring">        x
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn range_to_bounds(n: usize, range: impl RangeBounds&lt;usize&gt;) -&gt; (usize, usize) {
+</span><span class="boring">        use std::ops::Bound::*;
+</span><span class="boring">
+</span><span class="boring">        let l = match range.start_bound() {
+</span><span class="boring">            Included(&amp;v) =&gt; v,
+</span><span class="boring">            Excluded(&amp;v) =&gt; v + 1,
+</span><span class="boring">            Unbounded =&gt; 0,
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let r = match range.end_bound() {
+</span><span class="boring">            Included(&amp;v) =&gt; v + 1,
+</span><span class="boring">            Excluded(&amp;v) =&gt; v,
+</span><span class="boring">            Unbounded =&gt; n,
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        (l, r)
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub trait LzMonoid: Sized {
+</span><span class="boring">        fn e() -&gt; Self;
+</span><span class="boring">        fn opr_lhs(&amp;mut self, rhs: &amp;Self);
+</span><span class="boring">        fn opr_rhs(&amp;mut self, lhs: &amp;Self);
+</span><span class="boring">        fn opr(lhs: &amp;Self, rhs: &amp;Self) -&gt; Self {
+</span><span class="boring">            let mut ret = Self::e();
+</span><span class="boring">            ret.opr_rhs(lhs);
+</span><span class="boring">            ret.opr_lhs(rhs);
+</span><span class="boring">            ret
+</span><span class="boring">        }
+</span><span class="boring">        fn opr_set(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self) {
+</span><span class="boring">            *self = Self::opr(lhs, rhs);
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub trait LzMap&lt;S&gt;: Sized {
+</span><span class="boring">        fn id() -&gt; Self;
+</span><span class="boring">        fn map(&amp;self, apply: &amp;mut S);
+</span><span class="boring">        fn compos_lhs(&amp;mut self, rhs: &amp;Self);
+</span><span class="boring">        fn compos_rhs(&amp;mut self, lhs: &amp;Self);
+</span><span class="boring">        fn compos(lhs: &amp;Self, rhs: &amp;Self) -&gt; Self {
+</span><span class="boring">            let mut ret = Self::id();
+</span><span class="boring">            ret.compos_rhs(lhs);
+</span><span class="boring">            ret.compos_lhs(rhs);
+</span><span class="boring">            ret
+</span><span class="boring">        }
+</span><span class="boring">        fn opr_self(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self) {
+</span><span class="boring">            *self = Self::compos(lhs, rhs);
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub struct LazySeg&lt;S, F&gt; {
+</span><span class="boring">        n: usize,
+</span><span class="boring">        size: usize,
+</span><span class="boring">        log: u32,
+</span><span class="boring">        data: Vec&lt;S&gt;,
+</span><span class="boring">        lazy: Vec&lt;F&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl&lt;S, F&gt; LazySeg&lt;S, F&gt;
+</span><span class="boring">    where
+</span><span class="boring">        S: LzMonoid,
+</span><span class="boring">        F: LzMap&lt;S&gt;,
+</span><span class="boring">    {
+</span><span class="boring">        fn update(&amp;mut self, k: usize) {
+</span><span class="boring">            let val = S::opr(&amp;self.data[k &lt;&lt; 1], &amp;self.data[(k &lt;&lt; 1) + 1]);
+</span><span class="boring">            self.data[k] = val;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn all_apply(&amp;mut self, k: usize, f: &amp;F) {
+</span><span class="boring">            f.map(&amp;mut self.data[k]);
+</span><span class="boring">            if k &lt; self.size {
+</span><span class="boring">                self.lazy[k].compos_rhs(f);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn all_apply_unsafe(size: usize, k: usize, f: usize, data: &amp;mut [S], lazy: &amp;mut [F]) {
+</span><span class="boring">            // f &lt; k
+</span><span class="boring">            lazy[f].map(&amp;mut data[k]);
+</span><span class="boring">            if k &lt; size {
+</span><span class="boring">                let (fs, ks) = lazy.split_at_mut(k);
+</span><span class="boring">                ks[0].compos_rhs(&amp;fs[f]);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn push(&amp;mut self, k: usize) {
+</span><span class="boring">            Self::all_apply_unsafe(self.size, k &lt;&lt; 1, k, &amp;mut self.data, &amp;mut self.lazy);
+</span><span class="boring">            Self::all_apply_unsafe(self.size, (k &lt;&lt; 1) + 1, k, &amp;mut self.data, &amp;mut self.lazy);
+</span><span class="boring">            self.lazy[k] = F::id();
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn new(arr: Vec&lt;S&gt;) -&gt; Self {
+</span><span class="boring">            let n = arr.len();
+</span><span class="boring">            let log = ceil_pow2(n);
+</span><span class="boring">            let size = 1 &lt;&lt; log;
+</span><span class="boring">            let stsize = 1 &lt;&lt; (log + 1);
+</span><span class="boring">
+</span><span class="boring">            let mut data = Vec::with_capacity(stsize);
+</span><span class="boring">            data.extend((0..size).map(|_| S::e()));
+</span><span class="boring">            data.extend(arr.into_iter());
+</span><span class="boring">            data.extend((data.len()..stsize).map(|_| S::e()));
+</span><span class="boring">
+</span><span class="boring">            let mut ls = Self {
+</span><span class="boring">                n,
+</span><span class="boring">                log,
+</span><span class="boring">                size,
+</span><span class="boring">                data,
+</span><span class="boring">                lazy: Vec::from_iter((0..size).map(|_| F::id())),
+</span><span class="boring">            };
+</span><span class="boring">            for i in (1..size).rev() {
+</span><span class="boring">                ls.update(i);
+</span><span class="boring">            }
+</span><span class="boring">            ls
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn set(&amp;mut self, i: usize, v: S) {
+</span><span class="boring">            let i = i + self.size;
+</span><span class="boring">            for j in (1..=self.log).rev() {
+</span><span class="boring">                self.push(i &gt;&gt; j);
+</span><span class="boring">            }
+</span><span class="boring">            self.data[i] = v;
+</span><span class="boring">            for j in 1..=self.log {
+</span><span class="boring">                self.update(i &gt;&gt; j);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn get(&amp;mut self, i: usize) -&gt; &amp;S {
+</span><span class="boring">            let i = i + self.size;
+</span><span class="boring">            for j in (1..=self.log).rev() {
+</span><span class="boring">                self.push(i &gt;&gt; j);
+</span><span class="boring">            }
+</span><span class="boring">            &amp;self.data[i]
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn prod(&amp;mut self, range: impl RangeBounds&lt;usize&gt;) -&gt; S {
+</span><span class="boring">            let (l, r) = range_to_bounds(self.size, range);
+</span><span class="boring">
+</span><span class="boring">            if l == 0 &amp;&amp; r == self.size {
+</span><span class="boring">                let mut ret = S::e();
+</span><span class="boring">                ret.opr_lhs(&amp;self.data[1]);
+</span><span class="boring">                return ret;
+</span><span class="boring">            } else if l == r {
+</span><span class="boring">                return S::e();
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let (mut l, mut r) = (l + self.size, r + self.size);
+</span><span class="boring">
+</span><span class="boring">            for i in (1..=self.log).rev() {
+</span><span class="boring">                if ((l &gt;&gt; i) &lt;&lt; i) != l {
+</span><span class="boring">                    self.push(l &gt;&gt; i);
+</span><span class="boring">                }
+</span><span class="boring">                if ((r &gt;&gt; i) &lt;&lt; i) != r {
+</span><span class="boring">                    self.push((r - 1) &gt;&gt; i);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let (mut sml, mut smr) = (S::e(), S::e());
+</span><span class="boring">            while l &lt; r {
+</span><span class="boring">                if l &amp; 1 == 1 {
+</span><span class="boring">                    sml.opr_lhs(&amp;self.data[l]);
+</span><span class="boring">                    l += 1;
+</span><span class="boring">                }
+</span><span class="boring">                if r &amp; 1 == 1 {
+</span><span class="boring">                    r -= 1;
+</span><span class="boring">                    smr.opr_rhs(&amp;self.data[r]);
+</span><span class="boring">                }
+</span><span class="boring">                l &gt;&gt;= 1;
+</span><span class="boring">                r &gt;&gt;= 1;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            S::opr(&amp;sml, &amp;smr)
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn apply(&amp;mut self, i: usize, f: &amp;F) {
+</span><span class="boring">            let i = i + self.size;
+</span><span class="boring">            for j in (1..=self.log).rev() {
+</span><span class="boring">                self.push(i &gt;&gt; j);
+</span><span class="boring">            }
+</span><span class="boring">            f.map(&amp;mut self.data[i]);
+</span><span class="boring">            for j in 1..=self.log {
+</span><span class="boring">                self.update(i &gt;&gt; j);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn apply_range(&amp;mut self, range: impl RangeBounds&lt;usize&gt;, f: &amp;F) {
+</span><span class="boring">            let (l, r) = range_to_bounds(self.size, range);
+</span><span class="boring">
+</span><span class="boring">            if l == r {
+</span><span class="boring">                return;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let (mut l, mut r) = (l + self.size, r + self.size);
+</span><span class="boring">
+</span><span class="boring">            for i in (1..=self.log).rev() {
+</span><span class="boring">                if ((l &gt;&gt; i) &lt;&lt; i) != l {
+</span><span class="boring">                    self.push(l &gt;&gt; i);
+</span><span class="boring">                }
+</span><span class="boring">                if ((r &gt;&gt; i) &lt;&lt; i) != r {
+</span><span class="boring">                    self.push((r - 1) &gt;&gt; i);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let (l2, r2) = (l, r);
+</span><span class="boring">            while l &lt; r {
+</span><span class="boring">                if l &amp; 1 == 1 {
+</span><span class="boring">                    self.all_apply(l, f);
+</span><span class="boring">                    l += 1;
+</span><span class="boring">                }
+</span><span class="boring">                if r &amp; 1 == 1 {
+</span><span class="boring">                    r -= 1;
+</span><span class="boring">                    self.all_apply(r, f);
+</span><span class="boring">                }
+</span><span class="boring">                l &gt;&gt;= 1;
+</span><span class="boring">                r &gt;&gt;= 1;
+</span><span class="boring">            }
+</span><span class="boring">            l = l2;
+</span><span class="boring">            r = r2;
+</span><span class="boring">
+</span><span class="boring">            for i in 1..=self.log {
+</span><span class="boring">                if ((l &gt;&gt; i) &lt;&lt; i) != l {
+</span><span class="boring">                    self.update(l &gt;&gt; i);
+</span><span class="boring">                }
+</span><span class="boring">                if ((r &gt;&gt; i) &lt;&lt; i) != r {
+</span><span class="boring">                    self.update((r - 1) &gt;&gt; i);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn max_right(&amp;mut self, l: usize, g: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+</span><span class="boring">            if l == self.n {
+</span><span class="boring">                return self.n;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let mut l = l + self.size;
+</span><span class="boring">            for i in (1..=self.log).rev() {
+</span><span class="boring">                self.push(l &gt;&gt; i);
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let mut sm = S::e();
+</span><span class="boring">            loop {
+</span><span class="boring">                l &gt;&gt;= l.trailing_zeros();
+</span><span class="boring">                if !g(&amp;S::opr(&amp;sm, &amp;self.data[l])) {
+</span><span class="boring">                    while l &lt; self.size {
+</span><span class="boring">                        self.push(l);
+</span><span class="boring">                        l &lt;&lt;= 1;
+</span><span class="boring">                        let tmp = S::opr(&amp;sm, &amp;self.data[l]);
+</span><span class="boring">                        if g(&amp;tmp) {
+</span><span class="boring">                            sm = tmp;
+</span><span class="boring">                            l += 1;
+</span><span class="boring">                        }
+</span><span class="boring">                    }
+</span><span class="boring">                    return l - self.size;
+</span><span class="boring">                }
+</span><span class="boring">                sm.opr_lhs(&amp;self.data[l]);
+</span><span class="boring">                l += 1;
+</span><span class="boring">
+</span><span class="boring">                if l &amp; ((!l) + 1) != l {
+</span><span class="boring">                    break;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            self.n
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn min_left(&amp;mut self, r: usize, g: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+</span><span class="boring">            if r == 0 {
+</span><span class="boring">                return 0;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let mut r = r + self.size;
+</span><span class="boring">            for i in (1..=self.log).rev() {
+</span><span class="boring">                self.push((r - 1) &gt;&gt; i);
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            let mut sm = S::e();
+</span><span class="boring">            loop {
+</span><span class="boring">                r -= 1;
+</span><span class="boring">                while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+</span><span class="boring">                    r &gt;&gt;= 1;
+</span><span class="boring">                }
+</span><span class="boring">
+</span><span class="boring">                if !g(&amp;S::opr(&amp;self.data[r], &amp;sm)) {
+</span><span class="boring">                    while r &lt; self.size {
+</span><span class="boring">                        self.push(r);
+</span><span class="boring">                        r = (r &lt;&lt; 1) + 1;
+</span><span class="boring">                        let tmp = S::opr(&amp;self.data[r], &amp;sm);
+</span><span class="boring">                        if g(&amp;tmp) {
+</span><span class="boring">                            sm = tmp;
+</span><span class="boring">                            r -= 1;
+</span><span class="boring">                        }
+</span><span class="boring">                    }
+</span><span class="boring">                    return r + 1 - self.size;
+</span><span class="boring">                }
+</span><span class="boring">                sm.opr_rhs(&amp;self.data[r]);
+</span><span class="boring">
+</span><span class="boring">                if r &amp; ((!r) + 1) == r {
+</span><span class="boring">                    break;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            0
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre></pre>
+<h2 id="code-9"><a class="header" href="#code-9">Code</a></h2>
+<pre><code class="language-rust noplayground">mod lazyseg {
+    use std::ops::RangeBounds;
+
+    fn ceil_pow2(n: usize) -&gt; u32 {
+        let mut x = 0;
+        while 1 &lt;&lt; x &lt; n {
+            x += 1;
         }
+        x
     }
 
-    fn push(&amp;mut self, k: usize) {
-        self.all_apply(k &lt;&lt; 1, &amp;self.lazy[k].clone());
-        self.all_apply((k &lt;&lt; 1) + 1, &amp;self.lazy[k].clone());
-        self.lazy[k] = F::id();
-    }
+    fn range_to_bounds(n: usize, range: impl RangeBounds&lt;usize&gt;) -&gt; (usize, usize) {
+        use std::ops::Bound::*;
 
-    /// Initializes the lazy segment tree from the given array.
-    fn new(arr: &amp;Vec&lt;S&gt;) -&gt; Self {
-        let log = ceil_pow2(arr.len());
-        let mut ls: Self = LazySeg {
-            n: arr.len(),
-            log,
-            size: 1 &lt;&lt; log,
-            data: vec![S::e(); 1 &lt;&lt; (log + 1)],
-            lazy: vec![F::id(); 1 &lt;&lt; log],
+        let l = match range.start_bound() {
+            Included(&amp;v) =&gt; v,
+            Excluded(&amp;v) =&gt; v + 1,
+            Unbounded =&gt; 0,
         };
-        for (i, v) in arr.into_iter().enumerate() {
-            ls.data[ls.size + i] = (*v).clone();
-        }
-        for i in (1..ls.size).rev() {
-            ls.update(i);
-        }
-        ls
+
+        let r = match range.end_bound() {
+            Included(&amp;v) =&gt; v + 1,
+            Excluded(&amp;v) =&gt; v,
+            Unbounded =&gt; n,
+        };
+
+        (l, r)
     }
 
-    /// Sets a value at the index `i` to `v`.
-    fn set(&amp;mut self, i: usize, v: &amp;S) {
-        let i = i + self.size;
-        for j in (1..=self.log).rev() {
-            self.push(i &gt;&gt; j);
+    pub trait LzMonoid: Sized {
+        fn e() -&gt; Self;
+        fn opr_lhs(&amp;mut self, rhs: &amp;Self);
+        fn opr_rhs(&amp;mut self, lhs: &amp;Self);
+        fn opr(lhs: &amp;Self, rhs: &amp;Self) -&gt; Self {
+            let mut ret = Self::e();
+            ret.opr_rhs(lhs);
+            ret.opr_lhs(rhs);
+            ret
         }
-        self.data[i] = v.clone();
-        for j in 1..=self.log {
-            self.update(i &gt;&gt; j);
-        }
-    }
-
-    /// Returns a reference to the value at the index `i`.
-    fn get(&amp;mut self, i: usize) -&gt; &amp;S {
-        let i = i + self.size;
-        for j in (1..=self.log).rev() {
-            self.push(i &gt;&gt; j);
-        }
-        &amp;self.data[i]
-    }
-
-    /// Returns a product of elements in [l, r).
-    fn prod(&amp;mut self, l: usize, r: usize) -&gt; S {
-        if l == r {
-            return S::e();
-        }
-
-        let (mut l, mut r) = (l + self.size, r + self.size);
-
-        for i in (1..=self.log).rev() {
-            if ((l &gt;&gt; i) &lt;&lt; i) != l {
-                self.push(l &gt;&gt; i);
-            }
-            if ((r &gt;&gt; i) &lt;&lt; i) != r {
-                self.push((r - 1) &gt;&gt; i);
-            }
-        }
-
-        let (mut sml, mut smr) = (S::e(), S::e());
-        while l &lt; r {
-            if l &amp; 1 == 1 {
-                sml = sml.opr(&amp;self.data[l]);
-                l += 1;
-            }
-            if r &amp; 1 == 1 {
-                r -= 1;
-                smr = self.data[r].opr(&amp;smr);
-            }
-            l &gt;&gt;= 1;
-            r &gt;&gt;= 1;
-        }
-
-        sml.opr(&amp;smr)
-    }
-
-    /// Returns the product of every elements.
-    fn all_prod(&amp;self) -&gt; S {
-        self.data[1].clone()
-    }
-
-    /// Apply a map `f` to the element at `i`.
-    fn apply(&amp;mut self, i: usize, f: &amp;F) {
-        let i = i + self.size;
-        for j in (1..=self.log).rev() {
-            self.push(i &gt;&gt; j);
-        }
-        self.data[i] = f.map(&amp;self.data[i]);
-        for j in 1..=self.log {
-            self.update(i &gt;&gt; j);
+        fn opr_set(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self) {
+            *self = Self::opr(lhs, rhs);
         }
     }
 
-    /// Apply a map `f` to the element in an interval [l, r).
-    fn apply_range(&amp;mut self, l: usize, r: usize, f: &amp;F) {
-        if l == r {
-            return;
+    pub trait LzMap&lt;S&gt;: Sized {
+        fn id() -&gt; Self;
+        fn map(&amp;self, apply: &amp;mut S);
+        fn compos_lhs(&amp;mut self, rhs: &amp;Self);
+        fn compos_rhs(&amp;mut self, lhs: &amp;Self);
+        fn compos(lhs: &amp;Self, rhs: &amp;Self) -&gt; Self {
+            let mut ret = Self::id();
+            ret.compos_rhs(lhs);
+            ret.compos_lhs(rhs);
+            ret
         }
-
-        let (mut l, mut r) = (l + self.size, r + self.size);
-
-        for i in (1..=self.log).rev() {
-            if ((l &gt;&gt; i) &lt;&lt; i) != l {
-                self.push(l &gt;&gt; i);
-            }
-            if ((r &gt;&gt; i) &lt;&lt; i) != r {
-                self.push((r - 1) &gt;&gt; i);
-            }
-        }
-
-        let (l2, r2) = (l, r);
-        while l &lt; r {
-            if l &amp; 1 == 1 {
-                self.all_apply(l, f);
-                l += 1;
-            }
-            if r &amp; 1 == 1 {
-                r -= 1;
-                self.all_apply(r, f);
-            }
-            l &gt;&gt;= 1;
-            r &gt;&gt;= 1;
-        }
-        l = l2;
-        r = r2;
-
-        for i in 1..=self.log {
-            if ((l &gt;&gt; i) &lt;&lt; i) != l {
-                self.update(l &gt;&gt; i);
-            }
-            if ((r &gt;&gt; i) &lt;&lt; i) != r {
-                self.update((r - 1) &gt;&gt; i);
-            }
+        fn opr_self(&amp;mut self, lhs: &amp;Self, rhs: &amp;Self) {
+            *self = Self::compos(lhs, rhs);
         }
     }
-    
-    fn max_right&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, l: usize, g: C) -&gt; usize {
-        if l == self.n {
-            return self.n;
+
+    pub struct LazySeg&lt;S, F&gt; {
+        n: usize,
+        size: usize,
+        log: u32,
+        data: Vec&lt;S&gt;,
+        lazy: Vec&lt;F&gt;,
+    }
+
+    impl&lt;S, F&gt; LazySeg&lt;S, F&gt;
+    where
+        S: LzMonoid,
+        F: LzMap&lt;S&gt;,
+    {
+        fn update(&amp;mut self, k: usize) {
+            let val = S::opr(&amp;self.data[k &lt;&lt; 1], &amp;self.data[(k &lt;&lt; 1) + 1]);
+            self.data[k] = val;
         }
 
-        let mut l = l + self.size;
-        for i in (1..=self.log).rev() {
-            self.push(l &gt;&gt; i);
-        }
-
-        let mut sm = S::e();
-        loop {
-            while l &amp; 1 == 0 {
-                l &gt;&gt;= 1;
+        fn all_apply(&amp;mut self, k: usize, f: &amp;F) {
+            f.map(&amp;mut self.data[k]);
+            if k &lt; self.size {
+                self.lazy[k].compos_rhs(f);
             }
-            if !g(&amp;sm.opr(&amp;self.data[l])) {
-                while l &lt; self.size {
-                    self.push(l);
-                    l &lt;&lt;= 1;
-                    if g(&amp;sm.opr(&amp;self.data[l])) {
-                        sm = sm.opr(&amp;self.data[l]);
-                        l += 1;
-                    }
+        }
+
+        fn all_apply_unsafe(size: usize, k: usize, f: usize, data: &amp;mut [S], lazy: &amp;mut [F]) {
+            // f &lt; k
+            lazy[f].map(&amp;mut data[k]);
+            if k &lt; size {
+                let (fs, ks) = lazy.split_at_mut(k);
+                ks[0].compos_rhs(&amp;fs[f]);
+            }
+        }
+
+        fn push(&amp;mut self, k: usize) {
+            Self::all_apply_unsafe(self.size, k &lt;&lt; 1, k, &amp;mut self.data, &amp;mut self.lazy);
+            Self::all_apply_unsafe(self.size, (k &lt;&lt; 1) + 1, k, &amp;mut self.data, &amp;mut self.lazy);
+            self.lazy[k] = F::id();
+        }
+
+        pub fn new(arr: Vec&lt;S&gt;) -&gt; Self {
+            let n = arr.len();
+            let log = ceil_pow2(n);
+            let size = 1 &lt;&lt; log;
+            let stsize = 1 &lt;&lt; (log + 1);
+
+            let mut data = Vec::with_capacity(stsize);
+            data.extend((0..size).map(|_| S::e()));
+            data.extend(arr.into_iter());
+            data.extend((data.len()..stsize).map(|_| S::e()));
+
+            let mut ls = Self {
+                n,
+                log,
+                size,
+                data,
+                lazy: Vec::from_iter((0..size).map(|_| F::id())),
+            };
+            for i in (1..size).rev() {
+                ls.update(i);
+            }
+            ls
+        }
+
+        pub fn set(&amp;mut self, i: usize, v: S) {
+            let i = i + self.size;
+            for j in (1..=self.log).rev() {
+                self.push(i &gt;&gt; j);
+            }
+            self.data[i] = v;
+            for j in 1..=self.log {
+                self.update(i &gt;&gt; j);
+            }
+        }
+
+        pub fn get(&amp;mut self, i: usize) -&gt; &amp;S {
+            let i = i + self.size;
+            for j in (1..=self.log).rev() {
+                self.push(i &gt;&gt; j);
+            }
+            &amp;self.data[i]
+        }
+
+        pub fn prod(&amp;mut self, range: impl RangeBounds&lt;usize&gt;) -&gt; S {
+            let (l, r) = range_to_bounds(self.size, range);
+
+            if l == 0 &amp;&amp; r == self.size {
+                let mut ret = S::e();
+                ret.opr_lhs(&amp;self.data[1]);
+                return ret;
+            } else if l == r {
+                return S::e();
+            }
+
+            let (mut l, mut r) = (l + self.size, r + self.size);
+
+            for i in (1..=self.log).rev() {
+                if ((l &gt;&gt; i) &lt;&lt; i) != l {
+                    self.push(l &gt;&gt; i);
                 }
-                return l - self.size;
+                if ((r &gt;&gt; i) &lt;&lt; i) != r {
+                    self.push((r - 1) &gt;&gt; i);
+                }
             }
-            sm = sm.opr(&amp;self.data[l]);
-            l += 1;
 
-            if l &amp; ((!l) + 1) != l {
-                break;
-            }
-        }
-        self.n
-    }
-    
-    fn min_left&lt;C: Fn(&amp;S) -&gt; bool&gt;(&amp;mut self, r: usize, g: C) -&gt; usize {
-        if r == 0 {
-            return 0;
-        }
-
-        let mut r = r + self.size;
-        for i in (1..=self.log).rev() {
-            self.push((r - 1) &gt;&gt; i);
-        }
-
-        let mut sm = S::e();
-        loop {
-            r -= 1;
-            while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+            let (mut sml, mut smr) = (S::e(), S::e());
+            while l &lt; r {
+                if l &amp; 1 == 1 {
+                    sml.opr_lhs(&amp;self.data[l]);
+                    l += 1;
+                }
+                if r &amp; 1 == 1 {
+                    r -= 1;
+                    smr.opr_rhs(&amp;self.data[r]);
+                }
+                l &gt;&gt;= 1;
                 r &gt;&gt;= 1;
             }
-            if !g(&amp;self.data[r].opr(&amp;sm)) {
-                while r &lt; self.size {
-                    self.push(r);
-                    r = (r &lt;&lt; 1) + 1;
-                    if g(&amp;self.data[r].opr(&amp;sm)) {
-                        sm = self.data[r].opr(&amp;sm);
-                        r -= 1;
-                    }
-                }
-                return r + 1 - self.size;
-            }
-            sm = self.data[r].opr(&amp;sm);
 
-            if r &amp; ((!r) + 1) == r {
-                break;
+            S::opr(&amp;sml, &amp;smr)
+        }
+
+        pub fn apply(&amp;mut self, i: usize, f: &amp;F) {
+            let i = i + self.size;
+            for j in (1..=self.log).rev() {
+                self.push(i &gt;&gt; j);
+            }
+            f.map(&amp;mut self.data[i]);
+            for j in 1..=self.log {
+                self.update(i &gt;&gt; j);
             }
         }
-        0
+
+        pub fn apply_range(&amp;mut self, range: impl RangeBounds&lt;usize&gt;, f: &amp;F) {
+            let (l, r) = range_to_bounds(self.size, range);
+
+            if l == r {
+                return;
+            }
+
+            let (mut l, mut r) = (l + self.size, r + self.size);
+
+            for i in (1..=self.log).rev() {
+                if ((l &gt;&gt; i) &lt;&lt; i) != l {
+                    self.push(l &gt;&gt; i);
+                }
+                if ((r &gt;&gt; i) &lt;&lt; i) != r {
+                    self.push((r - 1) &gt;&gt; i);
+                }
+            }
+
+            let (l2, r2) = (l, r);
+            while l &lt; r {
+                if l &amp; 1 == 1 {
+                    self.all_apply(l, f);
+                    l += 1;
+                }
+                if r &amp; 1 == 1 {
+                    r -= 1;
+                    self.all_apply(r, f);
+                }
+                l &gt;&gt;= 1;
+                r &gt;&gt;= 1;
+            }
+            l = l2;
+            r = r2;
+
+            for i in 1..=self.log {
+                if ((l &gt;&gt; i) &lt;&lt; i) != l {
+                    self.update(l &gt;&gt; i);
+                }
+                if ((r &gt;&gt; i) &lt;&lt; i) != r {
+                    self.update((r - 1) &gt;&gt; i);
+                }
+            }
+        }
+
+        pub fn max_right(&amp;mut self, l: usize, g: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+            if l == self.n {
+                return self.n;
+            }
+
+            let mut l = l + self.size;
+            for i in (1..=self.log).rev() {
+                self.push(l &gt;&gt; i);
+            }
+
+            let mut sm = S::e();
+            loop {
+                l &gt;&gt;= l.trailing_zeros();
+                if !g(&amp;S::opr(&amp;sm, &amp;self.data[l])) {
+                    while l &lt; self.size {
+                        self.push(l);
+                        l &lt;&lt;= 1;
+                        let tmp = S::opr(&amp;sm, &amp;self.data[l]);
+                        if g(&amp;tmp) {
+                            sm = tmp;
+                            l += 1;
+                        }
+                    }
+                    return l - self.size;
+                }
+                sm.opr_lhs(&amp;self.data[l]);
+                l += 1;
+
+                if l &amp; ((!l) + 1) != l {
+                    break;
+                }
+            }
+
+            self.n
+        }
+
+        pub fn min_left(&amp;mut self, r: usize, g: impl Fn(&amp;S) -&gt; bool) -&gt; usize {
+            if r == 0 {
+                return 0;
+            }
+
+            let mut r = r + self.size;
+            for i in (1..=self.log).rev() {
+                self.push((r - 1) &gt;&gt; i);
+            }
+
+            let mut sm = S::e();
+            loop {
+                r -= 1;
+                while r &gt; 1 &amp;&amp; r &amp; 1 == 1 {
+                    r &gt;&gt;= 1;
+                }
+
+                if !g(&amp;S::opr(&amp;self.data[r], &amp;sm)) {
+                    while r &lt; self.size {
+                        self.push(r);
+                        r = (r &lt;&lt; 1) + 1;
+                        let tmp = S::opr(&amp;self.data[r], &amp;sm);
+                        if g(&amp;tmp) {
+                            sm = tmp;
+                            r -= 1;
+                        }
+                    }
+                    return r + 1 - self.size;
+                }
+                sm.opr_rhs(&amp;self.data[r]);
+
+                if r &amp; ((!r) + 1) == r {
+                    break;
+                }
+            }
+
+            0
+        }
     }
 }</code></pre>
-<h2 id="using-max_right-and-min_left"><a class="header" href="#using-max_right-and-min_left">Using max_right and min_left</a></h2>
-<h3 id="max_right"><a class="header" href="#max_right">max_right</a></h3>
+<h2 id="apis-1"><a class="header" href="#apis-1">APIs</a></h2>
+<p>Will be done soon. For <code>max_right</code> and <code>min_left</code>, either check the explanation from <a href="datastructure/segtree/./segtree.html#apis">the segment tree documentation</a>, or see the below mathematical definitions (which will be replaced with better explanation).</p>
+<h3 id="max_right"><a class="header" href="#max_right"><code>max_right</code></a></h3>
 <p>Given an index \(l\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
 <ul>
 <li>\(r=l\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
@@ -2387,8 +2807,8 @@ where
 <p>If \(f\) is monotone, this is the maximum \(r\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
 <p>It should be guaranteed that \(f(e)\) is true, \(0 \leq l \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
 <p>The search for \(r\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
-<h3 id="min_left"><a class="header" href="#min_left">min_left</a></h3>
-<p>Given an index \(r\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
+<h3 id="min_left"><a class="header" href="#min_left"><code>min_left</code></a></h3>
+<p>Given an index \(r\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(l\) such that satisfies both of the following conditions:</p>
 <ul>
 <li>\(l=r\) or \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \)</li>
 <li>\(l=0\) or \( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \)</li>
@@ -2396,52 +2816,9 @@ where
 <p>If \(f\) is monotone, this is the minimum \(l\) that satisfies \( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \).</p>
 <p>It should be guaranteed that \(f(e)\) is true, \(0 \leq r \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
 <p>The search for \(l\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
-<h2 id="examples-of-monoid-and-mapping-implementation"><a class="header" href="#examples-of-monoid-and-mapping-implementation">Examples of monoid and mapping implementation</a></h2>
-<h3 id="axb-lazy-segment-tree"><a class="header" href="#axb-lazy-segment-tree">\(ax+b\) lazy segment tree</a></h3>
-<pre><code class="language-rust noplayground">#[derive(Clone)]
-struct Elm {
-    len: i128,
-    sum: i128,
-}
-
-impl Monoid for Elm {
-    fn opr(&amp;self, other: &amp;Self) -&gt; Self {
-        Self {
-            len: self.len + other.len,
-            sum: self.sum + other.sum,
-        }
-    }
-    fn e() -&gt; Self {
-        Self { len: 0, sum: 0 }
-    }
-}
-
-#[derive(Clone)]
-struct Map {
-    mul: i128,
-    add: i128,
-}
-
-impl Mapping&lt;Elm&gt; for Map {
-    fn map(&amp;self, apply: &amp;Elm) -&gt; Elm {
-        Elm {
-            len: apply.len,
-            sum: self.mul * apply.sum + self.add * apply.len,
-        }
-    }
-    fn compos(&amp;self, other: &amp;Self) -&gt; Self {
-        Self {
-            mul: self.mul * other.mul,
-            add: self.mul * other.add + self.add,
-        }
-    }
-    fn id() -&gt; Self {
-        Self { mul: 1, add: 0 }
-    }
-}</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rope"><a class="header" href="#rope">Rope</a></h1>
 <p>Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \( O(\log{N}) \). However, accessing values also takes amortized \( O(\log{x}) \) time. Building a rope from an iterator takes \( O(N) \).</p>
-<h2 id="example-10"><a class="header" href="#example-10">Example</a></h2>
+<h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>use rope::Rope;
 
@@ -3101,7 +3478,7 @@ println!(&quot;{:?}&quot;, arr);
 </span><span class="boring">        }
 </span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-9"><a class="header" href="#code-9">Code</a></h2>
+<h2 id="code-10"><a class="header" href="#code-10">Code</a></h2>
 <pre><code class="language-rust noplayground">mod rope {
     use std::{
         cmp::Ordering,
@@ -3870,7 +4247,7 @@ impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dijkstra"><a class="header" href="#dijkstra">Dijkstra</a></h1>
 <p><code>dijkstra(graph: &amp;Graph&lt;T&gt;, src: usize)</code> where <code>Graph&lt;T&gt;</code> is a <a href="graphs/./adjlist.html">graph representation</a>, <code>T</code> is a numeric data type, and <code>src</code> is an id of a source node. It returns a <code>dist = Vec&lt;Option&lt;T&gt;&gt;</code>, where <code>dist[dst]</code> is the length of a shortest path from <code>src</code> to <code>dst</code> if it exists, or <code>None</code> if <code>dst</code> is unreachable from <code>src</code>.</p>
-<h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
+<h2 id="example-12"><a class="header" href="#example-12">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let mut g: Graph&lt;i64&gt; = Graph::new(4, 3);
 g.add_edge(0, 1, 5);
@@ -3948,7 +4325,7 @@ println!(&quot;{:?}&quot;, dijkstra(&amp;g, 0));
 </span><span class="boring">    }
 </span><span class="boring">    dist
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-10"><a class="header" href="#code-10">Code</a></h2>
+<h2 id="code-11"><a class="header" href="#code-11">Code</a></h2>
 <pre><code class="language-rust noplayground">fn dijkstra&lt;T: Copy + From&lt;u8&gt; + std::ops::Add&lt;Output = T&gt; + Eq + Ord&gt;(
     graph: &amp;Graph&lt;T&gt;,
     src: usize,
@@ -3976,7 +4353,7 @@ println!(&quot;{:?}&quot;, dijkstra(&amp;g, 0));
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="disjoint-set-union"><a class="header" href="#disjoint-set-union">Disjoint Set Union</a></h1>
 <p>Disjoint set union data structure.</p>
-<h2 id="example-12"><a class="header" href="#example-12">Example</a></h2>
+<h2 id="example-13"><a class="header" href="#example-13">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">struct UnionFind {
 </span><span class="boring">    n: usize,
 </span><span class="boring">    parent: Vec&lt;usize&gt;,
@@ -4022,7 +4399,7 @@ println!(&quot;{}&quot;, uf.is_differ(2, 6)); // true
 uf.union(2, 6);
 println!(&quot;{}&quot;, uf.is_differ(2, 6)); // false
 <span class="boring">}</span></code></pre></pre>
-<h2 id="code-11"><a class="header" href="#code-11">Code</a></h2>
+<h2 id="code-12"><a class="header" href="#code-12">Code</a></h2>
 <pre><code class="language-rust noplayground">struct UnionFind {
     n: usize,
     parent: Vec&lt;usize&gt;,
@@ -4072,7 +4449,7 @@ impl UnionFind {
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="weighted-dsu"><a class="header" href="#weighted-dsu">Weighted DSU</a></h1>
 <p>Disjoint set union where vertices have their own &quot;potential value&quot;.</p>
-<h2 id="code-12"><a class="header" href="#code-12">Code</a></h2>
+<h2 id="code-13"><a class="header" href="#code-13">Code</a></h2>
 <pre><code class="language-rust noplayground">struct WeightDSU {
     n: usize,
     group_num: usize,
@@ -4348,7 +4725,7 @@ impl TwoSat {
 <p>Given a <code>KMPNeedle</code> instance <code>p</code> and an array target \(T\), <code>KMPMatcher::new(&amp;p, T)</code> returns an iterator yielding indicies where \(P\) appears within \(T\). Even if some ranges where \(P\) exists within \(T\) overlap with each other, they are still all yielded as shown in the second string from the example <code>&quot;ABCDABCDABCD&quot;</code>.</p>
 <p><code>KMPNeedle::new(P)</code> runs in a time complexity of \(O(\left| P \right|)\) and <code>KMPMatcher::new(T)</code> takes a time complexity of \(O(\left| T \right|)\) to be consumed. <code>KMPMatcher</code> searches for a pattern lazily, so it only takes time of total searched length in \(T\).</p>
 <p>A single <code>KMPNeedle</code> instance can be used to search \(P\) in multiple arrays as shown in the example.</p>
-<h2 id="example-13"><a class="header" href="#example-13">Example</a></h2>
+<h2 id="example-14"><a class="header" href="#example-14">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let pattern = &quot;ABCDABC&quot;;
 let targets = vec![&quot;ABDABCDABCE&quot;, &quot;ABCDABCDABCD&quot;, &quot;ABBCCABCDABDABCDABC&quot;];
@@ -4427,7 +4804,7 @@ for &amp;t in targets.iter() {
 </span><span class="boring">        None
 </span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-13"><a class="header" href="#code-13">Code</a></h2>
+<h2 id="code-14"><a class="header" href="#code-14">Code</a></h2>
 <pre><code class="language-rust noplayground">struct KMPNeedle&lt;'a, T: PartialEq&gt; {
     p: &amp;'a [T],
     c: Vec&lt;usize&gt;,
@@ -4495,7 +4872,7 @@ impl&lt;'a, 'b: 'a, 'c: 'b, T: PartialEq&gt; Iterator for KMPMatcher&lt;'a, 'b, 
 <div style="break-before: page; page-break-before: always;"></div><h1 id="manacher"><a class="header" href="#manacher">Manacher</a></h1>
 <p>For an array \(A\) of length \(n\), <code>manacher(A)</code> returns a vector \(M\) where, for every \(i \in \left[0, n\right)\), \(A_{i-j} = A_{i+j}\) holds for every \(j \in \left[0, M_i \right)\).</p>
 <p>Additional modification should be added by a user to use this function for finding every palindromes among subsequences of a string.</p>
-<h2 id="example-14"><a class="header" href="#example-14">Example</a></h2>
+<h2 id="example-15"><a class="header" href="#example-15">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;abracadacabra&quot;.as_bytes();
 let man = manacher(s);
@@ -4538,7 +4915,7 @@ for i in 0..s.len() {
 </span><span class="boring">
 </span><span class="boring">    mana
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-14"><a class="header" href="#code-14">Code</a></h2>
+<h2 id="code-15"><a class="header" href="#code-15">Code</a></h2>
 <pre><code class="language-rust noplayground">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;usize&gt; {
     let n = arr.len();
     let mut mana: Vec&lt;usize&gt; = vec![1; n];
@@ -4579,7 +4956,7 @@ for i in 0..s.len() {
 </ul>
 <p>\(SA\) and \(LCP\) are called &quot;suffix array&quot; and &quot;LCP array&quot; of \(A\) respectively.</p>
 <p>For finding SA, Manber-Myers algorithm combined with counting sort is used, hence the time complexity is \(O(n\log{n})\). For LCP array, Kasai's algorithm is used, hence the time complexity is \(O(n)\). The total time complexity is \(O(n\log{n})\).</p>
-<h2 id="example-15"><a class="header" href="#example-15">Example</a></h2>
+<h2 id="example-16"><a class="header" href="#example-16">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;asdsdasd&quot;;
 let (sa, lcp) = sa_lcp(s.as_bytes());
@@ -4687,7 +5064,7 @@ println!(&quot;{:?}&quot;, lcp); // [x, 3, 0, 1, 1, 0, 2, 2]
 </span><span class="boring">    }
 </span><span class="boring">    (sa, lcp)
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-15"><a class="header" href="#code-15">Code</a></h2>
+<h2 id="code-16"><a class="header" href="#code-16">Code</a></h2>
 <pre><code class="language-rust noplayground">// Suffix array and LCP array
 // Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
 
@@ -4915,7 +5292,7 @@ fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
     stack
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<h2 id="example-16"><a class="header" href="#example-16">Example</a></h2>
+<h2 id="example-17"><a class="header" href="#example-17">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let arr: Vec&lt;i32&gt; = vec![1, 2, 4, 7, 9, 7, 4, 2, 1];
 
@@ -4941,7 +5318,7 @@ println!(&quot;{:?}&quot;, original); // [1, 2, 4, 7, 9, 7, 4, 2, 1]
 </span><span class="boring">    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
 </span><span class="boring">    (compressor, reevaluator)
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-16"><a class="header" href="#code-16">Code</a></h2>
+<h2 id="code-17"><a class="header" href="#code-17">Code</a></h2>
 <h3 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h3>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
@@ -5105,7 +5482,7 @@ fn isqrt(s: u32) -&gt; u32 {
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="arbitrary-precision-integer"><a class="header" href="#arbitrary-precision-integer">Arbitrary-Precision Integer</a></h1>
-<h2 id="example-17"><a class="header" href="#example-17">Example</a></h2>
+<h2 id="example-18"><a class="header" href="#example-18">Example</a></h2>
 <pre><code class="language-rust noplayground">use bigint::*;
 
 let _a = Int::from(0i8);
@@ -5119,7 +5496,7 @@ println!(&quot;{}&quot;, x);
 let mut y = Int::from_str(&quot;123456789123456789123456789123456789&quot;).unwrap();
 let z = &amp;y * &amp;c;
 println!(&quot;{}&quot;, y);</code></pre>
-<h2 id="code-17"><a class="header" href="#code-17">Code</a></h2>
+<h2 id="code-18"><a class="header" href="#code-18">Code</a></h2>
 <pre><code class="language-rust noplayground">mod bigint {
     use core::{
         fmt::Display,
@@ -5761,7 +6138,7 @@ println!(&quot;{}&quot;, y);</code></pre>
 <p>Both function has its &quot;Option&quot; equivalents. <code>sc.next_str_option()</code> returns the next token as <code>Some(&amp;str)</code>. This function returns <code>None</code> instead of panicing the whole program, compared to <code>sc.next_str()</code>. <code>sc.next_option()</code> works just like <code>sc.next()</code> except that it returns <code>Option&lt;T&gt;</code> so that the function returns <code>None</code> instead of panicing. These functions are useful when the code needs to detect <code>EOF</code>.</p>
 <p><code>next!</code> macros are for easy-typing for inputs. <code>next!()</code> is equivalent to <code>sc.next()</code>. You can specify the return type of it by using <code>next!(T)</code>. Multiple types can also be used as arguments, delimited by spaces: <code>next!(T U V)</code> returns a tuple <code>(T, U, V)</code>. Lastly, <code>next!(str)</code> is equivalent to <code>sc.next_str()</code>.</p>
 <p><code>out!</code> and <code>outln!</code> are just the same with <code>print!</code> and <code>println!</code>, but the stdout flush is buffered for faster output.</p>
-<h3 id="example-18"><a class="header" href="#example-18">Example</a></h3>
+<h3 id="example-19"><a class="header" href="#example-19">Example</a></h3>
 <pre><code class="language-rust noplayground">// Main
 let n: usize = next!();      // Identical to `let n: usize = sc.next();`
 let m = next!(usize);        // Identical to `let m = sc.next::&lt;usize&gt;();`
@@ -5773,7 +6150,7 @@ let word = next!(str);
 out!(&quot;{} &quot;, a);
 outln!(&quot;{}&quot;, b);
 outln!(&quot;{:?}&quot;, [n, m]);</code></pre>
-<h2 id="code-18"><a class="header" href="#code-18">Code</a></h2>
+<h2 id="code-19"><a class="header" href="#code-19">Code</a></h2>
 <h3 id="for-linux-almost-every-ojs-including-atcoder"><a class="header" href="#for-linux-almost-every-ojs-including-atcoder">For Linux (Almost every OJs including AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
 

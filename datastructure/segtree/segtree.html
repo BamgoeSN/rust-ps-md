@@ -163,7 +163,7 @@
 <h2 id="example"><a class="header" href="#example">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">use segtree::*;
 </span><span class="boring">
-</span>// Interval sum segment tree
+</span>// Range sum segment tree
 impl Monoid for i32 {
     fn e() -&gt; Self { 0 }
     fn opr_lhs(&amp;mut self, rhs: &amp;Self) { *self += rhs; }
