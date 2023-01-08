@@ -2009,7 +2009,7 @@ println!(&quot;{}&quot;, l);             // 0
 <li>Calculate the sum of the elements of an interval</li>
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
-<p>A type of elements of \(A\) must be a primitive signed integer type, such as <code>i32</code> and <code>i64</code>, and floats such as <code>f64</code>. Unsigned integer types like <code>u64</code> do not work.</p>
+<p>A type of elements of \(A\) must be a primitive signed integer type, such as <code>i32</code> and <code>i64</code>, and floats such as <code>f64</code>. Unsigned integer types like <code>u64</code> do not work. Specifically, the type should implement <code>From&lt;i8&gt;</code>.</p>
 <h2 id="example-9"><a class="header" href="#example-9">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let mut fw: Fenwick&lt;i32&gt; = Fenwick::new(10);
@@ -2017,7 +2017,6 @@ for i in 0..10 {
     print!(&quot;{} &quot;, fw.get(i));
 }
 println!(); // 0 0 0 0 0 0 0 0 0 0
-
 fw.add(2, 10);
 fw.add(5, 100);
 fw.add(3, -1);
@@ -2025,9 +2024,9 @@ for i in 0..10 {
     print!(&quot;{} &quot;, fw.get(i));
 }
 println!(); // 0 0 10 -1 0 100 0 0 0 0
+println!(&quot;{}&quot;, fw.sum(3..8)); // 99
 <span class="boring">}
 </span><span class="boring">
-</span><span class="boring">#[derive(Clone, Debug)]
 </span><span class="boring">struct Fenwick&lt;T&gt; {
 </span><span class="boring">    n: usize,
 </span><span class="boring">    data: Vec&lt;T&gt;,
@@ -2050,10 +2049,21 @@ println!(); // 0 0 10 -1 0 100 0 0 0 0
 </span><span class="boring">    }
 </span><span class="boring">
 </span><span class="boring">    fn get(&amp;self, idx: usize) -&gt; T {
-</span><span class="boring">        self.sum(idx, idx + 1)
+</span><span class="boring">        self.sum(idx..=idx)
 </span><span class="boring">    }
 </span><span class="boring">
-</span><span class="boring">    fn sum(&amp;self, l: usize, r: usize) -&gt; T {
+</span><span class="boring">    fn sum(&amp;self, range: impl std::ops::RangeBounds&lt;usize&gt;) -&gt; T {
+</span><span class="boring">        use std::ops::Bound::*;
+</span><span class="boring">        let l = match range.start_bound() {
+</span><span class="boring">            Included(&amp;v) =&gt; v,
+</span><span class="boring">            Excluded(&amp;v) =&gt; v + 1,
+</span><span class="boring">            Unbounded =&gt; 0,
+</span><span class="boring">        };
+</span><span class="boring">        let r = match range.end_bound() {
+</span><span class="boring">            Included(&amp;v) =&gt; v + 1,
+</span><span class="boring">            Excluded(&amp;v) =&gt; v,
+</span><span class="boring">            Unbounded =&gt; self.n,
+</span><span class="boring">        };
 </span><span class="boring">        self.inner_sum(r) - self.inner_sum(l)
 </span><span class="boring">    }
 </span><span class="boring">
@@ -2089,10 +2099,21 @@ impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output
     }
 
     fn get(&amp;self, idx: usize) -&gt; T {
-        self.sum(idx, idx + 1)
+        self.sum(idx..=idx)
     }
 
-    fn sum(&amp;self, l: usize, r: usize) -&gt; T {
+    fn sum(&amp;self, range: impl std::ops::RangeBounds&lt;usize&gt;) -&gt; T {
+        use std::ops::Bound::*;
+        let l = match range.start_bound() {
+            Included(&amp;v) =&gt; v,
+            Excluded(&amp;v) =&gt; v + 1,
+            Unbounded =&gt; 0,
+        };
+        let r = match range.end_bound() {
+            Included(&amp;v) =&gt; v + 1,
+            Excluded(&amp;v) =&gt; v,
+            Unbounded =&gt; self.n,
+        };
         self.inner_sum(r) - self.inner_sum(l)
     }
 
@@ -2817,7 +2838,7 @@ println!(&quot;{}&quot;, l); // 3
 <p>It should be guaranteed that \(f(e)\) is true, \(0 \leq r \leq n\), and \(f\) has no side effects i.e. calling \(f\) for the same value should always return the same result.</p>
 <p>The search for \(l\) is done by binary search, so the time complexity of this function is \( O(\log{n}) \).</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rope"><a class="header" href="#rope">Rope</a></h1>
-<p>Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \( O(\log{N}) \). However, accessing values also takes amortized \( O(\log{x}) \) time. Building a rope from an iterator takes \( O(N) \).</p>
+<p>Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \( O(\log{N}) \). However, accessing values also takes amortized \( O(\log{N}) \) time. Building a rope from an iterator takes \( O(N) \).</p>
 <h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>use rope::Rope;
