@@ -1,6 +1,6 @@
 # Rope
 
-Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \\( O(\log{N}) \\). However, accessing values also takes amortized \\( O(\log{x}) \\) time. Building a rope from an iterator takes \\( O(N) \\).
+Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \\( O(\log{N}) \\). However, accessing values also takes amortized \\( O(\log{N}) \\) time. Building a rope from an iterator takes \\( O(N) \\).
 
 ## Example
 ```rust
