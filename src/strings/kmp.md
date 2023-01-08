@@ -94,13 +94,13 @@ for &t in targets.iter() {
 ## Code
 
 ```rust,noplayground
-struct KMPNeedle<'a, T: PartialEq> {
-    p: &'a [T],
+struct KMPNeedle<'n, T: PartialEq> {
+    p: &'n [T],
     c: Vec<usize>,
 }
 
-impl<'a, T: PartialEq> KMPNeedle<'a, T> {
-    fn new(p: &'a [T]) -> Self {
+impl<'n, T: PartialEq> KMPNeedle<'n, T> {
+    fn new(p: &'n [T]) -> Self {
         let mut c: Vec<usize> = vec![0; p.len() + 1];
 
         let mut l = 0;
@@ -118,42 +118,42 @@ impl<'a, T: PartialEq> KMPNeedle<'a, T> {
     }
 }
 
-struct KMPMatcher<'a, 'b: 'a, 'c: 'b, T: PartialEq> {
-    needle: &'c KMPNeedle<'b, T>,
-    t: &'a [T],
-    i: usize,
-    j: usize,
+struct KMPMatcher<'h, 'n: 'h, 'a: 'n, T: PartialEq> {
+    needle: &'a KMPNeedle<'n, T>,
+    haystack: &'h [T],
+    hp: usize,
+    np: usize,
 }
 
-impl<'a, 'b: 'a, 'c: 'b, T: PartialEq> KMPMatcher<'a, 'b, 'c, T> {
-    fn new(needle: &'c KMPNeedle<'b, T>, t: &'a [T]) -> Self {
+impl<'h, 'n: 'h, 'a: 'n, T: PartialEq> KMPMatcher<'h, 'n, 'a, T> {
+    fn new(needle: &'a KMPNeedle<'n, T>, haystack: &'h [T]) -> Self {
         Self {
             needle,
-            t,
-            i: 0,
-            j: 0,
+            haystack,
+            hp: 0,
+            np: 0,
         }
     }
 }
 
-impl<'a, 'b: 'a, 'c: 'b, T: PartialEq> Iterator for KMPMatcher<'a, 'b, 'c, T> {
+impl<'h, 'n: 'h, 'a: 'n, T: PartialEq> Iterator for KMPMatcher<'h, 'n, 'a, T> {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while self.i < self.t.len() {
-            while self.j > 0 && self.t[self.i] != self.needle.p[self.j] {
-                self.j = self.needle.c[self.j];
+        while self.hp < self.haystack.len() {
+            while self.np > 0 && self.haystack[self.hp] != self.needle.p[self.np] {
+                self.np = self.needle.c[self.np];
             }
-            if self.t[self.i] == self.needle.p[self.j] {
-                if self.j == self.needle.p.len() - 1 {
-                    self.j = self.needle.c[self.j + 1];
-                    self.i += 1;
-                    return Some(self.i - self.needle.p.len());
+            if self.haystack[self.hp] == self.needle.p[self.np] {
+                if self.np == self.needle.p.len() - 1 {
+                    self.np = self.needle.c[self.np + 1];
+                    self.hp += 1;
+                    return Some(self.hp - self.needle.p.len());
                 } else {
-                    self.j += 1;
+                    self.np += 1;
                 }
             }
-            self.i += 1;
+            self.hp += 1;
         }
         None
     }
