@@ -19,7 +19,7 @@ assuming that calculating the product of two elements takes \\(O(1)\\) time.
 ```rust
 # use segtree::*;
 # 
-// Interval sum segment tree
+// Range sum segment tree
 impl Monoid for i32 {
     fn e() -> Self { 0 }
     fn opr_lhs(&mut self, rhs: &Self) { *self += rhs; }
