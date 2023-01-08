@@ -232,13 +232,13 @@ for &amp;t in targets.iter() {
 </span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
-<pre><code class="language-rust noplayground">struct KMPNeedle&lt;'a, T: PartialEq&gt; {
-    p: &amp;'a [T],
+<pre><code class="language-rust noplayground">struct KMPNeedle&lt;'n, T: PartialEq&gt; {
+    p: &amp;'n [T],
     c: Vec&lt;usize&gt;,
 }
 
-impl&lt;'a, T: PartialEq&gt; KMPNeedle&lt;'a, T&gt; {
-    fn new(p: &amp;'a [T]) -&gt; Self {
+impl&lt;'n, T: PartialEq&gt; KMPNeedle&lt;'n, T&gt; {
+    fn new(p: &amp;'n [T]) -&gt; Self {
         let mut c: Vec&lt;usize&gt; = vec![0; p.len() + 1];
 
         let mut l = 0;
