@@ -4536,209 +4536,605 @@ impl WeightDSU {
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="strongly-connected-components"><a class="header" href="#strongly-connected-components">Strongly Connected Components</a></h1>
-<pre><code class="language-rust noplayground">#[derive(Debug)]
-struct Graph&lt;T&gt; {
-    n: u32,
-    first: Vec&lt;u32&gt;,
-    edge: Vec&lt;(u32, u32, T)&gt;, // (to, prev, data)
-}
+<p>Code for calculating SCCs. Tarjan's algorithm is used for the algorithm. <a href="graphs/./adjlist.html">Adjancy list representation</a> should be included in the code for this snippet to work.</p>
+<h2 id="example-14"><a class="header" href="#example-14">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust">use scc::*;
+<span class="boring">
+</span><span class="boring">fn main() {
+</span>let mut graph: Graph&lt;()&gt; = Graph::new(5, 5);
 
-impl&lt;T&gt; Graph&lt;T&gt; {
-    fn new(n: u32, e: u32) -&gt; Self {
-        Self {
-            n,
-            first: vec![u32::MAX; n as usize],
-            edge: Vec::with_capacity(e as usize),
-        }
+graph.add_edge(0, 2, ());
+graph.add_edge(3, 0, ());
+graph.add_edge(2, 3, ());
+graph.add_edge(0, 1, ());
+graph.add_edge(1, 4, ());
+
+let scc = Scc::new(&amp;graph);
+println!(&quot;{:?}&quot;, scc.get_scc_list()); // [[3, 2, 0], [1], [4]]
+println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Graph&lt;T&gt; {
+</span><span class="boring">    n: usize,
+</span><span class="boring">    first: Vec&lt;usize&gt;,
+</span><span class="boring">    edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; Graph&lt;T&gt; {
+</span><span class="boring">    fn new(n: usize, e: usize) -&gt; Self {
+</span><span class="boring">        Self {
+</span><span class="boring">            n,
+</span><span class="boring">            first: vec![usize::MAX; n],
+</span><span class="boring">            edge: Vec::with_capacity(e),
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
+</span><span class="boring">        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
+</span><span class="boring">        self.edge.push((to, prev, data));
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn neighbor(&amp;self, of: usize) -&gt; Neighbor&lt;T&gt; {
+</span><span class="boring">        Neighbor {
+</span><span class="boring">            graph: self,
+</span><span class="boring">            next_edge: self.first[of],
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct Neighbor&lt;'g, T&gt; {
+</span><span class="boring">    graph: &amp;'g Graph&lt;T&gt;,
+</span><span class="boring">    next_edge: usize,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
+</span><span class="boring">    type Item = (usize, &amp;'g T);
+</span><span class="boring">
+</span><span class="boring">    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+</span><span class="boring">        let (to, next_edge, data) = self.graph.edge.get(self.next_edge)?;
+</span><span class="boring">        self.next_edge = *next_edge;
+</span><span class="boring">        Some((*to, data))
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod scc {
+</span><span class="boring">    use super::*;
+</span><span class="boring">    struct SccStack {
+</span><span class="boring">        stack: Vec&lt;u32&gt;,
+</span><span class="boring">        check: Vec&lt;bool&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl SccStack {
+</span><span class="boring">        fn new(cap: usize) -&gt; Self {
+</span><span class="boring">            Self {
+</span><span class="boring">                stack: vec![0; cap],
+</span><span class="boring">                check: vec![false; cap],
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn push(&amp;mut self, n: usize) {
+</span><span class="boring">            self.stack.push(n as u32);
+</span><span class="boring">            self.check[n] = true;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn pop(&amp;mut self) -&gt; Option&lt;usize&gt; {
+</span><span class="boring">            let tmp = self.stack.pop()? as usize;
+</span><span class="boring">            self.check[tmp] = false;
+</span><span class="boring">            Some(tmp)
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn contains(&amp;self, n: usize) -&gt; bool {
+</span><span class="boring">            self.check[n]
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub struct Scc&lt;'g, T&gt; {
+</span><span class="boring">        graph: &amp;'g Graph&lt;T&gt;,
+</span><span class="boring">        scc_list: Vec&lt;Vec&lt;usize&gt;&gt;,
+</span><span class="boring">        scc_ids: Vec&lt;usize&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl&lt;'g, T: 'g&gt; Scc&lt;'g, T&gt; {
+</span><span class="boring">        pub(super) fn new(graph: &amp;'g Graph&lt;T&gt;) -&gt; Self {
+</span><span class="boring">            let mut st = SccStack::new(graph.n);
+</span><span class="boring">            let mut list = vec![];
+</span><span class="boring">            let mut gid = 0;
+</span><span class="boring">            let mut id = vec![graph.n; graph.n];
+</span><span class="boring">            let mut low = vec![usize::MAX; graph.n];
+</span><span class="boring">
+</span><span class="boring">            for x in 0..graph.n {
+</span><span class="boring">                if id[x] != graph.n {
+</span><span class="boring">                    continue;
+</span><span class="boring">                }
+</span><span class="boring">                Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list);
+</span><span class="boring">            }
+</span><span class="boring">            list.reverse();
+</span><span class="boring">
+</span><span class="boring">            let mut ids = vec![0; graph.n];
+</span><span class="boring">            for (i, l) in list.iter().enumerate() {
+</span><span class="boring">                for &amp;v in l.iter() {
+</span><span class="boring">                    ids[v] = i;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            Self {
+</span><span class="boring">                graph,
+</span><span class="boring">                scc_list: list,
+</span><span class="boring">                scc_ids: ids,
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn dfs(
+</span><span class="boring">            graph: &amp;Graph&lt;T&gt;,
+</span><span class="boring">            curr: usize,
+</span><span class="boring">            gid: &amp;mut usize,
+</span><span class="boring">            id: &amp;mut Vec&lt;usize&gt;,
+</span><span class="boring">            low: &amp;mut Vec&lt;usize&gt;,
+</span><span class="boring">            st: &amp;mut SccStack,
+</span><span class="boring">            list: &amp;mut Vec&lt;Vec&lt;usize&gt;&gt;,
+</span><span class="boring">        ) {
+</span><span class="boring">            st.push(curr);
+</span><span class="boring">            id[curr] = *gid;
+</span><span class="boring">            low[curr] = *gid;
+</span><span class="boring">            *gid += 1;
+</span><span class="boring">
+</span><span class="boring">            for (next, _) in graph.neighbor(curr) {
+</span><span class="boring">                if id[next] == graph.n {
+</span><span class="boring">                    Self::dfs(graph, next, gid, id, low, st, list);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            for (next, _) in graph.neighbor(curr) {
+</span><span class="boring">                if st.contains(next) {
+</span><span class="boring">                    low[curr] = low[curr].min(low[next]);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            if id[curr] == low[curr] {
+</span><span class="boring">                let mut newlist = vec![];
+</span><span class="boring">                while let Some(popped) = st.pop() {
+</span><span class="boring">                    if popped == curr {
+</span><span class="boring">                        break;
+</span><span class="boring">                    }
+</span><span class="boring">                    newlist.push(popped);
+</span><span class="boring">                }
+</span><span class="boring">                newlist.push(curr);
+</span><span class="boring">                list.push(newlist);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Returns list of SCCs. Each vector in the list is a single SCC. The order of SCCs are
+</span><span class="boring">        /// sorted in topological order. That is,, if u and v are in different SCCs, and there is
+</span><span class="boring">        /// an edge from u to v, then the SCC containing u appears earlier than the SCC containing
+</span><span class="boring">        /// v in the list. The order of vertices in each SCC is unspecified.
+</span><span class="boring">        pub fn get_scc_list(&amp;self) -&gt; &amp;Vec&lt;Vec&lt;usize&gt;&gt; {
+</span><span class="boring">            &amp;self.scc_list
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Returns SCC ids. If u is in scc_list[i], then scc_id[u] = i.
+</span><span class="boring">        pub fn get_scc_ids(&amp;self) -&gt; &amp;Vec&lt;usize&gt; {
+</span><span class="boring">            &amp;self.scc_ids
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre></pre>
+<h2 id="code-14"><a class="header" href="#code-14">Code</a></h2>
+<pre><code class="language-rust noplayground">mod scc {
+    use super::*;
+    struct SccStack {
+        stack: Vec&lt;u32&gt;,
+        check: Vec&lt;bool&gt;,
     }
 
-    fn add_edge(&amp;mut self, from: u32, to: u32, data: T) {
-        let prev = std::mem::replace(&amp;mut self.first[from as usize], self.edge.len() as u32);
-        self.edge.push((to, prev, data));
-    }
-
-    fn neighbor(&amp;self, of: u32) -&gt; Neighbor&lt;T&gt; {
-        Neighbor {
-            graph: self,
-            next_edge: self.first[of as usize],
-        }
-    }
-}
-
-struct Neighbor&lt;'g, T&gt; {
-    graph: &amp;'g Graph&lt;T&gt;,
-    next_edge: u32,
-}
-
-impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
-    type Item = (u32, &amp;'g T);
-
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
-        let (to, next_edge, data) = self.graph.edge.get(self.next_edge as usize)?;
-        self.next_edge = *next_edge;
-        Some((*to, data))
-    }
-}
-
-struct SccStack {
-    stack: Vec&lt;u32&gt;,
-    check: Vec&lt;bool&gt;,
-}
-
-impl SccStack {
-    fn new(cap: u32) -&gt; Self {
-        Self {
-            stack: vec![0; cap as usize],
-            check: vec![false; cap as usize],
-        }
-    }
-
-    fn len(&amp;self) -&gt; u32 {
-        self.stack.len() as u32
-    }
-
-    fn push(&amp;mut self, n: u32) {
-        self.stack.push(n);
-        self.check[n as usize] = true;
-    }
-
-    fn get(&amp;self) -&gt; u32 {
-        self.stack[self.len() as usize - 1]
-    }
-
-    fn pop(&amp;mut self) -&gt; u32 {
-        let tmp = self.stack.pop().unwrap();
-        self.check[tmp as usize] = false;
-        tmp
-    }
-
-    fn is_in(&amp;self, n: u32) -&gt; bool {
-        self.check[n as usize]
-    }
-}
-
-struct SCC&lt;'g, T&gt; {
-    graph: &amp;'g Graph&lt;T&gt;,
-    scc_list: Vec&lt;Vec&lt;u32&gt;&gt;,
-    scc_ids: Vec&lt;u32&gt;,
-}
-
-impl&lt;'g, T: 'g&gt; SCC&lt;'g, T&gt; {
-    fn new(graph: &amp;'g Graph&lt;T&gt;) -&gt; Self {
-        let mut st = SccStack::new(graph.n);
-        let mut list: Vec&lt;Vec&lt;u32&gt;&gt; = Vec::new();
-        let mut gid: u32 = 0;
-        let mut id = vec![graph.n; graph.n as usize];
-        let mut low = vec![u32::MAX; graph.n as usize];
-
-        for x in 0..graph.n {
-            if id[x as usize] != graph.n {
-                continue;
+    impl SccStack {
+        fn new(cap: usize) -&gt; Self {
+            Self {
+                stack: vec![0; cap],
+                check: vec![false; cap],
             }
-            Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list)
-        }
-        list.reverse();
-
-        let mut ids = vec![0u32; graph.n as usize];
-        for (i, l) in list.iter().enumerate() {
-            for &amp;v in l.iter() {
-                ids[v as usize] = i as u32;
-            }
         }
 
-        Self {
-            graph,
-            scc_list: list,
-            scc_ids: ids,
+        fn push(&amp;mut self, n: usize) {
+            self.stack.push(n as u32);
+            self.check[n] = true;
+        }
+
+        fn pop(&amp;mut self) -&gt; Option&lt;usize&gt; {
+            let tmp = self.stack.pop()? as usize;
+            self.check[tmp] = false;
+            Some(tmp)
+        }
+
+        fn contains(&amp;self, n: usize) -&gt; bool {
+            self.check[n]
         }
     }
 
-    fn dfs(
-        graph: &amp;Graph&lt;T&gt;,
-        curr: u32,
-        gid: &amp;mut u32,
-        id: &amp;mut Vec&lt;u32&gt;,
-        low: &amp;mut Vec&lt;u32&gt;,
-        st: &amp;mut SccStack,
-        list: &amp;mut Vec&lt;Vec&lt;u32&gt;&gt;,
-    ) {
-        st.push(curr);
-        id[curr as usize] = *gid;
-        low[curr as usize] = *gid;
-        (*gid) += 1;
+    pub struct Scc&lt;'g, T&gt; {
+        graph: &amp;'g Graph&lt;T&gt;,
+        scc_list: Vec&lt;Vec&lt;usize&gt;&gt;,
+        scc_ids: Vec&lt;usize&gt;,
+    }
 
-        for (next, _) in graph.neighbor(curr) {
-            if id[next as usize] == graph.n {
-                Self::dfs(graph, next, gid, id, low, st, list);
+    impl&lt;'g, T: 'g&gt; Scc&lt;'g, T&gt; {
+        pub(super) fn new(graph: &amp;'g Graph&lt;T&gt;) -&gt; Self {
+            let mut st = SccStack::new(graph.n);
+            let mut list = vec![];
+            let mut gid = 0;
+            let mut id = vec![graph.n; graph.n];
+            let mut low = vec![usize::MAX; graph.n];
+
+            for x in 0..graph.n {
+                if id[x] != graph.n {
+                    continue;
+                }
+                Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list);
+            }
+            list.reverse();
+
+            let mut ids = vec![0; graph.n];
+            for (i, l) in list.iter().enumerate() {
+                for &amp;v in l.iter() {
+                    ids[v] = i;
+                }
+            }
+
+            Self {
+                graph,
+                scc_list: list,
+                scc_ids: ids,
             }
         }
 
-        for (next, _) in graph.neighbor(curr) {
-            if st.is_in(next) {
-                low[curr as usize] = low[curr as usize].min(low[next as usize]);
+        fn dfs(
+            graph: &amp;Graph&lt;T&gt;,
+            curr: usize,
+            gid: &amp;mut usize,
+            id: &amp;mut Vec&lt;usize&gt;,
+            low: &amp;mut Vec&lt;usize&gt;,
+            st: &amp;mut SccStack,
+            list: &amp;mut Vec&lt;Vec&lt;usize&gt;&gt;,
+        ) {
+            st.push(curr);
+            id[curr] = *gid;
+            low[curr] = *gid;
+            *gid += 1;
+
+            for (next, _) in graph.neighbor(curr) {
+                if id[next] == graph.n {
+                    Self::dfs(graph, next, gid, id, low, st, list);
+                }
+            }
+
+            for (next, _) in graph.neighbor(curr) {
+                if st.contains(next) {
+                    low[curr] = low[curr].min(low[next]);
+                }
+            }
+
+            if id[curr] == low[curr] {
+                let mut newlist = vec![];
+                while let Some(popped) = st.pop() {
+                    if popped == curr {
+                        break;
+                    }
+                    newlist.push(popped);
+                }
+                newlist.push(curr);
+                list.push(newlist);
             }
         }
 
-        if id[curr as usize] == low[curr as usize] {
-            let p = list.len();
-            list.push(Vec::new());
-            while st.len() != 0 &amp;&amp; st.get() != curr {
-                list[p].push(st.pop());
-            }
-            st.pop();
-            list[p].push(curr);
+        /// Returns list of SCCs. Each vector in the list is a single SCC. The order of SCCs are
+        /// sorted in topological order. That is,, if u and v are in different SCCs, and there is
+        /// an edge from u to v, then the SCC containing u appears earlier than the SCC containing
+        /// v in the list. The order of vertices in each SCC is unspecified.
+        pub fn get_scc_list(&amp;self) -&gt; &amp;Vec&lt;Vec&lt;usize&gt;&gt; {
+            &amp;self.scc_list
+        }
+
+        /// Returns SCC ids. If u is in scc_list[i], then scc_id[u] = i.
+        pub fn get_scc_ids(&amp;self) -&gt; &amp;Vec&lt;usize&gt; {
+            &amp;self.scc_ids
         }
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
-<p>Required snippets: <a href="graphs/./scc.html#strongly-connected-components">SCC</a></p>
-<pre><code class="language-rust noplayground">struct TwoSat {
-    n: u32,
-    graph: Graph&lt;()&gt;,
-}
+<p>2-SAT with \(N\) clauses can be solved with time complexity of \(O(N)\). SCC module should be with this snippet in the code.</p>
+<h2 id="example-15"><a class="header" href="#example-15">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust">use twosat::*;
 
-impl TwoSat {
-    fn new(n: u32, clause_num: u32) -&gt; Self {
-        Self {
-            n,
-            graph: Graph::new(n &lt;&lt; 1, clause_num &lt;&lt; 1),
-        }
+<span class="boring">
+</span><span class="boring">fn main() {
+</span>// (not 0 or 1) and (not 1 or 2) and (0 or 2) and (2 or 1)
+let mut ts = TwoSat::new(3, 4);
+ts.add_clause(0, false, 1, true);
+ts.add_clause(1, false, 2, true);
+ts.add_clause(0, true, 2, true);
+ts.add_clause(2, true, 1, true);
+println!(&quot;{:?}&quot;, ts.solve()); // Some([false, true, true])
+
+// (0 or 0) and (not 0 or not 0)
+let mut ts = TwoSat::new(1, 2);
+ts.add_clause(0, true, 0, true);
+ts.add_clause(0, false, 0, false);
+println!(&quot;{:?}&quot;, ts.solve()); // None
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">#[derive(Debug)]
+</span><span class="boring">struct Graph&lt;T&gt; {
+</span><span class="boring">    n: usize,
+</span><span class="boring">    first: Vec&lt;usize&gt;,
+</span><span class="boring">    edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;T&gt; Graph&lt;T&gt; {
+</span><span class="boring">    fn new(n: usize, e: usize) -&gt; Self {
+</span><span class="boring">        Self {
+</span><span class="boring">            n,
+</span><span class="boring">            first: vec![usize::MAX; n],
+</span><span class="boring">            edge: Vec::with_capacity(e),
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
+</span><span class="boring">        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
+</span><span class="boring">        self.edge.push((to, prev, data));
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    fn neighbor(&amp;self, of: usize) -&gt; Neighbor&lt;T&gt; {
+</span><span class="boring">        Neighbor {
+</span><span class="boring">            graph: self,
+</span><span class="boring">            next_edge: self.first[of],
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct Neighbor&lt;'g, T&gt; {
+</span><span class="boring">    graph: &amp;'g Graph&lt;T&gt;,
+</span><span class="boring">    next_edge: usize,
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
+</span><span class="boring">    type Item = (usize, &amp;'g T);
+</span><span class="boring">
+</span><span class="boring">    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+</span><span class="boring">        let (to, next_edge, data) = self.graph.edge.get(self.next_edge)?;
+</span><span class="boring">        self.next_edge = *next_edge;
+</span><span class="boring">        Some((*to, data))
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod scc {
+</span><span class="boring">    use super::*;
+</span><span class="boring">    struct SccStack {
+</span><span class="boring">        stack: Vec&lt;u32&gt;,
+</span><span class="boring">        check: Vec&lt;bool&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl SccStack {
+</span><span class="boring">        fn new(cap: usize) -&gt; Self {
+</span><span class="boring">            Self {
+</span><span class="boring">                stack: vec![0; cap],
+</span><span class="boring">                check: vec![false; cap],
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn push(&amp;mut self, n: usize) {
+</span><span class="boring">            self.stack.push(n as u32);
+</span><span class="boring">            self.check[n] = true;
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn pop(&amp;mut self) -&gt; Option&lt;usize&gt; {
+</span><span class="boring">            let tmp = self.stack.pop()? as usize;
+</span><span class="boring">            self.check[tmp] = false;
+</span><span class="boring">            Some(tmp)
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn contains(&amp;self, n: usize) -&gt; bool {
+</span><span class="boring">            self.check[n]
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub struct Scc&lt;'g, T&gt; {
+</span><span class="boring">        graph: &amp;'g Graph&lt;T&gt;,
+</span><span class="boring">        scc_list: Vec&lt;Vec&lt;usize&gt;&gt;,
+</span><span class="boring">        scc_ids: Vec&lt;usize&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl&lt;'g, T: 'g&gt; Scc&lt;'g, T&gt; {
+</span><span class="boring">        pub(super) fn new(graph: &amp;'g Graph&lt;T&gt;) -&gt; Self {
+</span><span class="boring">            let mut st = SccStack::new(graph.n);
+</span><span class="boring">            let mut list = vec![];
+</span><span class="boring">            let mut gid = 0;
+</span><span class="boring">            let mut id = vec![graph.n; graph.n];
+</span><span class="boring">            let mut low = vec![usize::MAX; graph.n];
+</span><span class="boring">
+</span><span class="boring">            for x in 0..graph.n {
+</span><span class="boring">                if id[x] != graph.n {
+</span><span class="boring">                    continue;
+</span><span class="boring">                }
+</span><span class="boring">                Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list);
+</span><span class="boring">            }
+</span><span class="boring">            list.reverse();
+</span><span class="boring">
+</span><span class="boring">            let mut ids = vec![0; graph.n];
+</span><span class="boring">            for (i, l) in list.iter().enumerate() {
+</span><span class="boring">                for &amp;v in l.iter() {
+</span><span class="boring">                    ids[v] = i;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            Self {
+</span><span class="boring">                graph,
+</span><span class="boring">                scc_list: list,
+</span><span class="boring">                scc_ids: ids,
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn dfs(
+</span><span class="boring">            graph: &amp;Graph&lt;T&gt;,
+</span><span class="boring">            curr: usize,
+</span><span class="boring">            gid: &amp;mut usize,
+</span><span class="boring">            id: &amp;mut Vec&lt;usize&gt;,
+</span><span class="boring">            low: &amp;mut Vec&lt;usize&gt;,
+</span><span class="boring">            st: &amp;mut SccStack,
+</span><span class="boring">            list: &amp;mut Vec&lt;Vec&lt;usize&gt;&gt;,
+</span><span class="boring">        ) {
+</span><span class="boring">            st.push(curr);
+</span><span class="boring">            id[curr] = *gid;
+</span><span class="boring">            low[curr] = *gid;
+</span><span class="boring">            *gid += 1;
+</span><span class="boring">
+</span><span class="boring">            for (next, _) in graph.neighbor(curr) {
+</span><span class="boring">                if id[next] == graph.n {
+</span><span class="boring">                    Self::dfs(graph, next, gid, id, low, st, list);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            for (next, _) in graph.neighbor(curr) {
+</span><span class="boring">                if st.contains(next) {
+</span><span class="boring">                    low[curr] = low[curr].min(low[next]);
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            if id[curr] == low[curr] {
+</span><span class="boring">                let mut newlist = vec![];
+</span><span class="boring">                while let Some(popped) = st.pop() {
+</span><span class="boring">                    if popped == curr {
+</span><span class="boring">                        break;
+</span><span class="boring">                    }
+</span><span class="boring">                    newlist.push(popped);
+</span><span class="boring">                }
+</span><span class="boring">                newlist.push(curr);
+</span><span class="boring">                list.push(newlist);
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Returns list of SCCs. Each vector in the list is a single SCC. The order of SCCs are
+</span><span class="boring">        /// sorted in topological order. That is,, if u and v are in different SCCs, and there is
+</span><span class="boring">        /// an edge from u to v, then the SCC containing u appears earlier than the SCC containing
+</span><span class="boring">        /// v in the list. The order of vertices in each SCC is unspecified.
+</span><span class="boring">        pub fn get_scc_list(&amp;self) -&gt; &amp;Vec&lt;Vec&lt;usize&gt;&gt; {
+</span><span class="boring">            &amp;self.scc_list
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Returns SCC ids. If u is in scc_list[i], then scc_id[u] = i.
+</span><span class="boring">        pub fn get_scc_ids(&amp;self) -&gt; &amp;Vec&lt;usize&gt; {
+</span><span class="boring">            &amp;self.scc_ids
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod twosat {
+</span><span class="boring">    use super::{scc::*, *};
+</span><span class="boring">
+</span><span class="boring">    pub struct TwoSat {
+</span><span class="boring">        n: usize,
+</span><span class="boring">        graph: Graph&lt;()&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl TwoSat {
+</span><span class="boring">        pub fn new(n: usize, clause_num: usize) -&gt; Self {
+</span><span class="boring">            Self {
+</span><span class="boring">                n,
+</span><span class="boring">                graph: Graph::new(n &lt;&lt; 1, clause_num &lt;&lt; 1),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn judge(f: bool, a: usize, b: usize) -&gt; usize {
+</span><span class="boring">            if f {
+</span><span class="boring">                a
+</span><span class="boring">            } else {
+</span><span class="boring">                b
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Adds a clause (&quot;not&quot; if !f)i or (&quot;not&quot; if !g)j.
+</span><span class="boring">        pub fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
+</span><span class="boring">            self.graph.add_edge(
+</span><span class="boring">                (i &lt;&lt; 1) + Self::judge(f, 0, 1),
+</span><span class="boring">                (j &lt;&lt; 1) + Self::judge(g, 1, 0),
+</span><span class="boring">                (),
+</span><span class="boring">            );
+</span><span class="boring">            self.graph.add_edge(
+</span><span class="boring">                (j &lt;&lt; 1) + Self::judge(g, 0, 1),
+</span><span class="boring">                (i &lt;&lt; 1) + Self::judge(f, 1, 0),
+</span><span class="boring">                (),
+</span><span class="boring">            );
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn solve(self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
+</span><span class="boring">            let mut answer = vec![false; self.n];
+</span><span class="boring">
+</span><span class="boring">            let scc = Scc::new(&amp;self.graph);
+</span><span class="boring">            let ids = scc.get_scc_ids();
+</span><span class="boring">
+</span><span class="boring">            for i in 0..self.n {
+</span><span class="boring">                if ids[i &lt;&lt; 1] == ids[(i &lt;&lt; 1) + 1] {
+</span><span class="boring">                    return None;
+</span><span class="boring">                }
+</span><span class="boring">                answer[i] = ids[i &lt;&lt; 1] &lt; ids[(i &lt;&lt; 1) + 1];
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            Some(answer)
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre></pre>
+<h2 id="code-15"><a class="header" href="#code-15">Code</a></h2>
+<pre><code class="language-rust noplayground">mod twosat {
+    use super::{scc::*, *};
+
+    pub struct TwoSat {
+        n: usize,
+        graph: Graph&lt;()&gt;,
     }
 
-    fn judge(f: bool, a: u32, b: u32) -&gt; u32 {
-        if f {
-            a
-        } else {
-            b
-        }
-    }
-
-    fn add_clause(&amp;mut self, i: u32, f: bool, j: u32, g: bool) {
-        self.graph.add_edge(
-            (i &lt;&lt; 1) + Self::judge(f, 0, 1),
-            (j &lt;&lt; 1) + Self::judge(g, 1, 0),
-            (),
-        );
-        self.graph.add_edge(
-            (j &lt;&lt; 1) + Self::judge(g, 0, 1),
-            (i &lt;&lt; 1) + Self::judge(f, 1, 0),
-            (),
-        );
-    }
-
-    fn solve(self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
-        let mut answer = vec![false; self.n as usize];
-
-        let scc = SCC::new(&amp;self.graph);
-        let ids = &amp;scc.scc_ids;
-
-        for i in 0..self.n {
-            if ids[(i as usize) &lt;&lt; 1] == ids[((i as usize) &lt;&lt; 1) + 1] {
-                return None;
+    impl TwoSat {
+        pub fn new(n: usize, clause_num: usize) -&gt; Self {
+            Self {
+                n,
+                graph: Graph::new(n &lt;&lt; 1, clause_num &lt;&lt; 1),
             }
-            answer[i as usize] = ids[(i as usize) &lt;&lt; 1] &lt; ids[((i as usize) &lt;&lt; 1) + 1];
         }
-        Some(answer)
+
+        fn judge(f: bool, a: usize, b: usize) -&gt; usize {
+            if f {
+                a
+            } else {
+                b
+            }
+        }
+
+        /// Adds a clause (&quot;not&quot; if !f)i or (&quot;not&quot; if !g)j.
+        pub fn add_clause(&amp;mut self, i: usize, f: bool, j: usize, g: bool) {
+            self.graph.add_edge(
+                (i &lt;&lt; 1) + Self::judge(f, 0, 1),
+                (j &lt;&lt; 1) + Self::judge(g, 1, 0),
+                (),
+            );
+            self.graph.add_edge(
+                (j &lt;&lt; 1) + Self::judge(g, 0, 1),
+                (i &lt;&lt; 1) + Self::judge(f, 1, 0),
+                (),
+            );
+        }
+
+        pub fn solve(self) -&gt; Option&lt;Vec&lt;bool&gt;&gt; {
+            let mut answer = vec![false; self.n];
+
+            let scc = Scc::new(&amp;self.graph);
+            let ids = scc.get_scc_ids();
+
+            for i in 0..self.n {
+                if ids[i &lt;&lt; 1] == ids[(i &lt;&lt; 1) + 1] {
+                    return None;
+                }
+                answer[i] = ids[i &lt;&lt; 1] &lt; ids[(i &lt;&lt; 1) + 1];
+            }
+
+            Some(answer)
+        }
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="kmp"><a class="header" href="#kmp">KMP</a></h1>
@@ -4746,7 +5142,7 @@ impl TwoSat {
 <p>Given a <code>KMPNeedle</code> instance <code>p</code> and an array target \(T\), <code>KMPMatcher::new(&amp;p, T)</code> returns an iterator yielding indicies where \(P\) appears within \(T\). Even if some ranges where \(P\) exists within \(T\) overlap with each other, they are still all yielded as shown in the second string from the example <code>&quot;ABCDABCDABCD&quot;</code>.</p>
 <p><code>KMPNeedle::new(P)</code> runs in a time complexity of \(O(\left| P \right|)\) and <code>KMPMatcher::new(T)</code> takes a time complexity of \(O(\left| T \right|)\) to be consumed. <code>KMPMatcher</code> searches for a pattern lazily, so it only takes time of total searched length in \(T\).</p>
 <p>A single <code>KMPNeedle</code> instance can be used to search \(P\) in multiple arrays as shown in the example.</p>
-<h2 id="example-14"><a class="header" href="#example-14">Example</a></h2>
+<h2 id="example-16"><a class="header" href="#example-16">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let pattern = &quot;ABCDABC&quot;;
 let targets = vec![&quot;ABDABCDABCE&quot;, &quot;ABCDABCDABCD&quot;, &quot;ABBCCABCDABDABCDABC&quot;];
@@ -4825,7 +5221,7 @@ for &amp;t in targets.iter() {
 </span><span class="boring">        None
 </span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-14"><a class="header" href="#code-14">Code</a></h2>
+<h2 id="code-16"><a class="header" href="#code-16">Code</a></h2>
 <pre><code class="language-rust noplayground">struct KMPNeedle&lt;'n, T: PartialEq&gt; {
     p: &amp;'n [T],
     c: Vec&lt;usize&gt;,
@@ -4893,7 +5289,7 @@ impl&lt;'h, 'n: 'h, 'a: 'n, T: PartialEq&gt; Iterator for KMPMatcher&lt;'h, 'n, 
 <div style="break-before: page; page-break-before: always;"></div><h1 id="manacher"><a class="header" href="#manacher">Manacher</a></h1>
 <p>For an array \(A\) of length \(n\), <code>manacher(A)</code> returns a vector \(M\) where, for every \(i \in \left[0, n\right)\), \(A_{i-j} = A_{i+j}\) holds for every \(j \in \left[0, M_i \right)\).</p>
 <p>Additional modification should be added by a user to use this function for finding every palindromes among subsequences of a string.</p>
-<h2 id="example-15"><a class="header" href="#example-15">Example</a></h2>
+<h2 id="example-17"><a class="header" href="#example-17">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;abracadacabra&quot;.as_bytes();
 let man = manacher(s);
@@ -4936,7 +5332,7 @@ for i in 0..s.len() {
 </span><span class="boring">
 </span><span class="boring">    mana
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-15"><a class="header" href="#code-15">Code</a></h2>
+<h2 id="code-17"><a class="header" href="#code-17">Code</a></h2>
 <pre><code class="language-rust noplayground">fn manacher&lt;T: Eq&gt;(arr: &amp;[T]) -&gt; Vec&lt;usize&gt; {
     let n = arr.len();
     let mut mana: Vec&lt;usize&gt; = vec![1; n];
@@ -4977,7 +5373,7 @@ for i in 0..s.len() {
 </ul>
 <p>\(SA\) and \(LCP\) are called &quot;suffix array&quot; and &quot;LCP array&quot; of \(A\) respectively.</p>
 <p>For finding SA, Manber-Myers algorithm combined with counting sort is used, hence the time complexity is \(O(n\log{n})\). For LCP array, Kasai's algorithm is used, hence the time complexity is \(O(n)\). The total time complexity is \(O(n\log{n})\).</p>
-<h2 id="example-16"><a class="header" href="#example-16">Example</a></h2>
+<h2 id="example-18"><a class="header" href="#example-18">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;asdsdasd&quot;;
 let (sa, lcp) = sa_lcp(s.as_bytes());
@@ -5085,7 +5481,7 @@ println!(&quot;{:?}&quot;, lcp); // [x, 3, 0, 1, 1, 0, 2, 2]
 </span><span class="boring">    }
 </span><span class="boring">    (sa, lcp)
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-16"><a class="header" href="#code-16">Code</a></h2>
+<h2 id="code-18"><a class="header" href="#code-18">Code</a></h2>
 <pre><code class="language-rust noplayground">// Suffix array and LCP array
 // Reference: http://www.secmem.org/blog/2021/07/18/suffix-array-and-lcp/
 
@@ -5313,7 +5709,7 @@ fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
     stack
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<h2 id="example-17"><a class="header" href="#example-17">Example</a></h2>
+<h2 id="example-19"><a class="header" href="#example-19">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let arr: Vec&lt;i32&gt; = vec![1, 2, 4, 7, 9, 7, 4, 2, 1];
 
@@ -5339,7 +5735,7 @@ println!(&quot;{:?}&quot;, original); // [1, 2, 4, 7, 9, 7, 4, 2, 1]
 </span><span class="boring">    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
 </span><span class="boring">    (compressor, reevaluator)
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-17"><a class="header" href="#code-17">Code</a></h2>
+<h2 id="code-19"><a class="header" href="#code-19">Code</a></h2>
 <h3 id="w-hashmap"><a class="header" href="#w-hashmap">w/ HashMap</a></h3>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
@@ -5503,7 +5899,7 @@ fn isqrt(s: u32) -&gt; u32 {
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="arbitrary-precision-integer"><a class="header" href="#arbitrary-precision-integer">Arbitrary-Precision Integer</a></h1>
-<h2 id="example-18"><a class="header" href="#example-18">Example</a></h2>
+<h2 id="example-20"><a class="header" href="#example-20">Example</a></h2>
 <pre><code class="language-rust noplayground">use bigint::*;
 
 let _a = Int::from(0i8);
@@ -5517,7 +5913,7 @@ println!(&quot;{}&quot;, x);
 let mut y = Int::from_str(&quot;123456789123456789123456789123456789&quot;).unwrap();
 let z = &amp;y * &amp;c;
 println!(&quot;{}&quot;, y);</code></pre>
-<h2 id="code-18"><a class="header" href="#code-18">Code</a></h2>
+<h2 id="code-20"><a class="header" href="#code-20">Code</a></h2>
 <pre><code class="language-rust noplayground">mod bigint {
     use core::{
         fmt::Display,
@@ -6159,7 +6555,7 @@ println!(&quot;{}&quot;, y);</code></pre>
 <p>Both function has its &quot;Option&quot; equivalents. <code>sc.next_str_option()</code> returns the next token as <code>Some(&amp;str)</code>. This function returns <code>None</code> instead of panicing the whole program, compared to <code>sc.next_str()</code>. <code>sc.next_option()</code> works just like <code>sc.next()</code> except that it returns <code>Option&lt;T&gt;</code> so that the function returns <code>None</code> instead of panicing. These functions are useful when the code needs to detect <code>EOF</code>.</p>
 <p><code>next!</code> macros are for easy-typing for inputs. <code>next!()</code> is equivalent to <code>sc.next()</code>. You can specify the return type of it by using <code>next!(T)</code>. Multiple types can also be used as arguments, delimited by spaces: <code>next!(T U V)</code> returns a tuple <code>(T, U, V)</code>. Lastly, <code>next!(str)</code> is equivalent to <code>sc.next_str()</code>.</p>
 <p><code>out!</code> and <code>outln!</code> are just the same with <code>print!</code> and <code>println!</code>, but the stdout flush is buffered for faster output.</p>
-<h3 id="example-19"><a class="header" href="#example-19">Example</a></h3>
+<h3 id="example-21"><a class="header" href="#example-21">Example</a></h3>
 <pre><code class="language-rust noplayground">// Main
 let n: usize = next!();      // Identical to `let n: usize = sc.next();`
 let m = next!(usize);        // Identical to `let m = sc.next::&lt;usize&gt;();`
@@ -6171,7 +6567,7 @@ let word = next!(str);
 out!(&quot;{} &quot;, a);
 outln!(&quot;{}&quot;, b);
 outln!(&quot;{:?}&quot;, [n, m]);</code></pre>
-<h2 id="code-19"><a class="header" href="#code-19">Code</a></h2>
+<h2 id="code-21"><a class="header" href="#code-21">Code</a></h2>
 <h3 id="for-linux-almost-every-ojs-including-atcoder"><a class="header" href="#for-linux-almost-every-ojs-including-atcoder">For Linux (Almost every OJs including AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
 
