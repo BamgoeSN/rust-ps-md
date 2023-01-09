@@ -1,6 +1,6 @@
 # Strongly Connected Components
 
-Code for calculating SCCs. Tarjan's algorithm is used for the algorithm. [Adjancy list representation](./adjlist.md) should be included in the code for this snippet to work.
+Finding SCCs of a directed graph. Tarjan's algorithm is used for the algorithm. [Adjancy list representation](./adjlist.md) should be included in the code for this snippet to work.
 
 ## Example
 ```rust
