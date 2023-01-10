@@ -13,6 +13,7 @@
 # Numerical Algorithms
 
 - [Integer Square Root](./numerical/isqrt.md)
+- [Sieve](./numerical/sieve.md)
 - [Linear Recurrence](./numerical/linrec/intro.md)
   - [Berlekamp-Massey](./numerical/linrec/berlekamp.md)
   - [Kitamasa](./numerical/linrec/kitamasa.md)
