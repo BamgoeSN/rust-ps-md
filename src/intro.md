@@ -36,6 +36,8 @@ Clicking on the search icon <i class="fa fa-search"></i> in the menu bar, or pre
 
 As stated from the license below, I do not hold any responsibilities for any problems happened from using these snippets. Never use it for production! I never guarantee my codes to work perfectly.
 
+MIT license states that the user should include the license to copies or redistributions, but I don't really care about adding it to the code. This license should be just considered as a placeholder, so that I can fully open users to use my snippets completely freely, while I can be safe from getting sued. I'm planning to replace the license to something else (something similar to IDGAF license but less rude) whenever I find one.
+
 ## License
 
 Copyright 2023 BamgoeSN
