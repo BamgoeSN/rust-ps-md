@@ -33,6 +33,7 @@
 
 - [Adjacency List Graph Representation](./graphs/adjlist.md)
 - [Dijkstra](./graphs/dijkstra.md)
+  - [Dial](./graphs/dial.md)
 - [Disjoint Set Union](./graphs/dsu.md)
   - [Weighted DSU](./graphs/wdsu.md)
 - [Strongly Connected Components](./graphs/scc.md)
