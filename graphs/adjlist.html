@@ -152,22 +152,22 @@
 <pre><code class="language-rust noplayground">#[derive(Debug)]
 struct Graph&lt;T&gt; {
     n: usize,
-    first: Vec&lt;usize&gt;,
-    edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
+    first: Vec&lt;u32&gt;,
+    edge: Vec&lt;(u32, u32, T)&gt;, // (to, prev, data)
 }
 
 impl&lt;T&gt; Graph&lt;T&gt; {
     fn new(n: usize, e: usize) -&gt; Self {
         Self {
             n,
-            first: vec![usize::MAX; n],
+            first: vec![u32::MAX; n],
             edge: Vec::with_capacity(e),
         }
     }
 
     fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
-        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
-        self.edge.push((to, prev, data));
+        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len() as u32);
+        self.edge.push((to as u32, prev, data));
     }
 
     fn neighbor(&amp;self, of: usize) -&gt; Neighbor&lt;T&gt; {
@@ -180,16 +180,16 @@ impl&lt;T&gt; Graph&lt;T&gt; {
 
 struct Neighbor&lt;'g, T&gt; {
     graph: &amp;'g Graph&lt;T&gt;,
-    next_edge: usize,
+    next_edge: u32,
 }
 
 impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
     type Item = (usize, &amp;'g T);
 
     fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
-        let (to, next_edge, data) = self.graph.edge.get(self.next_edge)?;
+        let (to, next_edge, data) = self.graph.edge.get(self.next_edge as usize)?;
         self.next_edge = *next_edge;
-        Some((*to, data))
+        Some((*to as usize, data))
     }
 }</code></pre>
 

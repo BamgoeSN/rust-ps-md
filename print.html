@@ -174,6 +174,14 @@
 <ul>
 <li><a href="https://github.com/cheran-senthil/PyRival">PyRival</a></li>
 </ul>
+<h2 id="disclaimer"><a class="header" href="#disclaimer">Disclaimer</a></h2>
+<p><strong>None of the codes from this document should be used in any other fields besides competitive programming!</strong> Every code here is strictly designed for CP, thus there are basically no guards for possible errors.</p>
+<p>As stated from the license below, I do not hold any responsibilities for any problems happened from using these snippets. Never use it for production! I never guarantee my codes to work perfectly.</p>
+<h2 id="license"><a class="header" href="#license">License</a></h2>
+<p>Copyright 2023 BamgoeSN</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gcd-lcm"><a class="header" href="#gcd-lcm">GCD, LCM</a></h1>
 <p><code>gcd(x, y)</code> returns the greatest common divisor (GCD) of <code>x</code> and <code>y</code>. <br />
 <code>lcm(x, y)</code> returns the least common multiple (LCM) of <code>x</code> and <code>y</code>.</p>
@@ -4283,22 +4291,22 @@ println!(&quot;{:?}&quot;, arr);
 <pre><code class="language-rust noplayground">#[derive(Debug)]
 struct Graph&lt;T&gt; {
     n: usize,
-    first: Vec&lt;usize&gt;,
-    edge: Vec&lt;(usize, usize, T)&gt;, // (to, prev, data)
+    first: Vec&lt;u32&gt;,
+    edge: Vec&lt;(u32, u32, T)&gt;, // (to, prev, data)
 }
 
 impl&lt;T&gt; Graph&lt;T&gt; {
     fn new(n: usize, e: usize) -&gt; Self {
         Self {
             n,
-            first: vec![usize::MAX; n],
+            first: vec![u32::MAX; n],
             edge: Vec::with_capacity(e),
         }
     }
 
     fn add_edge(&amp;mut self, from: usize, to: usize, data: T) {
-        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len());
-        self.edge.push((to, prev, data));
+        let prev = std::mem::replace(&amp;mut self.first[from], self.edge.len() as u32);
+        self.edge.push((to as u32, prev, data));
     }
 
     fn neighbor(&amp;self, of: usize) -&gt; Neighbor&lt;T&gt; {
@@ -4311,16 +4319,16 @@ impl&lt;T&gt; Graph&lt;T&gt; {
 
 struct Neighbor&lt;'g, T&gt; {
     graph: &amp;'g Graph&lt;T&gt;,
-    next_edge: usize,
+    next_edge: u32,
 }
 
 impl&lt;'g, T&gt; Iterator for Neighbor&lt;'g, T&gt; {
     type Item = (usize, &amp;'g T);
 
     fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
-        let (to, next_edge, data) = self.graph.edge.get(self.next_edge)?;
+        let (to, next_edge, data) = self.graph.edge.get(self.next_edge as usize)?;
         self.next_edge = *next_edge;
-        Some((*to, data))
+        Some((*to as usize, data))
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dijkstra"><a class="header" href="#dijkstra">Dijkstra</a></h1>
@@ -4404,6 +4412,60 @@ println!(&quot;{:?}&quot;, dijkstra(&amp;g, 0));
 </span><span class="boring">    dist
 </span><span class="boring">}</span></code></pre></pre>
 <h2 id="code-11"><a class="header" href="#code-11">Code</a></h2>
+<pre><code class="language-rust noplayground">trait HasNz {
+    type NzType;
+    fn into_nz(self) -&gt; Option&lt;Self::NzType&gt;;
+    fn retrieve(nz: Self::NzType) -&gt; Self;
+}
+
+macro_rules! impl_hasnz {
+    ($($t:ty, $n:ty);*) =&gt; { $(
+        impl HasNz for $t {
+            type NzType = $n;
+            fn into_nz(self) -&gt; Option&lt;$n&gt; { &lt;$n&gt;::new(self) }
+            fn retrieve(nz: $n) -&gt; Self { nz.get() }
+        }
+    )* };
+}
+
+use std::num::*;
+impl_hasnz!(i8, NonZeroI8; i16, NonZeroI16; i32, NonZeroI32; i64, NonZeroI64; i128, NonZeroI128; isize, NonZeroIsize);
+impl_hasnz!(u8, NonZeroU8; u16, NonZeroU16; u32, NonZeroU32; u64, NonZeroU64; u128, NonZeroU128; usize, NonZeroUsize);
+
+use std::ops::*;
+fn dijkstra&lt;T&gt;(graph: &amp;Graph&lt;T&gt;, src: usize) -&gt; Vec&lt;Option&lt;T&gt;&gt;
+where
+    T: Copy + From&lt;u8&gt; + Add&lt;Output = T&gt; + Sub&lt;Output = T&gt; + Eq + Ord + HasNz,
+    &lt;T as HasNz&gt;::NzType: Copy,
+{
+    use core::cmp::Reverse;
+    use std::collections::BinaryHeap;
+
+    let mut dist: Vec&lt;Option&lt;T::NzType&gt;&gt; = vec![None; graph.n];
+    let mut heap: BinaryHeap&lt;(Reverse&lt;T&gt;, usize)&gt; = BinaryHeap::new();
+    heap.push((Reverse(1.into()), src));
+
+    while let Some((Reverse(curr_cost), curr)) = heap.pop() {
+        if dist[curr].map_or(false, |x| T::retrieve(x) &lt; curr_cost) {
+            continue;
+        }
+        dist[curr] = curr_cost.into_nz();
+
+        for (next, &amp;weight) in graph.neighbor(curr) {
+            let next_cost = curr_cost + weight;
+            if dist[next].map_or(true, |x| T::retrieve(x) &gt; next_cost) {
+                dist[next] = next_cost.into_nz();
+                heap.push((Reverse(next_cost), next));
+            }
+        }
+    }
+
+    dist.iter()
+        .map(|x| x.map(|x| T::retrieve(x) - 1.into()))
+        .collect()
+}</code></pre>
+<h3 id="compact-version"><a class="header" href="#compact-version">Compact Version</a></h3>
+<p>The code is much compact, but the performance is slightly worse than the one above. This version seems to be approximately 10% slower, but none of the definitive tests have been done to check it.</p>
 <pre><code class="language-rust noplayground">fn dijkstra&lt;T: Copy + From&lt;u8&gt; + std::ops::Add&lt;Output = T&gt; + Eq + Ord&gt;(
     graph: &amp;Graph&lt;T&gt;,
     src: usize,
@@ -4791,19 +4853,19 @@ println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
             }
         }
 
-        fn push(&amp;mut self, n: usize) {
-            self.stack.push(n as u32);
-            self.check[n] = true;
+        fn push(&amp;mut self, n: u32) {
+            self.stack.push(n);
+            self.check[n as usize] = true;
         }
 
-        fn pop(&amp;mut self) -&gt; Option&lt;usize&gt; {
-            let tmp = self.stack.pop()? as usize;
-            self.check[tmp] = false;
+        fn pop(&amp;mut self) -&gt; Option&lt;u32&gt; {
+            let tmp = self.stack.pop()?;
+            self.check[tmp as usize] = false;
             Some(tmp)
         }
 
-        fn contains(&amp;self, n: usize) -&gt; bool {
-            self.check[n]
+        fn contains(&amp;self, n: u32) -&gt; bool {
+            self.check[n as usize]
         }
     }
 
@@ -4818,11 +4880,11 @@ println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
             let mut st = SccStack::new(graph.n);
             let mut list = vec![];
             let mut gid = 0;
-            let mut id = vec![graph.n; graph.n];
-            let mut low = vec![usize::MAX; graph.n];
+            let mut id = vec![graph.n as u32; graph.n];
+            let mut low = vec![u32::MAX; graph.n];
 
-            for x in 0..graph.n {
-                if id[x] != graph.n {
+            for x in 0..graph.n as u32 {
+                if id[x as usize] != graph.n as u32 {
                     continue;
                 }
                 Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list);
@@ -4845,39 +4907,39 @@ println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
 
         fn dfs(
             graph: &amp;Graph&lt;T&gt;,
-            curr: usize,
-            gid: &amp;mut usize,
-            id: &amp;mut Vec&lt;usize&gt;,
-            low: &amp;mut Vec&lt;usize&gt;,
+            curr: u32,
+            gid: &amp;mut u32,
+            id: &amp;mut Vec&lt;u32&gt;,
+            low: &amp;mut Vec&lt;u32&gt;,
             st: &amp;mut SccStack,
             list: &amp;mut Vec&lt;Vec&lt;usize&gt;&gt;,
         ) {
             st.push(curr);
-            id[curr] = *gid;
-            low[curr] = *gid;
+            id[curr as usize] = *gid;
+            low[curr as usize] = *gid;
             *gid += 1;
 
-            for (next, _) in graph.neighbor(curr) {
-                if id[next] == graph.n {
-                    Self::dfs(graph, next, gid, id, low, st, list);
+            for (next, _) in graph.neighbor(curr as usize) {
+                if id[next] == graph.n as u32 {
+                    Self::dfs(graph, next as u32, gid, id, low, st, list);
                 }
             }
 
-            for (next, _) in graph.neighbor(curr) {
-                if st.contains(next) {
-                    low[curr] = low[curr].min(low[next]);
+            for (next, _) in graph.neighbor(curr as usize) {
+                if st.contains(next as u32) {
+                    low[curr as usize] = low[curr as usize].min(low[next]);
                 }
             }
 
-            if id[curr] == low[curr] {
+            if id[curr as usize] == low[curr as usize] {
                 let mut newlist = vec![];
                 while let Some(popped) = st.pop() {
                     if popped == curr {
                         break;
                     }
-                    newlist.push(popped);
+                    newlist.push(popped as usize);
                 }
-                newlist.push(curr);
+                newlist.push(curr as usize);
                 list.push(newlist);
             }
         }

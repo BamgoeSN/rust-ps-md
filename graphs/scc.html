@@ -346,19 +346,19 @@ println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
             }
         }
 
-        fn push(&amp;mut self, n: usize) {
-            self.stack.push(n as u32);
-            self.check[n] = true;
+        fn push(&amp;mut self, n: u32) {
+            self.stack.push(n);
+            self.check[n as usize] = true;
         }
 
-        fn pop(&amp;mut self) -&gt; Option&lt;usize&gt; {
-            let tmp = self.stack.pop()? as usize;
-            self.check[tmp] = false;
+        fn pop(&amp;mut self) -&gt; Option&lt;u32&gt; {
+            let tmp = self.stack.pop()?;
+            self.check[tmp as usize] = false;
             Some(tmp)
         }
 
-        fn contains(&amp;self, n: usize) -&gt; bool {
-            self.check[n]
+        fn contains(&amp;self, n: u32) -&gt; bool {
+            self.check[n as usize]
         }
     }
 
@@ -373,11 +373,11 @@ println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
             let mut st = SccStack::new(graph.n);
             let mut list = vec![];
             let mut gid = 0;
-            let mut id = vec![graph.n; graph.n];
-            let mut low = vec![usize::MAX; graph.n];
+            let mut id = vec![graph.n as u32; graph.n];
+            let mut low = vec![u32::MAX; graph.n];
 
-            for x in 0..graph.n {
-                if id[x] != graph.n {
+            for x in 0..graph.n as u32 {
+                if id[x as usize] != graph.n as u32 {
                     continue;
                 }
                 Self::dfs(graph, x, &amp;mut gid, &amp;mut id, &amp;mut low, &amp;mut st, &amp;mut list);
@@ -400,39 +400,39 @@ println!(&quot;{:?}&quot;, scc.get_scc_ids()); // [0, 1, 0, 0, 2]
 
         fn dfs(
             graph: &amp;Graph&lt;T&gt;,
-            curr: usize,
-            gid: &amp;mut usize,
-            id: &amp;mut Vec&lt;usize&gt;,
-            low: &amp;mut Vec&lt;usize&gt;,
+            curr: u32,
+            gid: &amp;mut u32,
+            id: &amp;mut Vec&lt;u32&gt;,
+            low: &amp;mut Vec&lt;u32&gt;,
             st: &amp;mut SccStack,
             list: &amp;mut Vec&lt;Vec&lt;usize&gt;&gt;,
         ) {
             st.push(curr);
-            id[curr] = *gid;
-            low[curr] = *gid;
+            id[curr as usize] = *gid;
+            low[curr as usize] = *gid;
             *gid += 1;
 
-            for (next, _) in graph.neighbor(curr) {
-                if id[next] == graph.n {
-                    Self::dfs(graph, next, gid, id, low, st, list);
+            for (next, _) in graph.neighbor(curr as usize) {
+                if id[next] == graph.n as u32 {
+                    Self::dfs(graph, next as u32, gid, id, low, st, list);
                 }
             }
 
-            for (next, _) in graph.neighbor(curr) {
-                if st.contains(next) {
-                    low[curr] = low[curr].min(low[next]);
+            for (next, _) in graph.neighbor(curr as usize) {
+                if st.contains(next as u32) {
+                    low[curr as usize] = low[curr as usize].min(low[next]);
                 }
             }
 
-            if id[curr] == low[curr] {
+            if id[curr as usize] == low[curr as usize] {
                 let mut newlist = vec![];
                 while let Some(popped) = st.pop() {
                     if popped == curr {
                         break;
                     }
-                    newlist.push(popped);
+                    newlist.push(popped as usize);
                 }
-                newlist.push(curr);
+                newlist.push(curr as usize);
                 list.push(newlist);
             }
         }
