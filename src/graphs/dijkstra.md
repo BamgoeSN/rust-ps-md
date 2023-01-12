@@ -84,6 +84,64 @@ println!("{:?}", dijkstra(&g, 0));
 
 ## Code
 ```rust,noplayground
+trait HasNz {
+    type NzType;
+    fn into_nz(self) -> Option<Self::NzType>;
+    fn retrieve(nz: Self::NzType) -> Self;
+}
+
+macro_rules! impl_hasnz {
+    ($($t:ty, $n:ty);*) => { $(
+        impl HasNz for $t {
+            type NzType = $n;
+            fn into_nz(self) -> Option<$n> { <$n>::new(self) }
+            fn retrieve(nz: $n) -> Self { nz.get() }
+        }
+    )* };
+}
+
+use std::num::*;
+impl_hasnz!(i8, NonZeroI8; i16, NonZeroI16; i32, NonZeroI32; i64, NonZeroI64; i128, NonZeroI128; isize, NonZeroIsize);
+impl_hasnz!(u8, NonZeroU8; u16, NonZeroU16; u32, NonZeroU32; u64, NonZeroU64; u128, NonZeroU128; usize, NonZeroUsize);
+
+use std::ops::*;
+fn dijkstra<T>(graph: &Graph<T>, src: usize) -> Vec<Option<T>>
+where
+    T: Copy + From<u8> + Add<Output = T> + Sub<Output = T> + Eq + Ord + HasNz,
+    <T as HasNz>::NzType: Copy,
+{
+    use core::cmp::Reverse;
+    use std::collections::BinaryHeap;
+
+    let mut dist: Vec<Option<T::NzType>> = vec![None; graph.n];
+    let mut heap: BinaryHeap<(Reverse<T>, usize)> = BinaryHeap::new();
+    heap.push((Reverse(1.into()), src));
+
+    while let Some((Reverse(curr_cost), curr)) = heap.pop() {
+        if dist[curr].map_or(false, |x| T::retrieve(x) < curr_cost) {
+            continue;
+        }
+        dist[curr] = curr_cost.into_nz();
+
+        for (next, &weight) in graph.neighbor(curr) {
+            let next_cost = curr_cost + weight;
+            if dist[next].map_or(true, |x| T::retrieve(x) > next_cost) {
+                dist[next] = next_cost.into_nz();
+                heap.push((Reverse(next_cost), next));
+            }
+        }
+    }
+
+    dist.iter()
+        .map(|x| x.map(|x| T::retrieve(x) - 1.into()))
+        .collect()
+}
+```
+
+### Compact Version
+The code is much compact, but the performance is slightly worse than the one above. This version seems to be approximately 10% slower, but none of the definitive tests have been done to check it.
+
+```rust,noplayground
 fn dijkstra<T: Copy + From<u8> + std::ops::Add<Output = T> + Eq + Ord>(
     graph: &Graph<T>,
     src: usize,
