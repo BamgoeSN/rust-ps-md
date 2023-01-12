@@ -2,6 +2,8 @@
 
 Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \\( O(\log{N}) \\). However, accessing values also takes amortized \\( O(\log{N}) \\) time. Building a rope from an iterator takes \\( O(N) \\).
 
+When accessing to elements, if you use immutable borrow; that is, borrowing through `rope.get(idx)` or immutably indexing a value like `let v = rope[3];`, then **splaying doesn't happen** and in the worst case the accessing could take \\(O(N)\\). Make sure to use `get_mut()` for performance.
+
 ## Example
 ```rust
 # fn main() {
