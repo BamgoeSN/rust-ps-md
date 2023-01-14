@@ -7028,6 +7028,69 @@ macro_rules! hashmap {
         map
     }}
 }</code></pre>
+<h2 id="conversion-between-enum-and-u32"><a class="header" href="#conversion-between-enum-and-u32">Conversion between Enum and <code>u32</code></a></h2>
+<p>Macro from <a href="https://stackoverflow.com/questions/28028854/how-do-i-match-enum-values-with-an-integer">https://stackoverflow.com/questions/28028854/how-do-i-match-enum-values-with-an-integer</a>.</p>
+<h3 id="example-22"><a class="header" href="#example-22">Example</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">use std::convert::{TryFrom, TryInto};
+</span><span class="boring">macro_rules! back_to_enum {
+</span><span class="boring">    {$(#[$meta:meta])* $vis:vis enum $name:ident {
+</span><span class="boring">        $($(#[$vmeta:meta])* $vname:ident $(= $val:expr)?,)*
+</span><span class="boring">    }} =&gt; {
+</span><span class="boring">        $(#[$meta])*
+</span><span class="boring">        $vis enum $name {
+</span><span class="boring">            $($(#[$vmeta])* $vname $(= $val)?,)*
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        impl TryFrom&lt;u32&gt; for $name {
+</span><span class="boring">            type Error = ();
+</span><span class="boring">
+</span><span class="boring">            fn try_from(v: u32) -&gt; Result&lt;Self, Self::Error&gt; {
+</span><span class="boring">                match v {
+</span><span class="boring">                    $(x if x == $name::$vname as u32 =&gt; Ok($name::$vname),)*
+</span><span class="boring">                    _ =&gt; Err(()),
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span>back_to_enum! {
+    #[derive(Clone, Copy, Debug)]
+    enum Number {
+        Zero,
+        One,
+        Two,
+    }
+}
+
+<span class="boring">fn main() {
+</span>let i: u32 = 1;
+let n: Number = i.try_into().unwrap();
+println!(&quot;{:?}&quot;, n);  // One
+let i = n as i32;
+println!(&quot;{}&quot;, i);    // 1
+<span class="boring">}</span></code></pre></pre>
+<h3 id="code-23"><a class="header" href="#code-23">Code</a></h3>
+<pre><code class="language-rust noplayground">use std::convert::{TryFrom, TryInto};
+macro_rules! back_to_enum {
+    {$(#[$meta:meta])* $vis:vis enum $name:ident {
+        $($(#[$vmeta:meta])* $vname:ident $(= $val:expr)?,)*
+    }} =&gt; {
+        $(#[$meta])*
+        $vis enum $name {
+            $($(#[$vmeta])* $vname $(= $val)?,)*
+        }
+        impl TryFrom&lt;u32&gt; for $name {
+            type Error = ();
+            fn try_from(v: u32) -&gt; Result&lt;Self, Self::Error&gt; {
+                match v {
+                    $(x if x == $name::$vname as u32 =&gt; Ok($name::$vname),)*
+                    _ =&gt; Err(()),
+                }
+            }
+        }
+    }
+}</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="zeroone-trait-deprecated"><a class="header" href="#zeroone-trait-deprecated">Zero/One Trait (Deprecated)</a></h1>
 <p>This trait was used for representing numeric values, but the author has learned that <code>Into</code> and <code>From</code> traits exist, hence this trait is now deprecated. Any other templates which includes or requires to include this trait will be fixed soon.</p>
 <pre><code class="language-rust noplayground">pub trait ZeroOne: Sized + Copy {
