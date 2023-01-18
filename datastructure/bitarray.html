@@ -148,60 +148,755 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="bitset"><a class="header" href="#bitset">Bitset</a></h1>
-<pre><code class="language-rust noplayground">struct Bitset {
-    bytes: Vec&lt;u8&gt;,
+<p><code>BitSet</code> is equivalent to a fixed-size array of booleans. Each boolean value is packed as a bit of <code>u64</code>.</p>
+<p>For auto-vectorization, each <code>u64</code> are packed as <code>[u64; 4]</code> so that it can act as a &quot;SIMD lane&quot;.</p>
+<p>As this snippet is purely for PS and CP, it does not contain many necessary checks, such as checking if two bitset as an argument of a function has the same length.
+For any other purpose, I highly recommend the <a href="https://docs.rs/bitset-core/latest/bitset_core/">bitset_core crate</a> which highly inspired this snippet.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<p>An array of <code>[u64; 4]</code> implements <code>BitSetOps</code> trait, therefore is recognized as a bitset. The number of booleans packed into the bitset can be found with <code>fn bit_len(&amp;self) -&gt; usize</code>.</p>
+<p>Refer to the below example of a sieve of Eratosthenes, and <code>BitSetOps</code> implementations for further details.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow_unused]
+</span>use bitset::*;
+<span class="boring">
+</span><span class="boring">fn main() {
+</span>const MAX_VAL: usize = 1000000;
+
+let mut is_prime = [[0u64; 4]; (MAX_VAL + 256) / 256];
+println!(&quot;{}&quot;, is_prime.bit_len()); // 1000192
+
+is_prime.bit_init(true);
+is_prime.bit_reset(0);
+is_prime.bit_reset(1);
+
+for i in (2..=MAX_VAL).take_while(|&amp;i| i * i &lt;= MAX_VAL) {
+    if is_prime.bit_get(i) {
+        for j in (i * i..=MAX_VAL).step_by(i) {
+            is_prime.bit_reset(j);
+        }
+    }
 }
 
-impl Bitset {
-    #[inline(always)]
-    fn new(size: usize) -&gt; Self {
-        Self {
-            bytes: vec![0; (size &gt;&gt; 3) + 1],
+println!(
+    &quot;{}&quot;,
+    is_prime.bit_count_ones() - (is_prime.bit_len() - (MAX_VAL + 1))
+); // 78498
+
+// println!(&quot;{}&quot;, is_prime.bit_fmt());  // Prints the bitset, starting from the first boolean
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod bitset {
+</span><span class="boring">    /* Copyright (c) 2020 Casper &lt;CasualX@users.noreply.github.com&gt;
+</span><span class="boring">     * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+</span><span class="boring">     * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+</span><span class="boring">     * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+</span><span class="boring">     */
+</span><span class="boring">
+</span><span class="boring">    //! This module is purely for PS and CP. Thus it skips safety checks such as checking if
+</span><span class="boring">    //! self.len() and rhs.len() are equal, and it may panic if shift overflow (for the whole
+</span><span class="boring">    //! bitset) happens.
+</span><span class="boring">
+</span><span class="boring">    // DO NOT CHANGE THESE VALUES
+</span><span class="boring">    // The full generalization for bitset is not done.
+</span><span class="boring">    type ElemTy = u64;
+</span><span class="boring">    const ELEM_BIT: usize = ElemTy::BITS as usize;
+</span><span class="boring">    const ELEM_LEN: usize = 4;
+</span><span class="boring">    const BITS_PER_WORD: usize = ELEM_BIT * ELEM_LEN;
+</span><span class="boring">
+</span><span class="boring">    pub type BitSet = [[ElemTy; ELEM_LEN]];
+</span><span class="boring">
+</span><span class="boring">    pub trait BitSetOps {
+</span><span class="boring">        fn bit_len(&amp;self) -&gt; usize;
+</span><span class="boring">        fn bit_init(&amp;mut self, val: bool) -&gt; &amp;mut Self;
+</span><span class="boring">
+</span><span class="boring">        fn bit_get(&amp;self, idx: usize) -&gt; bool;
+</span><span class="boring">        fn bit_set(&amp;mut self, idx: usize) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_reset(&amp;mut self, idx: usize) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_flip(&amp;mut self, idx: usize) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_manip(&amp;mut self, idx: usize, val: bool) -&gt; &amp;mut Self;
+</span><span class="boring">
+</span><span class="boring">        fn bit_all(&amp;self) -&gt; bool;
+</span><span class="boring">        fn bit_any(&amp;self) -&gt; bool;
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_none(&amp;self) -&gt; bool {
+</span><span class="boring">            !self.bit_any()
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn bit_eq(&amp;self, rhs: &amp;Self) -&gt; bool;
+</span><span class="boring">        fn bit_disjoint(&amp;self, rhs: &amp;Self) -&gt; bool;
+</span><span class="boring">        fn bit_subset(&amp;self, rhs: &amp;Self) -&gt; bool;
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_superset(&amp;self, rhs: &amp;Self) -&gt; bool {
+</span><span class="boring">            rhs.bit_subset(self)
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn bit_or(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_and(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_nand(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_xor(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_not(&amp;mut self) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_mask(&amp;mut self, rhs: &amp;Self, mask: &amp;Self) -&gt; &amp;mut Self;
+</span><span class="boring">
+</span><span class="boring">        fn bit_shr(&amp;mut self, by: usize) -&gt; &amp;mut Self;
+</span><span class="boring">        fn bit_shl(&amp;mut self, by: usize) -&gt; &amp;mut Self;
+</span><span class="boring">
+</span><span class="boring">        fn bit_count_ones(&amp;self) -&gt; usize;
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_count_zeros(&amp;self) -&gt; usize {
+</span><span class="boring">            self.bit_len() - self.bit_count_ones()
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_fmt(&amp;self) -&gt; &amp;BitFmt&lt;Self&gt; {
+</span><span class="boring">            unsafe { &amp;*(self as *const _ as *const _) }
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl BitSetOps for BitSet {
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_len(&amp;self) -&gt; usize {
+</span><span class="boring">            self.len() * BITS_PER_WORD
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_init(&amp;mut self, val: bool) -&gt; &amp;mut Self {
+</span><span class="boring">            let val = [ElemTy::wrapping_add(!(val as ElemTy), 1); ELEM_LEN];
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i] = val;
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_get(&amp;self, idx: usize) -&gt; bool {
+</span><span class="boring">            let block = idx / BITS_PER_WORD;
+</span><span class="boring">            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+</span><span class="boring">            let bit = idx % ELEM_BIT;
+</span><span class="boring">            self[block][lane] &amp; (1 &lt;&lt; bit) != 0
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_set(&amp;mut self, idx: usize) -&gt; &amp;mut Self {
+</span><span class="boring">            let block = idx / BITS_PER_WORD;
+</span><span class="boring">            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+</span><span class="boring">            let bit = idx % ELEM_BIT;
+</span><span class="boring">            self[block][lane] |= 1 &lt;&lt; bit;
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_reset(&amp;mut self, idx: usize) -&gt; &amp;mut Self {
+</span><span class="boring">            let block = idx / BITS_PER_WORD;
+</span><span class="boring">            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+</span><span class="boring">            let bit = idx % ELEM_BIT;
+</span><span class="boring">            self[block][lane] &amp;= !(1 &lt;&lt; bit);
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_flip(&amp;mut self, idx: usize) -&gt; &amp;mut Self {
+</span><span class="boring">            let block = idx / BITS_PER_WORD;
+</span><span class="boring">            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+</span><span class="boring">            let bit = idx % ELEM_BIT;
+</span><span class="boring">            self[block][lane] ^= 1 &lt;&lt; bit;
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_manip(&amp;mut self, idx: usize, val: bool) -&gt; &amp;mut Self {
+</span><span class="boring">            let block = idx / BITS_PER_WORD;
+</span><span class="boring">            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+</span><span class="boring">            let bit = idx % ELEM_BIT;
+</span><span class="boring">            let mask = 1 &lt;&lt; bit;
+</span><span class="boring">            self[block][lane] =
+</span><span class="boring">                (self[block][lane] &amp; !mask) | (ElemTy::wrapping_add(!(val as ElemTy), 1) &amp; mask);
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_all(&amp;self) -&gt; bool {
+</span><span class="boring">            self.iter()
+</span><span class="boring">                .all(|block| block[0] == !0 &amp;&amp; block[1] == !0 &amp;&amp; block[2] == !0 &amp;&amp; block[3] == !0)
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_any(&amp;self) -&gt; bool {
+</span><span class="boring">            self.iter()
+</span><span class="boring">                .all(|block| block[0] == 0 &amp;&amp; block[1] == 0 &amp;&amp; block[2] == 0 &amp;&amp; block[3] == 0)
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_eq(&amp;self, rhs: &amp;Self) -&gt; bool {
+</span><span class="boring">            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
+</span><span class="boring">                lblk[0] == rblk[0] &amp;&amp; lblk[1] == rblk[1] &amp;&amp; lblk[2] == rblk[2] &amp;&amp; lblk[3] == rblk[3]
+</span><span class="boring">            })
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_disjoint(&amp;self, rhs: &amp;Self) -&gt; bool {
+</span><span class="boring">            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
+</span><span class="boring">                lblk[0] &amp; rblk[0] == 0
+</span><span class="boring">                    &amp;&amp; lblk[1] &amp; rblk[1] == 0
+</span><span class="boring">                    &amp;&amp; lblk[2] &amp; rblk[2] == 0
+</span><span class="boring">                    &amp;&amp; lblk[3] &amp; rblk[3] == 0
+</span><span class="boring">            })
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Returns if self is a subset of rhs
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_subset(&amp;self, rhs: &amp;Self) -&gt; bool {
+</span><span class="boring">            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
+</span><span class="boring">                rblk[0] == rblk[0] | lblk[0]
+</span><span class="boring">                    &amp;&amp; rblk[1] == rblk[1] | lblk[1]
+</span><span class="boring">                    &amp;&amp; rblk[2] == rblk[2] | lblk[2]
+</span><span class="boring">                    &amp;&amp; rblk[3] == rblk[3] | lblk[3]
+</span><span class="boring">            })
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_or(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i][0] |= rhs[i][0];
+</span><span class="boring">                self[i][1] |= rhs[i][1];
+</span><span class="boring">                self[i][2] |= rhs[i][2];
+</span><span class="boring">                self[i][3] |= rhs[i][3];
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_and(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i][0] &amp;= rhs[i][0];
+</span><span class="boring">                self[i][1] &amp;= rhs[i][1];
+</span><span class="boring">                self[i][2] &amp;= rhs[i][2];
+</span><span class="boring">                self[i][3] &amp;= rhs[i][3];
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_nand(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i][0] &amp;= !rhs[i][0];
+</span><span class="boring">                self[i][1] &amp;= !rhs[i][1];
+</span><span class="boring">                self[i][2] &amp;= !rhs[i][2];
+</span><span class="boring">                self[i][3] &amp;= !rhs[i][3];
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_xor(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i][0] ^= rhs[i][0];
+</span><span class="boring">                self[i][1] ^= rhs[i][1];
+</span><span class="boring">                self[i][2] ^= rhs[i][2];
+</span><span class="boring">                self[i][3] ^= rhs[i][3];
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_not(&amp;mut self) -&gt; &amp;mut Self {
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i][0] = !self[i][0];
+</span><span class="boring">                self[i][1] = !self[i][1];
+</span><span class="boring">                self[i][2] = !self[i][2];
+</span><span class="boring">                self[i][3] = !self[i][3];
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_mask(&amp;mut self, rhs: &amp;Self, mask: &amp;Self) -&gt; &amp;mut Self {
+</span><span class="boring">            for i in 0..self.len() {
+</span><span class="boring">                self[i][0] = self[i][0] &amp; !mask[i][0] | rhs[i][0] &amp; mask[i][0];
+</span><span class="boring">                self[i][1] = self[i][1] &amp; !mask[i][1] | rhs[i][1] &amp; mask[i][1];
+</span><span class="boring">                self[i][2] = self[i][2] &amp; !mask[i][2] | rhs[i][2] &amp; mask[i][2];
+</span><span class="boring">                self[i][3] = self[i][3] &amp; !mask[i][3] | rhs[i][3] &amp; mask[i][3];
+</span><span class="boring">            }
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_shl(&amp;mut self, by: usize) -&gt; &amp;mut Self {
+</span><span class="boring">            let elem_move = by / ELEM_BIT;
+</span><span class="boring">            let bit_move = by % ELEM_BIT;
+</span><span class="boring">
+</span><span class="boring">            let (_, slice, _): (_, &amp;mut [ElemTy], _) = unsafe { self.align_to_mut() };
+</span><span class="boring">            slice.copy_within(..slice.len() - elem_move, elem_move);
+</span><span class="boring">            slice[..elem_move].fill(0);
+</span><span class="boring">
+</span><span class="boring">            if bit_move != 0 {
+</span><span class="boring">                let mut carry: ElemTy = 0;
+</span><span class="boring">                let mut tmp: [ElemTy; ELEM_LEN] = [0; ELEM_LEN];
+</span><span class="boring">                for i in 0..self.len() {
+</span><span class="boring">                    tmp[0] = self[i][0] &gt;&gt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    tmp[1] = self[i][1] &gt;&gt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    tmp[2] = self[i][2] &gt;&gt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    tmp[3] = self[i][3] &gt;&gt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    self[i][0] &lt;&lt;= bit_move;
+</span><span class="boring">                    self[i][1] &lt;&lt;= bit_move;
+</span><span class="boring">                    self[i][2] &lt;&lt;= bit_move;
+</span><span class="boring">                    self[i][3] &lt;&lt;= bit_move;
+</span><span class="boring">                    let tmpc = tmp[ELEM_LEN - 1];
+</span><span class="boring">                    tmp.copy_within(..ELEM_LEN - 1, 1);
+</span><span class="boring">                    tmp[0] = carry;
+</span><span class="boring">                    self[i][0] |= tmp[0];
+</span><span class="boring">                    self[i][1] |= tmp[1];
+</span><span class="boring">                    self[i][2] |= tmp[2];
+</span><span class="boring">                    self[i][3] |= tmp[3];
+</span><span class="boring">                    carry = tmpc;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_shr(&amp;mut self, by: usize) -&gt; &amp;mut Self {
+</span><span class="boring">            let elem_move = by / ELEM_BIT;
+</span><span class="boring">            let bit_move = by % ELEM_BIT;
+</span><span class="boring">
+</span><span class="boring">            let (_, slice, _): (_, &amp;mut [ElemTy], _) = unsafe { self.align_to_mut() };
+</span><span class="boring">            slice.copy_within(elem_move.., 0);
+</span><span class="boring">            let sl = slice.len();
+</span><span class="boring">            slice[sl - elem_move..].fill(0);
+</span><span class="boring">
+</span><span class="boring">            if bit_move != 0 {
+</span><span class="boring">                let mut carry: ElemTy = 0;
+</span><span class="boring">                let mut tmp: [ElemTy; ELEM_LEN] = [0; ELEM_LEN];
+</span><span class="boring">                for i in 0..self.len() {
+</span><span class="boring">                    tmp[0] = self[i][0] &lt;&lt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    tmp[1] = self[i][1] &lt;&lt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    tmp[2] = self[i][2] &lt;&lt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    tmp[3] = self[i][3] &lt;&lt; (ELEM_BIT - bit_move);
+</span><span class="boring">                    self[i][0] &gt;&gt;= bit_move;
+</span><span class="boring">                    self[i][1] &gt;&gt;= bit_move;
+</span><span class="boring">                    self[i][2] &gt;&gt;= bit_move;
+</span><span class="boring">                    self[i][3] &gt;&gt;= bit_move;
+</span><span class="boring">                    let tmpc = tmp[0];
+</span><span class="boring">                    tmp.copy_within(1.., 0);
+</span><span class="boring">                    tmp[ELEM_LEN - 1] = carry;
+</span><span class="boring">                    carry = tmpc;
+</span><span class="boring">                    self[i][0] |= tmp[0];
+</span><span class="boring">                    self[i][1] |= tmp[1];
+</span><span class="boring">                    self[i][2] |= tmp[2];
+</span><span class="boring">                    self[i][3] |= tmp[3];
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            self
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        #[inline]
+</span><span class="boring">        fn bit_count_ones(&amp;self) -&gt; usize {
+</span><span class="boring">            self.iter()
+</span><span class="boring">                .map(|chunk| {
+</span><span class="boring">                    chunk[0].count_ones() as usize
+</span><span class="boring">                        + chunk[1].count_ones() as usize
+</span><span class="boring">                        + chunk[2].count_ones() as usize
+</span><span class="boring">                        + chunk[3].count_ones() as usize
+</span><span class="boring">                })
+</span><span class="boring">                .sum()
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    mod fmt {
+</span><span class="boring">        use super::BitSetOps as BitSet;
+</span><span class="boring">        use std::fmt;
+</span><span class="boring">
+</span><span class="boring">        #[repr(transparent)]
+</span><span class="boring">        pub struct BitFmt&lt;T: ?Sized&gt;(T);
+</span><span class="boring">
+</span><span class="boring">        fn bitstring&lt;T: ?Sized + BitSet&gt;(this: &amp;T, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+</span><span class="boring">            const ALPHABET: [u8; 2] = [b'0', b'1'];
+</span><span class="boring">            let mut buf = [0u8; 9];
+</span><span class="boring">            let mut first = true;
+</span><span class="boring">            buf[0] = b'_';
+</span><span class="boring">            let mut i = 0;
+</span><span class="boring">            while i &lt; this.bit_len() {
+</span><span class="boring">                buf[1] = ALPHABET[this.bit_get(i + 0) as usize];
+</span><span class="boring">                buf[2] = ALPHABET[this.bit_get(i + 1) as usize];
+</span><span class="boring">                buf[3] = ALPHABET[this.bit_get(i + 2) as usize];
+</span><span class="boring">                buf[4] = ALPHABET[this.bit_get(i + 3) as usize];
+</span><span class="boring">                buf[5] = ALPHABET[this.bit_get(i + 4) as usize];
+</span><span class="boring">                buf[6] = ALPHABET[this.bit_get(i + 5) as usize];
+</span><span class="boring">                buf[7] = ALPHABET[this.bit_get(i + 6) as usize];
+</span><span class="boring">                buf[8] = ALPHABET[this.bit_get(i + 7) as usize];
+</span><span class="boring">                let s = unsafe { &amp;*((&amp;buf[first as usize..]) as *const _ as *const str) };
+</span><span class="boring">                f.write_str(s)?;
+</span><span class="boring">                i += 8;
+</span><span class="boring">                first = false;
+</span><span class="boring">            }
+</span><span class="boring">            Ok(())
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        impl&lt;T: ?Sized + BitSet&gt; fmt::Display for BitFmt&lt;T&gt; {
+</span><span class="boring">            fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+</span><span class="boring">                bitstring(&amp;self.0, f)
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">    pub use self::fmt::BitFmt;
+</span><span class="boring">}</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">mod bitset {
+    /* Copyright (c) 2020 Casper &lt;CasualX@users.noreply.github.com&gt;
+     * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+     * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
+
+    //! This module is purely for PS and CP. Thus it skips safety checks such as checking if
+    //! self.len() and rhs.len() are equal, and it may panic if shift overflow (for the whole
+    //! bitset) happens.
+
+    // DO NOT CHANGE THESE VALUES
+    // The full generalization for bitset is not done.
+    type ElemTy = u64;
+    const ELEM_BIT: usize = ElemTy::BITS as usize;
+    const ELEM_LEN: usize = 4;
+    const BITS_PER_WORD: usize = ELEM_BIT * ELEM_LEN;
+
+    pub type BitSet = [[ElemTy; ELEM_LEN]];
+
+    pub trait BitSetOps {
+        fn bit_len(&amp;self) -&gt; usize;
+        fn bit_init(&amp;mut self, val: bool) -&gt; &amp;mut Self;
+
+        fn bit_get(&amp;self, idx: usize) -&gt; bool;
+        fn bit_set(&amp;mut self, idx: usize) -&gt; &amp;mut Self;
+        fn bit_reset(&amp;mut self, idx: usize) -&gt; &amp;mut Self;
+        fn bit_flip(&amp;mut self, idx: usize) -&gt; &amp;mut Self;
+        fn bit_manip(&amp;mut self, idx: usize, val: bool) -&gt; &amp;mut Self;
+
+        fn bit_all(&amp;self) -&gt; bool;
+        fn bit_any(&amp;self) -&gt; bool;
+        #[inline]
+        fn bit_none(&amp;self) -&gt; bool {
+            !self.bit_any()
+        }
+
+        fn bit_eq(&amp;self, rhs: &amp;Self) -&gt; bool;
+        fn bit_disjoint(&amp;self, rhs: &amp;Self) -&gt; bool;
+        fn bit_subset(&amp;self, rhs: &amp;Self) -&gt; bool;
+        #[inline]
+        fn bit_superset(&amp;self, rhs: &amp;Self) -&gt; bool {
+            rhs.bit_subset(self)
+        }
+
+        fn bit_or(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+        fn bit_and(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+        fn bit_nand(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+        fn bit_xor(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self;
+        fn bit_not(&amp;mut self) -&gt; &amp;mut Self;
+        fn bit_mask(&amp;mut self, rhs: &amp;Self, mask: &amp;Self) -&gt; &amp;mut Self;
+
+        fn bit_shr(&amp;mut self, by: usize) -&gt; &amp;mut Self;
+        fn bit_shl(&amp;mut self, by: usize) -&gt; &amp;mut Self;
+
+        fn bit_count_ones(&amp;self) -&gt; usize;
+        #[inline]
+        fn bit_count_zeros(&amp;self) -&gt; usize {
+            self.bit_len() - self.bit_count_ones()
+        }
+
+        #[inline]
+        fn bit_fmt(&amp;self) -&gt; &amp;BitFmt&lt;Self&gt; {
+            unsafe { &amp;*(self as *const _ as *const _) }
         }
     }
 
-    #[inline(always)]
-    fn get(&amp;self, idx: usize) -&gt; bool {
-        (self.bytes[idx &gt;&gt; 3] &gt;&gt; (idx &amp; 0b111)) &amp; 1 == 1
-    }
+    impl BitSetOps for BitSet {
+        #[inline]
+        fn bit_len(&amp;self) -&gt; usize {
+            self.len() * BITS_PER_WORD
+        }
 
-    #[inline(always)]
-    fn set_true(&amp;mut self, idx: usize) {
-        self.bytes[idx &gt;&gt; 3] |= 1 &lt;&lt; (idx &amp; 0b111);
-    }
+        #[inline]
+        fn bit_init(&amp;mut self, val: bool) -&gt; &amp;mut Self {
+            let val = [ElemTy::wrapping_add(!(val as ElemTy), 1); ELEM_LEN];
+            for i in 0..self.len() {
+                self[i] = val;
+            }
+            self
+        }
 
-    #[inline(always)]
-    fn set_false(&amp;mut self, idx: usize) {
-        self.bytes[idx &gt;&gt; 3] &amp;= !(1 &lt;&lt; (idx &amp; 0b111));
-    }
+        #[inline]
+        fn bit_get(&amp;self, idx: usize) -&gt; bool {
+            let block = idx / BITS_PER_WORD;
+            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+            let bit = idx % ELEM_BIT;
+            self[block][lane] &amp; (1 &lt;&lt; bit) != 0
+        }
 
-    #[inline(always)]
-    fn set(&amp;mut self, idx: usize, to: bool) {
-        if to {
-            self.set_true(idx);
-        } else {
-            self.set_false(idx);
+        #[inline]
+        fn bit_set(&amp;mut self, idx: usize) -&gt; &amp;mut Self {
+            let block = idx / BITS_PER_WORD;
+            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+            let bit = idx % ELEM_BIT;
+            self[block][lane] |= 1 &lt;&lt; bit;
+            self
+        }
+
+        #[inline]
+        fn bit_reset(&amp;mut self, idx: usize) -&gt; &amp;mut Self {
+            let block = idx / BITS_PER_WORD;
+            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+            let bit = idx % ELEM_BIT;
+            self[block][lane] &amp;= !(1 &lt;&lt; bit);
+            self
+        }
+
+        #[inline]
+        fn bit_flip(&amp;mut self, idx: usize) -&gt; &amp;mut Self {
+            let block = idx / BITS_PER_WORD;
+            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+            let bit = idx % ELEM_BIT;
+            self[block][lane] ^= 1 &lt;&lt; bit;
+            self
+        }
+
+        #[inline]
+        fn bit_manip(&amp;mut self, idx: usize, val: bool) -&gt; &amp;mut Self {
+            let block = idx / BITS_PER_WORD;
+            let lane = (idx % BITS_PER_WORD) / ELEM_BIT;
+            let bit = idx % ELEM_BIT;
+            let mask = 1 &lt;&lt; bit;
+            self[block][lane] =
+                (self[block][lane] &amp; !mask) | (ElemTy::wrapping_add(!(val as ElemTy), 1) &amp; mask);
+            self
+        }
+
+        #[inline]
+        fn bit_all(&amp;self) -&gt; bool {
+            self.iter()
+                .all(|block| block[0] == !0 &amp;&amp; block[1] == !0 &amp;&amp; block[2] == !0 &amp;&amp; block[3] == !0)
+        }
+
+        #[inline]
+        fn bit_any(&amp;self) -&gt; bool {
+            self.iter()
+                .all(|block| block[0] == 0 &amp;&amp; block[1] == 0 &amp;&amp; block[2] == 0 &amp;&amp; block[3] == 0)
+        }
+
+        #[inline]
+        fn bit_eq(&amp;self, rhs: &amp;Self) -&gt; bool {
+            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
+                lblk[0] == rblk[0] &amp;&amp; lblk[1] == rblk[1] &amp;&amp; lblk[2] == rblk[2] &amp;&amp; lblk[3] == rblk[3]
+            })
+        }
+
+        #[inline]
+        fn bit_disjoint(&amp;self, rhs: &amp;Self) -&gt; bool {
+            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
+                lblk[0] &amp; rblk[0] == 0
+                    &amp;&amp; lblk[1] &amp; rblk[1] == 0
+                    &amp;&amp; lblk[2] &amp; rblk[2] == 0
+                    &amp;&amp; lblk[3] &amp; rblk[3] == 0
+            })
+        }
+
+        /// Returns if self is a subset of rhs
+        #[inline]
+        fn bit_subset(&amp;self, rhs: &amp;Self) -&gt; bool {
+            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
+                rblk[0] == rblk[0] | lblk[0]
+                    &amp;&amp; rblk[1] == rblk[1] | lblk[1]
+                    &amp;&amp; rblk[2] == rblk[2] | lblk[2]
+                    &amp;&amp; rblk[3] == rblk[3] | lblk[3]
+            })
+        }
+
+        #[inline]
+        fn bit_or(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+            for i in 0..self.len() {
+                self[i][0] |= rhs[i][0];
+                self[i][1] |= rhs[i][1];
+                self[i][2] |= rhs[i][2];
+                self[i][3] |= rhs[i][3];
+            }
+            self
+        }
+
+        #[inline]
+        fn bit_and(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+            for i in 0..self.len() {
+                self[i][0] &amp;= rhs[i][0];
+                self[i][1] &amp;= rhs[i][1];
+                self[i][2] &amp;= rhs[i][2];
+                self[i][3] &amp;= rhs[i][3];
+            }
+            self
+        }
+
+        #[inline]
+        fn bit_nand(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+            for i in 0..self.len() {
+                self[i][0] &amp;= !rhs[i][0];
+                self[i][1] &amp;= !rhs[i][1];
+                self[i][2] &amp;= !rhs[i][2];
+                self[i][3] &amp;= !rhs[i][3];
+            }
+            self
+        }
+
+        #[inline]
+        fn bit_xor(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self {
+            for i in 0..self.len() {
+                self[i][0] ^= rhs[i][0];
+                self[i][1] ^= rhs[i][1];
+                self[i][2] ^= rhs[i][2];
+                self[i][3] ^= rhs[i][3];
+            }
+            self
+        }
+
+        #[inline]
+        fn bit_not(&amp;mut self) -&gt; &amp;mut Self {
+            for i in 0..self.len() {
+                self[i][0] = !self[i][0];
+                self[i][1] = !self[i][1];
+                self[i][2] = !self[i][2];
+                self[i][3] = !self[i][3];
+            }
+            self
+        }
+
+        #[inline]
+        fn bit_mask(&amp;mut self, rhs: &amp;Self, mask: &amp;Self) -&gt; &amp;mut Self {
+            for i in 0..self.len() {
+                self[i][0] = self[i][0] &amp; !mask[i][0] | rhs[i][0] &amp; mask[i][0];
+                self[i][1] = self[i][1] &amp; !mask[i][1] | rhs[i][1] &amp; mask[i][1];
+                self[i][2] = self[i][2] &amp; !mask[i][2] | rhs[i][2] &amp; mask[i][2];
+                self[i][3] = self[i][3] &amp; !mask[i][3] | rhs[i][3] &amp; mask[i][3];
+            }
+            self
+        }
+
+        #[inline]
+        fn bit_shl(&amp;mut self, by: usize) -&gt; &amp;mut Self {
+            let elem_move = by / ELEM_BIT;
+            let bit_move = by % ELEM_BIT;
+
+            let (_, slice, _): (_, &amp;mut [ElemTy], _) = unsafe { self.align_to_mut() };
+            slice.copy_within(..slice.len() - elem_move, elem_move);
+            slice[..elem_move].fill(0);
+
+            if bit_move != 0 {
+                let mut carry: ElemTy = 0;
+                let mut tmp: [ElemTy; ELEM_LEN] = [0; ELEM_LEN];
+                for i in 0..self.len() {
+                    tmp[0] = self[i][0] &gt;&gt; (ELEM_BIT - bit_move);
+                    tmp[1] = self[i][1] &gt;&gt; (ELEM_BIT - bit_move);
+                    tmp[2] = self[i][2] &gt;&gt; (ELEM_BIT - bit_move);
+                    tmp[3] = self[i][3] &gt;&gt; (ELEM_BIT - bit_move);
+                    self[i][0] &lt;&lt;= bit_move;
+                    self[i][1] &lt;&lt;= bit_move;
+                    self[i][2] &lt;&lt;= bit_move;
+                    self[i][3] &lt;&lt;= bit_move;
+                    let tmpc = tmp[ELEM_LEN - 1];
+                    tmp.copy_within(..ELEM_LEN - 1, 1);
+                    tmp[0] = carry;
+                    self[i][0] |= tmp[0];
+                    self[i][1] |= tmp[1];
+                    self[i][2] |= tmp[2];
+                    self[i][3] |= tmp[3];
+                    carry = tmpc;
+                }
+            }
+
+            self
+        }
+
+        #[inline]
+        fn bit_shr(&amp;mut self, by: usize) -&gt; &amp;mut Self {
+            let elem_move = by / ELEM_BIT;
+            let bit_move = by % ELEM_BIT;
+
+            let (_, slice, _): (_, &amp;mut [ElemTy], _) = unsafe { self.align_to_mut() };
+            slice.copy_within(elem_move.., 0);
+            let sl = slice.len();
+            slice[sl - elem_move..].fill(0);
+
+            if bit_move != 0 {
+                let mut carry: ElemTy = 0;
+                let mut tmp: [ElemTy; ELEM_LEN] = [0; ELEM_LEN];
+                for i in 0..self.len() {
+                    tmp[0] = self[i][0] &lt;&lt; (ELEM_BIT - bit_move);
+                    tmp[1] = self[i][1] &lt;&lt; (ELEM_BIT - bit_move);
+                    tmp[2] = self[i][2] &lt;&lt; (ELEM_BIT - bit_move);
+                    tmp[3] = self[i][3] &lt;&lt; (ELEM_BIT - bit_move);
+                    self[i][0] &gt;&gt;= bit_move;
+                    self[i][1] &gt;&gt;= bit_move;
+                    self[i][2] &gt;&gt;= bit_move;
+                    self[i][3] &gt;&gt;= bit_move;
+                    let tmpc = tmp[0];
+                    tmp.copy_within(1.., 0);
+                    tmp[ELEM_LEN - 1] = carry;
+                    carry = tmpc;
+                    self[i][0] |= tmp[0];
+                    self[i][1] |= tmp[1];
+                    self[i][2] |= tmp[2];
+                    self[i][3] |= tmp[3];
+                }
+            }
+
+            self
+        }
+
+        #[inline]
+        fn bit_count_ones(&amp;self) -&gt; usize {
+            self.iter()
+                .map(|chunk| {
+                    chunk[0].count_ones() as usize
+                        + chunk[1].count_ones() as usize
+                        + chunk[2].count_ones() as usize
+                        + chunk[3].count_ones() as usize
+                })
+                .sum()
         }
     }
 
-    #[inline(always)]
-    fn toggle(&amp;mut self, idx: usize) {
-        self.bytes[idx &gt;&gt; 3] ^= 1 &lt;&lt; (idx &amp; 0b111);
-    }
+    mod fmt {
+        use super::BitSetOps as BitSet;
+        use std::fmt;
 
-    #[inline(always)]
-    fn fill(&amp;mut self, with: u8) {
-        for v in self.bytes.iter_mut() {
-            *v = with;
+        #[repr(transparent)]
+        pub struct BitFmt&lt;T: ?Sized&gt;(T);
+
+        fn bitstring&lt;T: ?Sized + BitSet&gt;(this: &amp;T, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+            const ALPHABET: [u8; 2] = [b'0', b'1'];
+            let mut buf = [0u8; 9];
+            let mut first = true;
+            buf[0] = b'_';
+            let mut i = 0;
+            while i &lt; this.bit_len() {
+                buf[1] = ALPHABET[this.bit_get(i + 0) as usize];
+                buf[2] = ALPHABET[this.bit_get(i + 1) as usize];
+                buf[3] = ALPHABET[this.bit_get(i + 2) as usize];
+                buf[4] = ALPHABET[this.bit_get(i + 3) as usize];
+                buf[5] = ALPHABET[this.bit_get(i + 4) as usize];
+                buf[6] = ALPHABET[this.bit_get(i + 5) as usize];
+                buf[7] = ALPHABET[this.bit_get(i + 6) as usize];
+                buf[8] = ALPHABET[this.bit_get(i + 7) as usize];
+                let s = unsafe { &amp;*((&amp;buf[first as usize..]) as *const _ as *const str) };
+                f.write_str(s)?;
+                i += 8;
+                first = false;
+            }
+            Ok(())
+        }
+
+        impl&lt;T: ?Sized + BitSet&gt; fmt::Display for BitFmt&lt;T&gt; {
+            fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+                bitstring(&amp;self.0, f)
+            }
         }
     }
-
-    #[inline(always)]
-    fn fill_range(&amp;mut self, chunk_start: usize, chunk_end: usize, with: u8) {
-        for v in self.bytes[chunk_start..chunk_end].iter_mut() {
-            *v = with;
-        }
-    }
+    pub use self::fmt::BitFmt;
 }</code></pre>
 
                     </main>
