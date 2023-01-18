@@ -1559,10 +1559,9 @@ impl&lt;T&gt; std::ops::IndexMut&lt;usize&gt; for Matrix&lt;T&gt; {
 For any other purpose, I highly recommend the <a href="https://docs.rs/bitset-core/latest/bitset_core/">bitset_core crate</a> which highly inspired this snippet.</p>
 <h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
 <p>An array of <code>[u64; 4]</code> implements <code>BitSetOps</code> trait, therefore is recognized as a bitset. The number of booleans packed into the bitset can be found with <code>fn bit_len(&amp;self) -&gt; usize</code>.</p>
-<p>Refer to the below example of a sieve of Eratosthenes, and <code>BitSetOps</code> implementations for further details.</p>
+<p>Refer to the <a href="datastructure/bitarray.html#apis">APIs</a> for further references.</p>
 <h2 id="example-8"><a class="header" href="#example-8">Example</a></h2>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow_unused]
-</span>use bitset::*;
+<pre><pre class="playground"><code class="language-rust">use bitset::*;
 <span class="boring">
 </span><span class="boring">fn main() {
 </span>const MAX_VAL: usize = 1000000;
@@ -1586,8 +1585,6 @@ println!(
     &quot;{}&quot;,
     is_prime.bit_count_ones() - (is_prime.bit_len() - (MAX_VAL + 1))
 ); // 78498
-
-// println!(&quot;{}&quot;, is_prime.bit_fmt());  // Prints the bitset, starting from the first boolean
 <span class="boring">}
 </span><span class="boring">
 </span><span class="boring">mod bitset {
@@ -1747,7 +1744,6 @@ println!(
 </span><span class="boring">            })
 </span><span class="boring">        }
 </span><span class="boring">
-</span><span class="boring">        /// Returns if self is a subset of rhs
 </span><span class="boring">        #[inline]
 </span><span class="boring">        fn bit_subset(&amp;self, rhs: &amp;Self) -&gt; bool {
 </span><span class="boring">            self.iter().zip(rhs.iter()).all(|(&amp;lblk, &amp;rblk)| {
@@ -2303,6 +2299,117 @@ println!(
     }
     pub use self::fmt::BitFmt;
 }</code></pre>
+<h2 id="simd-auto-vectorization-and-rustc-optimization-level"><a class="header" href="#simd-auto-vectorization-and-rustc-optimization-level">SIMD, Auto-vectorization and <code>rustc</code> Optimization Level</a></h2>
+<p>To fully enable the power of aggressive SIMD optimization, the <code>opt-level</code> for compilation should be 3.
+When the level is 2, despite many of vectorizations still happen, the occurence noticably decreases.</p>
+<p>As most of the OJs compile Rust codes with <code>opt-level</code> of 2, to fully enable the power of SIMD, you need to hardcode the machine code into Rust.
+As this is virtually impossible to do manually in actual PS/CP, using third-party tools like <a href="https://github.com/kiwiyou/basm-rs">basm-rs</a> is highly recommended.</p>
+<h2 id="apis"><a class="header" href="#apis">APIs</a></h2>
+<p>The behavior of APIs having multiple bitsets as arguments, when their length are not equal to each other, is unspecified.</p>
+<ul>
+<li>
+<p><code>pub type BitSet</code></p>
+<p><code>[u64; 4]</code> is defined as a <code>type BitSet</code>.
+As this is a dynamically sized type, when declaring a bitset you cannot use <code>BitSet</code> in its type declaration.
+Instead, you need to do like the below example.</p>
+<pre><code class="language-rust noplayground">let mut bitset</code></pre>
+</li>
+<li>
+<p><code>fn bit_len(&amp;self) -&gt; usize</code></p>
+<p>Returns the number of boolean values included in the set.</p>
+</li>
+<li>
+<p><code>fn bit_init(&amp;mut self, val: bool) -&gt; &amp;mut Self</code></p>
+<p>Initializes every boolean value of <code>self</code> as <code>val</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_get(&amp;self, idx: usize) -&gt; bool</code></p>
+<p>Returns the <code>idx</code>th boolean value of <code>self</code>.</p>
+</li>
+<li>
+<p><code>fn bit_set(&amp;mut self, idx: usize) -&gt; &amp;mut Self</code></p>
+<p>Sets the <code>idx</code>th boolean value to <code>true</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_reset(&amp;mut self, idx: usize) -&gt; &amp;mut Self</code></p>
+<p>Sets the <code>idx</code>th boolean value to <code>false</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_flip(&amp;mut self, idx: usize) -&gt; &amp;mut Self</code></p>
+<p>Flips the <code>idx</code>th boolean value, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_manip(&amp;mut self, idx: usize, val: bool) -&gt; &amp;mut Self</code></p>
+<p>Sets the <code>idx</code>th boolean value to <code>val</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_all(&amp;self) -&gt; bool</code></p>
+<p>Returns <code>true</code> if every boolean value of <code>self</code> is <code>true</code>. Otherwise, returns <code>false</code>.</p>
+</li>
+<li>
+<p><code>fn bit_none(&amp;self) -&gt; bool</code></p>
+<p>Returns <code>true</code> if every boolean value of <code>self</code> is <code>false</code>. Otherwise, returns <code>false</code>.</p>
+</li>
+<li>
+<p><code>fn bit_disjoint(&amp;self, rhs: &amp;Self) -&gt; bool</code></p>
+<p>Returns <code>true</code> if every bit of <code>self</code> turned on is not in <code>rhs</code>, and vice versa. Otherwise, returns <code>false</code>.</p>
+</li>
+<li>
+<p><code>fn bit_subset(&amp;self, rhs: &amp;Self) -&gt; bool</code></p>
+<p>Returns <code>true</code> if <code>self</code> is a subset of <code>rhs</code>. Otherwise, returns <code>false</code>.</p>
+</li>
+<li>
+<p><code>fn bit_superset(&amp;self, rhs: &amp;Self) -&gt; bool</code></p>
+<p>Returns <code>true</code> if <code>self</code> is a superset of <code>rhs</code>. Otherwise, returns <code>false</code>.</p>
+</li>
+<li>
+<p><code>fn bit_or(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self</code></p>
+<p>Sets <code>self</code> as <code>self | rhs</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_and(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self</code></p>
+<p>Sets <code>self</code> as <code>self &amp; rhs</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_nand(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self</code></p>
+<p>Sets <code>self</code> as <code>self &amp; !rhs</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_xor(&amp;mut self, rhs: &amp;Self) -&gt; &amp;mut Self</code></p>
+<p>Sets <code>self</code> as <code>self ^ rhs</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_not(&amp;mut self) -&gt; &amp;mut Self</code></p>
+<p>Reverses every bits of <code>self</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_mask(&amp;mut self, rhs: &amp;Self, mask: &amp;Self) -&gt; &amp;mut Self</code></p>
+<p>Sets <code>self</code> as <code>(self &amp; !mask) | (rhs &amp; mask)</code>, and returns <code>&amp;mut self</code> back.</p>
+</li>
+<li>
+<p><code>fn bit_shr(&amp;mut self, by: usize) -&gt; &amp;mut Self</code></p>
+<p>Shifts <code>self</code> right by <code>by</code>. The direction of shifting is to the lower index.
+The empty bits are filled with <code>0</code>, and the overflowed bits disappear.</p>
+</li>
+<li>
+<p><code>fn bit_shl(&amp;mut self, by: usize) -&gt; &amp;mut Self</code></p>
+<p>Shifts <code>self</code> left by <code>by</code>. The direction of shifting is to the lower index.
+The empty bits are filled with <code>0</code>, and the overflowed bits disappear.</p>
+</li>
+<li>
+<p><code>fn bit_count_ones(&amp;self) -&gt; usize</code></p>
+<p>Returns the number of boolean values that is <code>true</code>.</p>
+</li>
+<li>
+<p><code>fn bit_count_zeros(&amp;self) -&gt; usize</code></p>
+<p>Returns the number of boolean values that is <code>false</code>.</p>
+</li>
+<li>
+<p><code>fn bit_fmt(&amp;self) -&gt; &amp;BitFmt&lt;Self&gt;</code></p>
+<p>Used for printing out the bitset.</p>
+<pre><code class="language-rust noplayground">println!(&quot;{}&quot;, bitset.bit_fmt());</code></pre>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="segment-trees"><a class="header" href="#segment-trees">Segment Trees</a></h1>
 <p>Segment trees are a category of data structures which can handle range queries efficiently.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="segment-tree"><a class="header" href="#segment-tree">Segment Tree</a></h1>
@@ -2726,7 +2833,7 @@ println!(&quot;{}&quot;, l);             // 0
         }
     }
 }</code></pre>
-<h2 id="apis"><a class="header" href="#apis">APIs</a></h2>
+<h2 id="apis-1"><a class="header" href="#apis-1">APIs</a></h2>
 <ul>
 <li>
 <p><code>trait Monoid</code> represents a monoid \(S\) explained above. Three methods <code>e</code>, <code>opr_lhs</code>, <code>opr_rhs</code> are required to be implemented. Implementing <code>opr</code> and <code>opr_set</code> is optional.</p>
@@ -3578,7 +3685,7 @@ println!(&quot;{}&quot;, l); // 3
         }
     }
 }</code></pre>
-<h2 id="apis-1"><a class="header" href="#apis-1">APIs</a></h2>
+<h2 id="apis-2"><a class="header" href="#apis-2">APIs</a></h2>
 <p>Will be done soon. For <code>max_right</code> and <code>min_left</code>, either check the explanation from <a href="datastructure/segtree/./segtree.html#apis">the segment tree documentation</a>, or see the below mathematical definitions (which will be replaced with better explanation).</p>
 <h3 id="max_right"><a class="header" href="#max_right"><code>max_right</code></a></h3>
 <p>Given an index \(l\) and a check function \( f : S \rightarrow bool \), <code>max_right</code> finds an index \(r\) such that satisfies both of the following conditions:</p>
