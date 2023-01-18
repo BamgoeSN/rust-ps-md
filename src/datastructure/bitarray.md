@@ -11,7 +11,7 @@ For any other purpose, I highly recommend the [bitset_core crate](https://docs.r
 
 An array of `[u64; 4]` implements `BitSetOps` trait, therefore is recognized as a bitset. The number of booleans packed into the bitset can be found with `fn bit_len(&self) -> usize`.
 
-Refer to the [APIs](#apis) for further references.
+Refer to the [APIs](#apis) for further information.
 
 ## Example
 
