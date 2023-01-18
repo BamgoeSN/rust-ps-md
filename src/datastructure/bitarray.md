@@ -11,12 +11,11 @@ For any other purpose, I highly recommend the [bitset_core crate](https://docs.r
 
 An array of `[u64; 4]` implements `BitSetOps` trait, therefore is recognized as a bitset. The number of booleans packed into the bitset can be found with `fn bit_len(&self) -> usize`.
 
-Refer to the below example of a sieve of Eratosthenes, and `BitSetOps` implementations for further details.
+Refer to the [APIs](#apis) for further references.
 
 ## Example
 
 ```rust
-# #![allow_unused]
 use bitset::*;
 # 
 # fn main() {
@@ -41,8 +40,6 @@ println!(
     "{}",
     is_prime.bit_count_ones() - (is_prime.bit_len() - (MAX_VAL + 1))
 ); // 78498
-
-// println!("{}", is_prime.bit_fmt());  // Prints the bitset, starting from the first boolean
 # }
 # 
 # mod bitset {
@@ -202,7 +199,6 @@ println!(
 #             })
 #         }
 # 
-#         /// Returns if self is a subset of rhs
 #         #[inline]
 #         fn bit_subset(&self, rhs: &Self) -> bool {
 #             self.iter().zip(rhs.iter()).all(|(&lblk, &rblk)| {
@@ -763,3 +759,121 @@ mod bitset {
     pub use self::fmt::BitFmt;
 }
 ```
+
+## SIMD, Auto-vectorization and `rustc` Optimization Level
+
+To fully enable the power of aggressive SIMD optimization, the `opt-level` for compilation should be 3.
+When the level is 2, despite many of vectorizations still happen, the occurence noticably decreases.
+
+As most of the OJs compile Rust codes with `opt-level` of 2, to fully enable the power of SIMD, you need to hardcode the machine code into Rust.
+As this is virtually impossible to do manually in actual PS/CP, using third-party tools like [basm-rs](https://github.com/kiwiyou/basm-rs) is highly recommended.
+
+## APIs
+
+The behavior of APIs having multiple bitsets as arguments, when their length are not equal to each other, is unspecified.
+
+- `pub type BitSet`
+
+  `[u64; 4]` is defined as a `type BitSet`.
+  As this is a dynamically sized type, when declaring a bitset you cannot use `BitSet` in its type declaration.
+  Instead, you need to do like the below example.
+  ```rust,noplayground
+  let mut bitset
+  ```
+
+- `fn bit_len(&self) -> usize`
+
+  Returns the number of boolean values included in the set.
+
+- `fn bit_init(&mut self, val: bool) -> &mut Self`
+
+  Initializes every boolean value of `self` as `val`, and returns `&mut self` back.
+
+- `fn bit_get(&self, idx: usize) -> bool`
+
+  Returns the `idx`th boolean value of `self`.
+
+- `fn bit_set(&mut self, idx: usize) -> &mut Self`
+
+  Sets the `idx`th boolean value to `true`, and returns `&mut self` back.
+
+- `fn bit_reset(&mut self, idx: usize) -> &mut Self`
+
+  Sets the `idx`th boolean value to `false`, and returns `&mut self` back.
+
+- `fn bit_flip(&mut self, idx: usize) -> &mut Self`
+
+  Flips the `idx`th boolean value, and returns `&mut self` back.
+
+- `fn bit_manip(&mut self, idx: usize, val: bool) -> &mut Self`
+
+  Sets the `idx`th boolean value to `val`, and returns `&mut self` back.
+
+- `fn bit_all(&self) -> bool`
+
+  Returns `true` if every boolean value of `self` is `true`. Otherwise, returns `false`.
+
+- `fn bit_none(&self) -> bool`
+
+  Returns `true` if every boolean value of `self` is `false`. Otherwise, returns `false`.
+
+- `fn bit_disjoint(&self, rhs: &Self) -> bool`
+
+  Returns `true` if every bit of `self` turned on is not in `rhs`, and vice versa. Otherwise, returns `false`.
+
+- `fn bit_subset(&self, rhs: &Self) -> bool`
+  
+  Returns `true` if `self` is a subset of `rhs`. Otherwise, returns `false`.
+
+- `fn bit_superset(&self, rhs: &Self) -> bool`
+
+  Returns `true` if `self` is a superset of `rhs`. Otherwise, returns `false`.
+
+- `fn bit_or(&mut self, rhs: &Self) -> &mut Self`
+
+  Sets `self` as `self | rhs`, and returns `&mut self` back.
+
+- `fn bit_and(&mut self, rhs: &Self) -> &mut Self`
+
+  Sets `self` as `self & rhs`, and returns `&mut self` back.
+
+- `fn bit_nand(&mut self, rhs: &Self) -> &mut Self`
+
+  Sets `self` as `self & !rhs`, and returns `&mut self` back.
+
+- `fn bit_xor(&mut self, rhs: &Self) -> &mut Self`
+
+  Sets `self` as `self ^ rhs`, and returns `&mut self` back.
+
+- `fn bit_not(&mut self) -> &mut Self`
+
+  Reverses every bits of `self`, and returns `&mut self` back.
+
+- `fn bit_mask(&mut self, rhs: &Self, mask: &Self) -> &mut Self`
+
+  Sets `self` as `(self & !mask) | (rhs & mask)`, and returns `&mut self` back.
+
+- `fn bit_shr(&mut self, by: usize) -> &mut Self`
+
+  Shifts `self` right by `by`. The direction of shifting is to the lower index.
+  The empty bits are filled with `0`, and the overflowed bits disappear.
+
+- `fn bit_shl(&mut self, by: usize) -> &mut Self`
+
+  Shifts `self` left by `by`. The direction of shifting is to the lower index.
+  The empty bits are filled with `0`, and the overflowed bits disappear.
+
+- `fn bit_count_ones(&self) -> usize`
+
+  Returns the number of boolean values that is `true`.
+
+- `fn bit_count_zeros(&self) -> usize`
+
+  Returns the number of boolean values that is `false`.
+
+- `fn bit_fmt(&self) -> &BitFmt<Self>`
+
+  Used for printing out the bitset.
+  ```rust,noplayground
+  println!("{}", bitset.bit_fmt());
+  ```
