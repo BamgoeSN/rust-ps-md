@@ -113,63 +113,56 @@ trait MillerRabin: From<u8> + PartialOrd {
 }
 
 macro_rules! impl_millerrabin {
-        ($t:ty, $u:ty, $thres:expr, $($x:expr),*) => {
-            impl MillerRabin for $t {
-                const MR_THRES: Self = $thres;
+    ($t:ty, $u:ty, $thres:expr, $($x:expr),*) => {
+        impl MillerRabin for $t {
+            const MR_THRES: Self = $thres;
 
-                #[inline(always)]
-                fn naive_primality(self) -> bool {
-                    for i in (2..).take_while(|&i| i * i <= self) {
-                        if self % i == 0 {
-                            return false;
-                        }
-                    }
-                    true
-                }
-
-                #[inline(always)]
-                fn miller_rabin_test(self, a: Self) -> bool {
-                    let d = self - 1;
-                    let mut p = d >> (d.trailing_zeros());
-
-                    let mut t = {
-                        let mut base = a as $u;
-                        let mut exp = p as $u;
-                        let rem = self as $u;
-                        let mut ret: $u = 1;
-                        while exp != 0 {
-                            if exp & 1 != 0 {
-                                ret = ret * base % rem;
-                            }
-                            base = base*base%rem;
-                            exp >>= 1;
-                        }
-                        ret as $t
-                    };
-
-                    let at_last = t == d || t == 1;
-
-                    while p != d {
-                        p <<= 1;
-                        t = ((t as $u * t as $u) % self as $u) as $t;
-                        if t == self - 1 {
-                            return true;
-                        }
-                    }
-                    at_last
-                }
-
-                fn miller_primality(self) -> bool {
-                    $(
-                        if !self.miller_rabin_test($x) {
-                            return false;
-                        }
-                    )*
-                    true
-                }
+            #[inline(always)]
+            fn naive_primality(self) -> bool {
+                (2..).take_while(|&i| i * i <= self).all(|i| self % i != 0)
             }
-        };
-    }
+
+            #[inline(always)]
+            fn miller_rabin_test(self, a: Self) -> bool {
+                let d = self - 1;
+                let mut p = d >> (d.trailing_zeros());
+
+                let mut t = {
+                    let mut base = a as $u;
+                    let mut exp = p as $u;
+                    let rem = self as $u;
+                    let mut ret: $u = 1;
+                    while exp != 0 {
+                        if exp & 1 != 0 {
+                            ret = ret * base % rem;
+                        }
+                        base = base * base % rem;
+                        exp >>= 1;
+                    }
+                    ret as $t
+                };
+
+                let at_last = t == d || t == 1;
+
+                while p != d {
+                    p <<= 1;
+                    t = ((t as $u * t as $u) % self as $u) as $t;
+                    if t == self - 1 {
+                        return true;
+                    }
+                }
+                at_last
+            }
+
+            fn miller_primality(self) -> bool {
+                $(
+                    if !self.miller_rabin_test($x) { return false; }
+                )*
+                true
+            }
+        }
+    };
+}
 
 impl_millerrabin!(u8, u16, 254, 2);
 impl_millerrabin!(u16, u32, 2000, 2, 3);
