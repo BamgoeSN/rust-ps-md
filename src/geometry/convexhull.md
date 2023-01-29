@@ -1,130 +1,67 @@
 # Convex Hull
 
-## Graham Scan
-This snippet excludes every points on vertices from the convex hull, and only includes points of both ends.
+`cvh(pts: &[Point])` returns indices of points included in a convex hull of `pts`.
+It's implemented based on monotone chain algorithm, a much intuitive and straightforward convex hull
+algorithm compared to the well-known Graham scan.
 
-### Snippet
+The code below excludes the points on the sides of the hull, but by simply changing `>=` from lines calling `ccw` to `>`,
+one can change its behavior to include such points.
+
+If `pts` includes duplicates and those happen to be on the convex hull, then only one of them is included in the result.
+
+## Code
+
 ```rust,noplayground
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct Point {
-    x: i64,
-    y: i64,
+type Coord = i32;
+type CCWOut = i64;
+type Point = (Coord, Coord);
+
+fn ccw(a: &Point, b: &Point, c: &Point) -> CCWOut {
+    let ba = (b.0 as CCWOut - a.0 as CCWOut, b.1 as CCWOut - a.1 as CCWOut);
+    let cb = (c.0 as CCWOut - b.0 as CCWOut, c.1 as CCWOut - b.1 as CCWOut);
+    ba.0 * cb.1 - ba.1 * cb.0
 }
 
-impl Point {
-    fn add(&self, other: &Self) -> Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-    fn sub(&self, other: &Self) -> Self {
-        Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-enum Turn {
-    CW,
-    CCW,
-    Zero,
-}
-
-fn get_turn(v1: &Point, v2: &Point) -> Turn {
-    let prod = v1.x * v2.y - v1.y * v2.x;
-    if prod > 0 {
-        Turn::CCW
-    } else if prod < 0 {
-        Turn::CW
-    } else {
-        Turn::Zero
-    }
-}
-
-fn compare_ccw(a: &Point, b: &Point) -> std::cmp::Ordering {
-    use std::cmp::Ordering;
-    if a == b {
-        return Ordering::Equal;
-    }
-    if a.x == 0 && a.y == 0 {
-        return Ordering::Less;
-    } else if b.x == 0 && b.y == 0 {
-        return Ordering::Greater;
+fn cvh(pts: &[Point]) -> Vec<usize> {
+    if pts.is_empty() {
+        return vec![];
+    } else if pts.len() == 1 {
+        return vec![0];
     }
 
-    let turn = get_turn(a, b);
-    if turn == Turn::CCW {
-        return Ordering::Less;
-    } else if turn == Turn::CW {
-        return Ordering::Greater;
-    }
+    let n = pts.len();
 
-    let a_dist = a.x * a.x + a.y * a.y;
-    let b_dist = b.x * b.x + b.y * b.y;
-    a_dist.cmp(&b_dist)
-}
+    let mut refs: Vec<_> = (0..n).collect();
+    refs.sort_unstable_by_key(|&i| pts[i]);
+    refs.dedup_by_key(|i| pts[*i]);
 
-fn convex_hull(arr: &mut [Point]) -> Vec<Point> {
-    let pivot = {
-        let mut pivot = Point {
-            x: i64::MAX,
-            y: i64::MAX,
-        };
-        for v in arr.iter() {
-            if pivot.y > v.y || (pivot.y == v.y && pivot.x > v.x) {
-                pivot.x = v.x;
-                pivot.y = v.y;
+    let mut upper = vec![refs[0]];
+    for &pt in refs.iter().skip(1) {
+        while upper.len() > 1 {
+            let ul = upper.len();
+            if ccw(&pts[upper[ul - 2]], &pts[upper[ul - 1]], &pts[pt]) > 0 {
+                upper.pop();
+            } else {
+                break;
             }
         }
-        pivot
-    };
-
-    for v in arr.iter_mut() {
-        *v = v.sub(&pivot);
+        upper.push(pt);
     }
 
-    arr.sort_unstable_by(compare_ccw);
-
-    let mut stack = vec![arr[0].clone()];
-    let mut i = 1;
-    while i < arr.len() {
-        if stack.len() == 1 {
-            if arr[i] != stack[0] {
-                stack.push(arr[i].clone());
-            }
-            i += 1;
-            continue;
-        }
-
-        let a = &arr[i];
-        let b = &stack[stack.len() - 1];
-        let c = &stack[stack.len() - 2];
-        match get_turn(&b.sub(c), &a.sub(b)) {
-            Turn::CCW => {
-                stack.push(a.clone());
-                i += 1;
-            }
-            Turn::CW => {
-                stack.pop();
-            }
-            _ => {
-                stack.pop();
-                stack.push(a.clone());
-                i += 1;
+    let mut lower = vec![*refs.last().unwrap()];
+    for &pt in refs.iter().rev().skip(1) {
+        while lower.len() > 1 {
+            let ll = lower.len();
+            if ccw(&pts[lower[ll - 2]], &pts[lower[ll - 1]], &pts[pt]) > 0 {
+                lower.pop();
+            } else {
+                break;
             }
         }
+        lower.push(pt);
     }
 
-    for v in arr.iter_mut() {
-        *v = v.add(&pivot);
-    }
-    for v in stack.iter_mut() {
-        *v = v.add(&pivot);
-    }
-
-    stack
+    lower.pop();
+    upper.into_iter().chain(lower.into_iter().skip(1)).collect()
 }
 ```
