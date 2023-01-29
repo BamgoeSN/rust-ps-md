@@ -21,7 +21,6 @@
 
 # Data Structures
 
-- [Fast n-dimensional Array](./datastructure/matrix.md)
 - [Bitset](./datastructure/bitarray.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
   - [Segment Tree](./datastructure/segtree/segtree.md)
