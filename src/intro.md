@@ -32,18 +32,33 @@ Clicking on the search icon <i class="fa fa-search"></i> in the menu bar, or pre
 
 ## Disclaimer
 
-**None of the codes from this document should be used in any other fields besides competitive programming!** Every code here is strictly designed for CP, thus there are basically no guards for possible errors.
-
-As stated from the license below, I do not hold any responsibilities for any problems happened from using these snippets. Never use it for production! I never guarantee my codes to work perfectly.
-
-MIT license states that the user should include the license to copies or redistributions, but I don't really care about adding it to the code. This license should be just considered as a placeholder, so that I can fully open users to use my snippets completely freely, while I can be safe from getting sued. I'm planning to replace the license to something else (something similar to IDGAF license but less rude) whenever I find one.
+**None of the codes from this document should be used in any other fields besides competitive programming!** Every code here is strictly designed for CP, and none of these codes are for actual production codes.
 
 ## License
 
-Copyright 2023 BamgoeSN
+Unless stated otherwise, or there is another license included in the code, every snippets here is under Unlicense.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+> This is free and unencumbered software released into the public domain.
+> 
+> Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+>
+> In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+> 
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+> 
+> For more information, please refer to <http://unlicense.org/>

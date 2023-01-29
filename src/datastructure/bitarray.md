@@ -877,3 +877,8 @@ The behavior of APIs having multiple bitsets as arguments, when their length are
   ```rust,noplayground
   println!("{}", bitset.bit_fmt());
   ```
+
+## License
+
+This code is protected under MIT license, holded by 
+Casper <CasualX@users.noreply.github.com>.
