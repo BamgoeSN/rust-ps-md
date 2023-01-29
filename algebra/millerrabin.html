@@ -151,120 +151,114 @@
 <p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime in a time complexity of \(O(\log{n})\). This test only works for integers under \(2^{64}\).</p>
 <p><code>x.is_prime()</code> chooses a roughly faster algorithm among naive primality test and Miller-Rabin test, and returns <code>true</code> if <code>x</code> is a prime, <code>false</code> if not.</p>
 <h2 id="example"><a class="header" href="#example">Example</a></h2>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+<pre><pre class="playground"><code class="language-rust">use miller_rabin::MillerRabin;
+
+<span class="boring">
+</span><span class="boring">fn main() {
 </span>println!(&quot;{}&quot;, 3284729387909u64.is_prime()); // true
 println!(&quot;{}&quot;, 3284729387911u64.is_prime()); // false 53×61976026187
 <span class="boring">}
 </span><span class="boring">
-</span><span class="boring">trait MillerRabin: From&lt;u8&gt; + PartialOrd {
-</span><span class="boring">    const MR_THRES: Self;
-</span><span class="boring">    fn naive_primality(self) -&gt; bool;
-</span><span class="boring">    fn miller_rabin_test(self, a: Self) -&gt; bool;
-</span><span class="boring">    fn miller_primality(self) -&gt; bool;
-</span><span class="boring">    fn is_prime(self) -&gt; bool {
-</span><span class="boring">        if self &lt;= 1.into() {
-</span><span class="boring">            false
-</span><span class="boring">        } else if self &lt;= Self::MR_THRES {
-</span><span class="boring">            self.naive_primality()
-</span><span class="boring">        } else {
-</span><span class="boring">            self.miller_primality()
+</span><span class="boring">mod miller_rabin {
+</span><span class="boring">    pub trait MillerRabin: From&lt;u8&gt; + PartialOrd {
+</span><span class="boring">        const MR_THRES: Self;
+</span><span class="boring">        fn naive_primality(self) -&gt; bool;
+</span><span class="boring">        fn miller_rabin_test(self, a: Self) -&gt; bool;
+</span><span class="boring">        fn miller_primality(self) -&gt; bool;
+</span><span class="boring">        fn is_prime(self) -&gt; bool {
+</span><span class="boring">            if self &lt;= 1.into() {
+</span><span class="boring">                false
+</span><span class="boring">            } else if self &lt;= Self::MR_THRES {
+</span><span class="boring">                self.naive_primality()
+</span><span class="boring">            } else {
+</span><span class="boring">                self.miller_primality()
+</span><span class="boring">            }
 </span><span class="boring">        }
 </span><span class="boring">    }
-</span><span class="boring">}
 </span><span class="boring">
-</span><span class="boring">macro_rules! impl_millerrabin {
-</span><span class="boring">    ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
-</span><span class="boring">        impl MillerRabin for $t {
-</span><span class="boring">            const MR_THRES: Self = $thres;
+</span><span class="boring">    macro_rules! impl_millerrabin {
+</span><span class="boring">        ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
+</span><span class="boring">            impl MillerRabin for $t {
+</span><span class="boring">                const MR_THRES: Self = $thres;
 </span><span class="boring">
-</span><span class="boring">            #[inline(always)]
-</span><span class="boring">            fn naive_primality(self) -&gt; bool {
-</span><span class="boring">                for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
-</span><span class="boring">                    if self % i == 0 {
-</span><span class="boring">                        return false;
-</span><span class="boring">                    }
+</span><span class="boring">                #[inline(always)]
+</span><span class="boring">                fn naive_primality(self) -&gt; bool {
+</span><span class="boring">                    (2..).take_while(|&amp;i| i * i &lt;= self).all(|i| self % i != 0)
 </span><span class="boring">                }
-</span><span class="boring">                true
-</span><span class="boring">            }
 </span><span class="boring">
-</span><span class="boring">               #[inline(always)]
-</span><span class="boring">               fn miller_rabin_test(self, a: Self) -&gt; bool {
-</span><span class="boring">                   let d = self - 1;
-</span><span class="boring">                   let mut p = d &gt;&gt; (d.trailing_zeros());
+</span><span class="boring">                #[inline(always)]
+</span><span class="boring">                fn miller_rabin_test(self, a: Self) -&gt; bool {
+</span><span class="boring">                    let d = self - 1;
+</span><span class="boring">                    let mut p = d &gt;&gt; (d.trailing_zeros());
 </span><span class="boring">
-</span><span class="boring">                   let mut t = {
-</span><span class="boring">                       let mut base = a as $u;
-</span><span class="boring">                       let mut exp = p as $u;
-</span><span class="boring">                       let rem = self as $u;
-</span><span class="boring">                       let mut ret: $u = 1;
-</span><span class="boring">                       while exp != 0 {
-</span><span class="boring">                           if exp &amp; 1 != 0 {
-</span><span class="boring">                               ret = ret * base % rem;
-</span><span class="boring">                           }
-</span><span class="boring">                           base = base*base%rem;
-</span><span class="boring">                           exp &gt;&gt;= 1;
-</span><span class="boring">                       }
-</span><span class="boring">                       ret as $t
-</span><span class="boring">                   };
+</span><span class="boring">                    let mut t = {
+</span><span class="boring">                        let mut base = a as $u;
+</span><span class="boring">                        let mut exp = p as $u;
+</span><span class="boring">                        let rem = self as $u;
+</span><span class="boring">                        let mut ret: $u = 1;
+</span><span class="boring">                        while exp != 0 {
+</span><span class="boring">                            if exp &amp; 1 != 0 {
+</span><span class="boring">                                ret = ret * base % rem;
+</span><span class="boring">                            }
+</span><span class="boring">                            base = base * base % rem;
+</span><span class="boring">                            exp &gt;&gt;= 1;
+</span><span class="boring">                        }
+</span><span class="boring">                        ret as $t
+</span><span class="boring">                    };
 </span><span class="boring">
-</span><span class="boring">                   let at_last = t == d || t == 1;
+</span><span class="boring">                    let at_last = t == d || t == 1;
 </span><span class="boring">
-</span><span class="boring">                   while p != d {
-</span><span class="boring">                       p &lt;&lt;= 1;
-</span><span class="boring">                       t = ((t as $u * t as $u) % self as $u) as $t;
-</span><span class="boring">                       if t == self - 1 {
-</span><span class="boring">                           return true;
-</span><span class="boring">                       }
-</span><span class="boring">                   }
-</span><span class="boring">                   at_last
-</span><span class="boring">               }
-</span><span class="boring">
-</span><span class="boring">            fn miller_primality(self) -&gt; bool {
-</span><span class="boring">                $(
-</span><span class="boring">                    if !self.miller_rabin_test($x) {
-</span><span class="boring">                        return false;
+</span><span class="boring">                    while p != d {
+</span><span class="boring">                        p &lt;&lt;= 1;
+</span><span class="boring">                        t = ((t as $u * t as $u) % self as $u) as $t;
+</span><span class="boring">                        if t == self - 1 {
+</span><span class="boring">                            return true;
+</span><span class="boring">                        }
 </span><span class="boring">                    }
-</span><span class="boring">                )*
-</span><span class="boring">                true
-</span><span class="boring">            }
-</span><span class="boring">        }
-</span><span class="boring">    };
-</span><span class="boring">}
+</span><span class="boring">                    at_last
+</span><span class="boring">                }
 </span><span class="boring">
-</span><span class="boring">impl_millerrabin!(u8, u16, 254, 2);
-</span><span class="boring">impl_millerrabin!(u16, u32, 2000, 2, 3);
-</span><span class="boring">impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
-</span><span class="boring">impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);</span></code></pre></pre>
+</span><span class="boring">                fn miller_primality(self) -&gt; bool {
+</span><span class="boring">                    $(
+</span><span class="boring">                        if !self.miller_rabin_test($x) { return false; }
+</span><span class="boring">                    )*
+</span><span class="boring">                    true
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl_millerrabin!(u8, u16, 254, 2);
+</span><span class="boring">    impl_millerrabin!(u16, u32, 2000, 2, 3);
+</span><span class="boring">    impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
+</span><span class="boring">    impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+</span><span class="boring">}</span></code></pre></pre>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
-<pre><code class="language-rust noplayground">trait MillerRabin: From&lt;u8&gt; + PartialOrd {
-    const MR_THRES: Self;
-    fn naive_primality(self) -&gt; bool;
-    fn miller_rabin_test(self, a: Self) -&gt; bool;
-    fn miller_primality(self) -&gt; bool;
-    fn is_prime(self) -&gt; bool {
-        if self &lt;= 1.into() {
-            false
-        } else if self &lt;= Self::MR_THRES {
-            self.naive_primality()
-        } else {
-            self.miller_primality()
+<pre><code class="language-rust noplayground">mod miller_rabin {
+    pub trait MillerRabin: From&lt;u8&gt; + PartialOrd {
+        const MR_THRES: Self;
+        fn naive_primality(self) -&gt; bool;
+        fn miller_rabin_test(self, a: Self) -&gt; bool;
+        fn miller_primality(self) -&gt; bool;
+        fn is_prime(self) -&gt; bool {
+            if self &lt;= 1.into() {
+                false
+            } else if self &lt;= Self::MR_THRES {
+                self.naive_primality()
+            } else {
+                self.miller_primality()
+            }
         }
     }
-}
 
-macro_rules! impl_millerrabin {
+    macro_rules! impl_millerrabin {
         ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
             impl MillerRabin for $t {
                 const MR_THRES: Self = $thres;
 
                 #[inline(always)]
                 fn naive_primality(self) -&gt; bool {
-                    for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
-                        if self % i == 0 {
-                            return false;
-                        }
-                    }
-                    true
+                    (2..).take_while(|&amp;i| i * i &lt;= self).all(|i| self % i != 0)
                 }
 
                 #[inline(always)]
@@ -281,7 +275,7 @@ macro_rules! impl_millerrabin {
                             if exp &amp; 1 != 0 {
                                 ret = ret * base % rem;
                             }
-                            base = base*base%rem;
+                            base = base * base % rem;
                             exp &gt;&gt;= 1;
                         }
                         ret as $t
@@ -301,9 +295,7 @@ macro_rules! impl_millerrabin {
 
                 fn miller_primality(self) -&gt; bool {
                     $(
-                        if !self.miller_rabin_test($x) {
-                            return false;
-                        }
+                        if !self.miller_rabin_test($x) { return false; }
                     )*
                     true
                 }
@@ -311,10 +303,11 @@ macro_rules! impl_millerrabin {
         };
     }
 
-impl_millerrabin!(u8, u16, 254, 2);
-impl_millerrabin!(u16, u32, 2000, 2, 3);
-impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
-impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);</code></pre>
+    impl_millerrabin!(u8, u16, 254, 2);
+    impl_millerrabin!(u16, u32, 2000, 2, 3);
+    impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
+    impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+}</code></pre>
 
                     </main>
 

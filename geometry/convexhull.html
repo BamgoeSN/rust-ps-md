@@ -148,130 +148,64 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="convex-hull"><a class="header" href="#convex-hull">Convex Hull</a></h1>
-<h2 id="graham-scan"><a class="header" href="#graham-scan">Graham Scan</a></h2>
-<p>This snippet excludes every points on vertices from the convex hull, and only includes points of both ends.</p>
-<h3 id="snippet"><a class="header" href="#snippet">Snippet</a></h3>
-<pre><code class="language-rust noplayground">#[derive(Clone, Debug, Eq, PartialEq)]
-struct Point {
-    x: i64,
-    y: i64,
+<p><code>cvh(pts: &amp;[Point])</code> returns indices of points included in a convex hull of <code>pts</code>.
+It's implemented based on monotone chain algorithm, a much intuitive and straightforward convex hull
+algorithm compared to the well-known Graham scan.</p>
+<p>The code below excludes the points on the sides of the hull, but by simply changing <code>&gt;=</code> from lines calling <code>ccw</code> to <code>&gt;</code>,
+one can change its behavior to include such points.</p>
+<p>If <code>pts</code> includes duplicates and those happen to be on the convex hull, then only one of them is included in the result.</p>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">type Coord = i32;
+type CCWOut = i64;
+type Point = (Coord, Coord);
+
+fn ccw(a: &amp;Point, b: &amp;Point, c: &amp;Point) -&gt; CCWOut {
+    let ba = (b.0 as CCWOut - a.0 as CCWOut, b.1 as CCWOut - a.1 as CCWOut);
+    let cb = (c.0 as CCWOut - b.0 as CCWOut, c.1 as CCWOut - b.1 as CCWOut);
+    ba.0 * cb.1 - ba.1 * cb.0
 }
 
-impl Point {
-    fn add(&amp;self, other: &amp;Self) -&gt; Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-    fn sub(&amp;self, other: &amp;Self) -&gt; Self {
-        Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-enum Turn {
-    CW,
-    CCW,
-    Zero,
-}
-
-fn get_turn(v1: &amp;Point, v2: &amp;Point) -&gt; Turn {
-    let prod = v1.x * v2.y - v1.y * v2.x;
-    if prod &gt; 0 {
-        Turn::CCW
-    } else if prod &lt; 0 {
-        Turn::CW
-    } else {
-        Turn::Zero
-    }
-}
-
-fn compare_ccw(a: &amp;Point, b: &amp;Point) -&gt; std::cmp::Ordering {
-    use std::cmp::Ordering;
-    if a == b {
-        return Ordering::Equal;
-    }
-    if a.x == 0 &amp;&amp; a.y == 0 {
-        return Ordering::Less;
-    } else if b.x == 0 &amp;&amp; b.y == 0 {
-        return Ordering::Greater;
+fn cvh(pts: &amp;[Point]) -&gt; Vec&lt;usize&gt; {
+    if pts.is_empty() {
+        return vec![];
+    } else if pts.len() == 1 {
+        return vec![0];
     }
 
-    let turn = get_turn(a, b);
-    if turn == Turn::CCW {
-        return Ordering::Less;
-    } else if turn == Turn::CW {
-        return Ordering::Greater;
-    }
+    let n = pts.len();
 
-    let a_dist = a.x * a.x + a.y * a.y;
-    let b_dist = b.x * b.x + b.y * b.y;
-    a_dist.cmp(&amp;b_dist)
-}
+    let mut refs: Vec&lt;_&gt; = (0..n).collect();
+    refs.sort_unstable_by_key(|&amp;i| pts[i]);
+    refs.dedup_by_key(|i| pts[*i]);
 
-fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
-    let pivot = {
-        let mut pivot = Point {
-            x: i64::MAX,
-            y: i64::MAX,
-        };
-        for v in arr.iter() {
-            if pivot.y &gt; v.y || (pivot.y == v.y &amp;&amp; pivot.x &gt; v.x) {
-                pivot.x = v.x;
-                pivot.y = v.y;
+    let mut upper = vec![refs[0]];
+    for &amp;pt in refs.iter().skip(1) {
+        while upper.len() &gt; 1 {
+            let ul = upper.len();
+            if ccw(&amp;pts[upper[ul - 2]], &amp;pts[upper[ul - 1]], &amp;pts[pt]) &gt; 0 {
+                upper.pop();
+            } else {
+                break;
             }
         }
-        pivot
-    };
-
-    for v in arr.iter_mut() {
-        *v = v.sub(&amp;pivot);
+        upper.push(pt);
     }
 
-    arr.sort_unstable_by(compare_ccw);
-
-    let mut stack = vec![arr[0].clone()];
-    let mut i = 1;
-    while i &lt; arr.len() {
-        if stack.len() == 1 {
-            if arr[i] != stack[0] {
-                stack.push(arr[i].clone());
-            }
-            i += 1;
-            continue;
-        }
-
-        let a = &amp;arr[i];
-        let b = &amp;stack[stack.len() - 1];
-        let c = &amp;stack[stack.len() - 2];
-        match get_turn(&amp;b.sub(c), &amp;a.sub(b)) {
-            Turn::CCW =&gt; {
-                stack.push(a.clone());
-                i += 1;
-            }
-            Turn::CW =&gt; {
-                stack.pop();
-            }
-            _ =&gt; {
-                stack.pop();
-                stack.push(a.clone());
-                i += 1;
+    let mut lower = vec![*refs.last().unwrap()];
+    for &amp;pt in refs.iter().rev().skip(1) {
+        while lower.len() &gt; 1 {
+            let ll = lower.len();
+            if ccw(&amp;pts[lower[ll - 2]], &amp;pts[lower[ll - 1]], &amp;pts[pt]) &gt; 0 {
+                lower.pop();
+            } else {
+                break;
             }
         }
+        lower.push(pt);
     }
 
-    for v in arr.iter_mut() {
-        *v = v.add(&amp;pivot);
-    }
-    for v in stack.iter_mut() {
-        *v = v.add(&amp;pivot);
-    }
-
-    stack
+    lower.pop();
+    upper.into_iter().chain(lower.into_iter().skip(1)).collect()
 }</code></pre>
 
                     </main>

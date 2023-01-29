@@ -427,120 +427,114 @@ fn crt(r: &amp;[i64], m: &amp;[i64]) -&gt; Option&lt;i64&gt; {
 <p>Deterministic Miller-Rabin primality test determines whether a certain unsigned integer is a prime in a time complexity of \(O(\log{n})\). This test only works for integers under \(2^{64}\).</p>
 <p><code>x.is_prime()</code> chooses a roughly faster algorithm among naive primality test and Miller-Rabin test, and returns <code>true</code> if <code>x</code> is a prime, <code>false</code> if not.</p>
 <h2 id="example-3"><a class="header" href="#example-3">Example</a></h2>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+<pre><pre class="playground"><code class="language-rust">use miller_rabin::MillerRabin;
+
+<span class="boring">
+</span><span class="boring">fn main() {
 </span>println!(&quot;{}&quot;, 3284729387909u64.is_prime()); // true
 println!(&quot;{}&quot;, 3284729387911u64.is_prime()); // false 53×61976026187
 <span class="boring">}
 </span><span class="boring">
-</span><span class="boring">trait MillerRabin: From&lt;u8&gt; + PartialOrd {
-</span><span class="boring">    const MR_THRES: Self;
-</span><span class="boring">    fn naive_primality(self) -&gt; bool;
-</span><span class="boring">    fn miller_rabin_test(self, a: Self) -&gt; bool;
-</span><span class="boring">    fn miller_primality(self) -&gt; bool;
-</span><span class="boring">    fn is_prime(self) -&gt; bool {
-</span><span class="boring">        if self &lt;= 1.into() {
-</span><span class="boring">            false
-</span><span class="boring">        } else if self &lt;= Self::MR_THRES {
-</span><span class="boring">            self.naive_primality()
-</span><span class="boring">        } else {
-</span><span class="boring">            self.miller_primality()
+</span><span class="boring">mod miller_rabin {
+</span><span class="boring">    pub trait MillerRabin: From&lt;u8&gt; + PartialOrd {
+</span><span class="boring">        const MR_THRES: Self;
+</span><span class="boring">        fn naive_primality(self) -&gt; bool;
+</span><span class="boring">        fn miller_rabin_test(self, a: Self) -&gt; bool;
+</span><span class="boring">        fn miller_primality(self) -&gt; bool;
+</span><span class="boring">        fn is_prime(self) -&gt; bool {
+</span><span class="boring">            if self &lt;= 1.into() {
+</span><span class="boring">                false
+</span><span class="boring">            } else if self &lt;= Self::MR_THRES {
+</span><span class="boring">                self.naive_primality()
+</span><span class="boring">            } else {
+</span><span class="boring">                self.miller_primality()
+</span><span class="boring">            }
 </span><span class="boring">        }
 </span><span class="boring">    }
-</span><span class="boring">}
 </span><span class="boring">
-</span><span class="boring">macro_rules! impl_millerrabin {
-</span><span class="boring">    ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
-</span><span class="boring">        impl MillerRabin for $t {
-</span><span class="boring">            const MR_THRES: Self = $thres;
+</span><span class="boring">    macro_rules! impl_millerrabin {
+</span><span class="boring">        ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
+</span><span class="boring">            impl MillerRabin for $t {
+</span><span class="boring">                const MR_THRES: Self = $thres;
 </span><span class="boring">
-</span><span class="boring">            #[inline(always)]
-</span><span class="boring">            fn naive_primality(self) -&gt; bool {
-</span><span class="boring">                for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
-</span><span class="boring">                    if self % i == 0 {
-</span><span class="boring">                        return false;
-</span><span class="boring">                    }
+</span><span class="boring">                #[inline(always)]
+</span><span class="boring">                fn naive_primality(self) -&gt; bool {
+</span><span class="boring">                    (2..).take_while(|&amp;i| i * i &lt;= self).all(|i| self % i != 0)
 </span><span class="boring">                }
-</span><span class="boring">                true
-</span><span class="boring">            }
 </span><span class="boring">
-</span><span class="boring">               #[inline(always)]
-</span><span class="boring">               fn miller_rabin_test(self, a: Self) -&gt; bool {
-</span><span class="boring">                   let d = self - 1;
-</span><span class="boring">                   let mut p = d &gt;&gt; (d.trailing_zeros());
+</span><span class="boring">                #[inline(always)]
+</span><span class="boring">                fn miller_rabin_test(self, a: Self) -&gt; bool {
+</span><span class="boring">                    let d = self - 1;
+</span><span class="boring">                    let mut p = d &gt;&gt; (d.trailing_zeros());
 </span><span class="boring">
-</span><span class="boring">                   let mut t = {
-</span><span class="boring">                       let mut base = a as $u;
-</span><span class="boring">                       let mut exp = p as $u;
-</span><span class="boring">                       let rem = self as $u;
-</span><span class="boring">                       let mut ret: $u = 1;
-</span><span class="boring">                       while exp != 0 {
-</span><span class="boring">                           if exp &amp; 1 != 0 {
-</span><span class="boring">                               ret = ret * base % rem;
-</span><span class="boring">                           }
-</span><span class="boring">                           base = base*base%rem;
-</span><span class="boring">                           exp &gt;&gt;= 1;
-</span><span class="boring">                       }
-</span><span class="boring">                       ret as $t
-</span><span class="boring">                   };
+</span><span class="boring">                    let mut t = {
+</span><span class="boring">                        let mut base = a as $u;
+</span><span class="boring">                        let mut exp = p as $u;
+</span><span class="boring">                        let rem = self as $u;
+</span><span class="boring">                        let mut ret: $u = 1;
+</span><span class="boring">                        while exp != 0 {
+</span><span class="boring">                            if exp &amp; 1 != 0 {
+</span><span class="boring">                                ret = ret * base % rem;
+</span><span class="boring">                            }
+</span><span class="boring">                            base = base * base % rem;
+</span><span class="boring">                            exp &gt;&gt;= 1;
+</span><span class="boring">                        }
+</span><span class="boring">                        ret as $t
+</span><span class="boring">                    };
 </span><span class="boring">
-</span><span class="boring">                   let at_last = t == d || t == 1;
+</span><span class="boring">                    let at_last = t == d || t == 1;
 </span><span class="boring">
-</span><span class="boring">                   while p != d {
-</span><span class="boring">                       p &lt;&lt;= 1;
-</span><span class="boring">                       t = ((t as $u * t as $u) % self as $u) as $t;
-</span><span class="boring">                       if t == self - 1 {
-</span><span class="boring">                           return true;
-</span><span class="boring">                       }
-</span><span class="boring">                   }
-</span><span class="boring">                   at_last
-</span><span class="boring">               }
-</span><span class="boring">
-</span><span class="boring">            fn miller_primality(self) -&gt; bool {
-</span><span class="boring">                $(
-</span><span class="boring">                    if !self.miller_rabin_test($x) {
-</span><span class="boring">                        return false;
+</span><span class="boring">                    while p != d {
+</span><span class="boring">                        p &lt;&lt;= 1;
+</span><span class="boring">                        t = ((t as $u * t as $u) % self as $u) as $t;
+</span><span class="boring">                        if t == self - 1 {
+</span><span class="boring">                            return true;
+</span><span class="boring">                        }
 </span><span class="boring">                    }
-</span><span class="boring">                )*
-</span><span class="boring">                true
-</span><span class="boring">            }
-</span><span class="boring">        }
-</span><span class="boring">    };
-</span><span class="boring">}
+</span><span class="boring">                    at_last
+</span><span class="boring">                }
 </span><span class="boring">
-</span><span class="boring">impl_millerrabin!(u8, u16, 254, 2);
-</span><span class="boring">impl_millerrabin!(u16, u32, 2000, 2, 3);
-</span><span class="boring">impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
-</span><span class="boring">impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);</span></code></pre></pre>
+</span><span class="boring">                fn miller_primality(self) -&gt; bool {
+</span><span class="boring">                    $(
+</span><span class="boring">                        if !self.miller_rabin_test($x) { return false; }
+</span><span class="boring">                    )*
+</span><span class="boring">                    true
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl_millerrabin!(u8, u16, 254, 2);
+</span><span class="boring">    impl_millerrabin!(u16, u32, 2000, 2, 3);
+</span><span class="boring">    impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
+</span><span class="boring">    impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+</span><span class="boring">}</span></code></pre></pre>
 <h2 id="code-3"><a class="header" href="#code-3">Code</a></h2>
-<pre><code class="language-rust noplayground">trait MillerRabin: From&lt;u8&gt; + PartialOrd {
-    const MR_THRES: Self;
-    fn naive_primality(self) -&gt; bool;
-    fn miller_rabin_test(self, a: Self) -&gt; bool;
-    fn miller_primality(self) -&gt; bool;
-    fn is_prime(self) -&gt; bool {
-        if self &lt;= 1.into() {
-            false
-        } else if self &lt;= Self::MR_THRES {
-            self.naive_primality()
-        } else {
-            self.miller_primality()
+<pre><code class="language-rust noplayground">mod miller_rabin {
+    pub trait MillerRabin: From&lt;u8&gt; + PartialOrd {
+        const MR_THRES: Self;
+        fn naive_primality(self) -&gt; bool;
+        fn miller_rabin_test(self, a: Self) -&gt; bool;
+        fn miller_primality(self) -&gt; bool;
+        fn is_prime(self) -&gt; bool {
+            if self &lt;= 1.into() {
+                false
+            } else if self &lt;= Self::MR_THRES {
+                self.naive_primality()
+            } else {
+                self.miller_primality()
+            }
         }
     }
-}
 
-macro_rules! impl_millerrabin {
+    macro_rules! impl_millerrabin {
         ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
             impl MillerRabin for $t {
                 const MR_THRES: Self = $thres;
 
                 #[inline(always)]
                 fn naive_primality(self) -&gt; bool {
-                    for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
-                        if self % i == 0 {
-                            return false;
-                        }
-                    }
-                    true
+                    (2..).take_while(|&amp;i| i * i &lt;= self).all(|i| self % i != 0)
                 }
 
                 #[inline(always)]
@@ -557,7 +551,7 @@ macro_rules! impl_millerrabin {
                             if exp &amp; 1 != 0 {
                                 ret = ret * base % rem;
                             }
-                            base = base*base%rem;
+                            base = base * base % rem;
                             exp &gt;&gt;= 1;
                         }
                         ret as $t
@@ -577,9 +571,7 @@ macro_rules! impl_millerrabin {
 
                 fn miller_primality(self) -&gt; bool {
                     $(
-                        if !self.miller_rabin_test($x) {
-                            return false;
-                        }
+                        if !self.miller_rabin_test($x) { return false; }
                     )*
                     true
                 }
@@ -587,10 +579,11 @@ macro_rules! impl_millerrabin {
         };
     }
 
-impl_millerrabin!(u8, u16, 254, 2);
-impl_millerrabin!(u16, u32, 2000, 2, 3);
-impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
-impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);</code></pre>
+    impl_millerrabin!(u8, u16, 254, 2);
+    impl_millerrabin!(u16, u32, 2000, 2, 3);
+    impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
+    impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+}</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="pollards-rho-algorithm"><a class="header" href="#pollards-rho-algorithm">Pollard's Rho Algorithm</a></h1>
 <p>Pollard rho algorithm is a randomized algorithm which factorizes a number in an average time complexity of \(O(n^{1/4})\).</p>
 <p><code>x.factorize()</code> factorizes <code>x</code> and returns a vector with the factors. The order of factors in the vector is undefined.</p>
@@ -6566,130 +6559,64 @@ fn sa_lcp&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (Vec&lt;usize&gt;, Vec&lt;usize&gt;
     (sa, lcp)
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="convex-hull"><a class="header" href="#convex-hull">Convex Hull</a></h1>
-<h2 id="graham-scan"><a class="header" href="#graham-scan">Graham Scan</a></h2>
-<p>This snippet excludes every points on vertices from the convex hull, and only includes points of both ends.</p>
-<h3 id="snippet"><a class="header" href="#snippet">Snippet</a></h3>
-<pre><code class="language-rust noplayground">#[derive(Clone, Debug, Eq, PartialEq)]
-struct Point {
-    x: i64,
-    y: i64,
+<p><code>cvh(pts: &amp;[Point])</code> returns indices of points included in a convex hull of <code>pts</code>.
+It's implemented based on monotone chain algorithm, a much intuitive and straightforward convex hull
+algorithm compared to the well-known Graham scan.</p>
+<p>The code below excludes the points on the sides of the hull, but by simply changing <code>&gt;=</code> from lines calling <code>ccw</code> to <code>&gt;</code>,
+one can change its behavior to include such points.</p>
+<p>If <code>pts</code> includes duplicates and those happen to be on the convex hull, then only one of them is included in the result.</p>
+<h2 id="code-21"><a class="header" href="#code-21">Code</a></h2>
+<pre><code class="language-rust noplayground">type Coord = i32;
+type CCWOut = i64;
+type Point = (Coord, Coord);
+
+fn ccw(a: &amp;Point, b: &amp;Point, c: &amp;Point) -&gt; CCWOut {
+    let ba = (b.0 as CCWOut - a.0 as CCWOut, b.1 as CCWOut - a.1 as CCWOut);
+    let cb = (c.0 as CCWOut - b.0 as CCWOut, c.1 as CCWOut - b.1 as CCWOut);
+    ba.0 * cb.1 - ba.1 * cb.0
 }
 
-impl Point {
-    fn add(&amp;self, other: &amp;Self) -&gt; Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-    fn sub(&amp;self, other: &amp;Self) -&gt; Self {
-        Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-enum Turn {
-    CW,
-    CCW,
-    Zero,
-}
-
-fn get_turn(v1: &amp;Point, v2: &amp;Point) -&gt; Turn {
-    let prod = v1.x * v2.y - v1.y * v2.x;
-    if prod &gt; 0 {
-        Turn::CCW
-    } else if prod &lt; 0 {
-        Turn::CW
-    } else {
-        Turn::Zero
-    }
-}
-
-fn compare_ccw(a: &amp;Point, b: &amp;Point) -&gt; std::cmp::Ordering {
-    use std::cmp::Ordering;
-    if a == b {
-        return Ordering::Equal;
-    }
-    if a.x == 0 &amp;&amp; a.y == 0 {
-        return Ordering::Less;
-    } else if b.x == 0 &amp;&amp; b.y == 0 {
-        return Ordering::Greater;
+fn cvh(pts: &amp;[Point]) -&gt; Vec&lt;usize&gt; {
+    if pts.is_empty() {
+        return vec![];
+    } else if pts.len() == 1 {
+        return vec![0];
     }
 
-    let turn = get_turn(a, b);
-    if turn == Turn::CCW {
-        return Ordering::Less;
-    } else if turn == Turn::CW {
-        return Ordering::Greater;
-    }
+    let n = pts.len();
 
-    let a_dist = a.x * a.x + a.y * a.y;
-    let b_dist = b.x * b.x + b.y * b.y;
-    a_dist.cmp(&amp;b_dist)
-}
+    let mut refs: Vec&lt;_&gt; = (0..n).collect();
+    refs.sort_unstable_by_key(|&amp;i| pts[i]);
+    refs.dedup_by_key(|i| pts[*i]);
 
-fn convex_hull(arr: &amp;mut [Point]) -&gt; Vec&lt;Point&gt; {
-    let pivot = {
-        let mut pivot = Point {
-            x: i64::MAX,
-            y: i64::MAX,
-        };
-        for v in arr.iter() {
-            if pivot.y &gt; v.y || (pivot.y == v.y &amp;&amp; pivot.x &gt; v.x) {
-                pivot.x = v.x;
-                pivot.y = v.y;
+    let mut upper = vec![refs[0]];
+    for &amp;pt in refs.iter().skip(1) {
+        while upper.len() &gt; 1 {
+            let ul = upper.len();
+            if ccw(&amp;pts[upper[ul - 2]], &amp;pts[upper[ul - 1]], &amp;pts[pt]) &gt; 0 {
+                upper.pop();
+            } else {
+                break;
             }
         }
-        pivot
-    };
-
-    for v in arr.iter_mut() {
-        *v = v.sub(&amp;pivot);
+        upper.push(pt);
     }
 
-    arr.sort_unstable_by(compare_ccw);
-
-    let mut stack = vec![arr[0].clone()];
-    let mut i = 1;
-    while i &lt; arr.len() {
-        if stack.len() == 1 {
-            if arr[i] != stack[0] {
-                stack.push(arr[i].clone());
-            }
-            i += 1;
-            continue;
-        }
-
-        let a = &amp;arr[i];
-        let b = &amp;stack[stack.len() - 1];
-        let c = &amp;stack[stack.len() - 2];
-        match get_turn(&amp;b.sub(c), &amp;a.sub(b)) {
-            Turn::CCW =&gt; {
-                stack.push(a.clone());
-                i += 1;
-            }
-            Turn::CW =&gt; {
-                stack.pop();
-            }
-            _ =&gt; {
-                stack.pop();
-                stack.push(a.clone());
-                i += 1;
+    let mut lower = vec![*refs.last().unwrap()];
+    for &amp;pt in refs.iter().rev().skip(1) {
+        while lower.len() &gt; 1 {
+            let ll = lower.len();
+            if ccw(&amp;pts[lower[ll - 2]], &amp;pts[lower[ll - 1]], &amp;pts[pt]) &gt; 0 {
+                lower.pop();
+            } else {
+                break;
             }
         }
+        lower.push(pt);
     }
 
-    for v in arr.iter_mut() {
-        *v = v.add(&amp;pivot);
-    }
-    for v in stack.iter_mut() {
-        *v = v.add(&amp;pivot);
-    }
-
-    stack
+    lower.pop();
+    upper.into_iter().chain(lower.into_iter().skip(1)).collect()
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
 <h2 id="example-20"><a class="header" href="#example-20">Example</a></h2>
@@ -6718,7 +6645,7 @@ println!(&quot;{:?}&quot;, original); // [1, 2, 4, 7, 9, 7, 4, 2, 1]
 </span><span class="boring">    let reevaluator: Vec&lt;&amp;T&gt; = compressor.iter().map(|x| *x.0).collect();
 </span><span class="boring">    (compressor, reevaluator)
 </span><span class="boring">}</span></code></pre></pre>
-<h2 id="code-21"><a class="header" href="#code-21">Code</a></h2>
+<h2 id="code-22"><a class="header" href="#code-22">Code</a></h2>
 <pre><code class="language-rust noplayground">/// compressor[original_value] = compressed_value
 /// reevaluator[compressed_value] = original_value
 fn compress_value&lt;T: Ord&gt;(arr: &amp;[T]) -&gt; (std::collections::BTreeMap&lt;&amp;T, usize&gt;, Vec&lt;&amp;T&gt;) {
@@ -6879,7 +6806,7 @@ println!(&quot;{}&quot;, x);
 let mut y = Int::from_str(&quot;123456789123456789123456789123456789&quot;).unwrap();
 let z = &amp;y * &amp;c;
 println!(&quot;{}&quot;, y);</code></pre>
-<h2 id="code-22"><a class="header" href="#code-22">Code</a></h2>
+<h2 id="code-23"><a class="header" href="#code-23">Code</a></h2>
 <pre><code class="language-rust noplayground">mod bigint {
     use core::{
         fmt::Display,
@@ -7533,7 +7460,7 @@ let word = next!(str);
 out!(&quot;{} &quot;, a);
 outln!(&quot;{}&quot;, b);
 outln!(&quot;{:?}&quot;, [n, m]);</code></pre>
-<h2 id="code-23"><a class="header" href="#code-23">Code</a></h2>
+<h2 id="code-24"><a class="header" href="#code-24">Code</a></h2>
 <h3 id="for-linux-almost-every-ojs-including-atcoder"><a class="header" href="#for-linux-almost-every-ojs-including-atcoder">For Linux (Almost every OJs including AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
 
@@ -7852,7 +7779,7 @@ println!(&quot;{:?}&quot;, n);  // One
 let i = n as i32;
 println!(&quot;{}&quot;, i);    // 1
 <span class="boring">}</span></code></pre></pre>
-<h3 id="code-24"><a class="header" href="#code-24">Code</a></h3>
+<h3 id="code-25"><a class="header" href="#code-25">Code</a></h3>
 <pre><code class="language-rust noplayground">use std::convert::{TryFrom, TryInto};
 macro_rules! back_to_enum {
     {$(#[$meta:meta])* $vis:vis enum $name:ident {
