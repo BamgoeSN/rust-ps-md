@@ -148,26 +148,56 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="fast-io"><a class="header" href="#fast-io">Fast IO</a></h1>
-<p><code>get_input()</code> returns every text read from the standard input, using <code>mmap</code>. Because of this, the input must be read by file redirection as <code>cargo run --release &lt; input.txt</code>. THIS FUNCTION DOESN'T WORK ON WINDOWS. THE FUNCTION MUST BE REWRITTEN MANUALLY TO BE USED FOR <u><strong>CODEFORCES</strong></u>, WHICH RUNS CODES ON WINDOWS.</p>
-<p><code>Scanner</code> is a structure which can read either lines or tokens out of a string. <code>Scanner::tokenize(str)</code> tokenizes <code>str</code> by whitespaces, such as <code> </code> spaces, <code>\t</code> tabs, and <code>\n</code> newlines.</p>
-<p><code>sc</code> in <code>main()</code> function is a scanner instance, which splits <code>input_str</code> by whitespaces. <code>sc.next_str()</code> returns the next token as <code>&amp;str</code>. If the input has been exhausted, the program panics. <code>sc.next::&lt;T&gt;()</code> reads the next token, parses it into a type <code>T</code>, and returns it. If the input has been exhausted or the parse fails, the program panics.</p>
-<p>Both function has its &quot;Option&quot; equivalents. <code>sc.next_str_option()</code> returns the next token as <code>Some(&amp;str)</code>. This function returns <code>None</code> instead of panicing the whole program, compared to <code>sc.next_str()</code>. <code>sc.next_option()</code> works just like <code>sc.next()</code> except that it returns <code>Option&lt;T&gt;</code> so that the function returns <code>None</code> instead of panicing. These functions are useful when the code needs to detect <code>EOF</code>.</p>
-<p><code>next!</code> macros are for easy-typing for inputs. <code>next!()</code> is equivalent to <code>sc.next()</code>. You can specify the return type of it by using <code>next!(T)</code>. Multiple types can also be used as arguments, delimited by spaces: <code>next!(T U V)</code> returns a tuple <code>(T, U, V)</code>. Lastly, <code>next!(str)</code> is equivalent to <code>sc.next_str()</code>.</p>
-<p><code>out!</code> and <code>outln!</code> are just the same with <code>print!</code> and <code>println!</code>, but the stdout flush is buffered for faster output.</p>
-<h3 id="example"><a class="header" href="#example">Example</a></h3>
-<pre><code class="language-rust noplayground">// Main
-let n: usize = next!();      // Identical to `let n: usize = sc.next();`
-let m = next!(usize);        // Identical to `let m = sc.next::&lt;usize&gt;();`
-let (a, b) = next!(u32 i64); // Identical to `let (a, b): (u32, i64) = (sc.next(), sc.next());`
-let arr: Vec&lt;u64&gt; = (0..n).map(|_| next!()).collect();
+<ul>
+<li>
+<p><code>get_input() -&gt; &amp;'static str</code> reads every input from stdin, leaks it and returns it as <code>&amp;'static str</code>.
+The function leaks the string because it's easier to handle input in CP this way.</p>
+</li>
+<li>
+<p><code>Tokenizer</code> tokenizes a string based on a function its fed when initialized.</p>
+<ul>
+<li>
+<p>The default template initializes a tokenizer <code>sc</code> with <code>Tokenizer::new(input_str, |s| s.split_ascii_whitespace())</code>.
+This means that <code>sc</code> tokenizes the input by ascii whitespace.
+If you want to tokenize the input with non-ascii whitespace as well, then change <code>split_ascii_whitespace</code> to <code>split_whitespace</code>.
+If you want a tokenizer which splits a string by lines, then change <code>split_ascii_whitespace</code> to <code>lines</code>.</p>
+</li>
+<li>
+<p><code>Tokenizer::next(&amp;mut Self) -&gt; T</code> parses next token into <code>T</code> and returns it. If there's no tokens left or it fails to parse, the program panics.</p>
+</li>
+<li>
+<p><code>Tokenizer::next_str(&amp;mut self) -&gt; &amp;str</code> returns next token.</p>
+</li>
+<li>
+<p><code>Tokenizer::next_ok(&amp;mut self) -&gt; Result&lt;T, InputError&gt;</code> parses the next token into <code>T</code>. If there's no tokens left in the string, it returns <code>Err(InputExhaust)</code>.
+If it fails to parse, it returns <code>Err(ParseError(token))</code>. Otherwise, it returns the parsed <code>T</code> value.</p>
+</li>
+<li>
+<p><code>Tokenizer::next_str_ok(&amp;mut self) -&gt; Result&lt;T, InputError&gt;</code> returns next token if there's any. Otherwise, it returns <code>Err(InputExhaust)</code>.</p>
+</li>
+<li>
+<p><code>Tokenizer::next_iter(&amp;mut self) -&gt; impl Iterator&lt;Item = T&gt;</code> returns an iterator repeatedly consumes and parses tokens into <code>T</code>.
+If <code>Tokenizer</code> meets a token that can't be parsed into <code>T</code>, it just skips to the next token until it can parse it into <code>T</code>.
+The iterator ends only when the entire tokens are consumed. This behavior can be used for reading up to EOF, or blocked by <code>take</code> method for reading given number of tokens.</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><code class="language-rust noplayground">let n: usize = sc.next();
+let arr: Vec&lt;u64&gt; = sc.next_iter().take(m).collect();
+let (m, k): (u32, u64) = sc.next();
+let text = sc.next_str();
+outln!(&quot;{:?}&quot;, [m, k]);
 
-let word = next!(str);
-
-out!(&quot;{} &quot;, a);
-outln!(&quot;{}&quot;, b);
-outln!(&quot;{:?}&quot;, [n, m]);</code></pre>
+while let Ok(n @ ..1) = sc.next_ok::&lt;u32&gt;() {
+    println!(&quot;{}&quot;, n);
+    if sc.next_str_ok().is_none() {
+        outln!(&quot;EOF&quot;);
+    }
+}</code></pre>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
-<h3 id="for-linux-almost-every-ojs-including-atcoder"><a class="header" href="#for-linux-almost-every-ojs-including-atcoder">For Linux (Almost every OJs including AtCoder)</a></h3>
+<h3 id="for-recent-rust-versions-almost-every-ojs-except-atcoder"><a class="header" href="#for-recent-rust-versions-almost-every-ojs-except-atcoder">For Recent Rust versions (Almost every OJs except AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
 
 #[no_mangle]
@@ -175,16 +205,12 @@ fn main() -&gt; i32 {
     // FastIO
     use fastio::*;
     let input_str = get_input();
-    let mut sc: Splitter&lt;_&gt; = Splitter::new(input_str, |s| s.split_ascii_whitespace());
-    use std::io::*;
+    let mut sc = Tokenizer::new(input_str, |s| s.split_ascii_whitespace());
+    use std::io::{stdout, BufWriter, Write};
     let stdout = stdout();
     let wr = &amp;mut BufWriter::new(stdout.lock());
 
     // FastIO Macros
-    macro_rules! next {
-        () =&gt; { sc.next() };
-        ($($t:ty) +) =&gt; { ($(sc.next::&lt;$t&gt;()),+) };
-    }
     macro_rules! out { ($($arg:tt)*) =&gt; { write!(wr, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(wr, $($arg)*).ok(); }; }
 
@@ -194,48 +220,115 @@ fn main() -&gt; i32 {
     0
 }
 
+#[allow(unused)]
 mod fastio {
-    use core::{slice::*, str::*};
+    use std::{fmt, io, num::*, slice::*, str::*};
 
     #[link(name = &quot;c&quot;)]
-    extern &quot;C&quot; {
-        fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -&gt; *mut u8;
-        fn fstat(fd: i32, stat: *mut usize) -&gt; i32;
-    }
+    extern &quot;C&quot; {}
 
     pub fn get_input() -&gt; &amp;'static str {
-        let mut stat = [0; 20];
-        unsafe { fstat(0, stat.as_mut_ptr()) };
-        let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
-        unsafe { from_utf8_unchecked(from_raw_parts(buffer, stat[6])) }
+        let buf = io::read_to_string(io::stdin()).unwrap();
+        Box::leak(buf.into_boxed_str())
     }
 
-    pub struct Splitter&lt;I: Iterator&gt; {
-        it: I,
+    pub enum InputError&lt;'t&gt; {
+        InputExhaust,
+        ParseError(&amp;'t str),
+    }
+    use InputError::*;
+
+    impl&lt;'t&gt; fmt::Debug for InputError&lt;'t&gt; {
+        fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+            match self {
+                InputExhaust =&gt; f.debug_struct(&quot;InputExhaust&quot;).finish(),
+                ParseError(s) =&gt; f.debug_struct(&quot;ParseError&quot;).field(&quot;str&quot;, s).finish(),
+            }
+        }
     }
 
-    impl&lt;'a, 'b: 'a, T: Iterator&gt; Splitter&lt;T&gt; {
-        pub fn new(s: &amp;'b str, split: impl FnOnce(&amp;'a str) -&gt; T) -&gt; Self {
+    pub trait Atom: Sized {
+        fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt;;
+    }
+
+    pub trait IterParse: Sized {
+        fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt;
+        where
+            It: Iterator&lt;Item = &amp;'t str&gt;;
+    }
+
+    macro_rules! impl_trait_for_fromstr {
+        ($($t:ty) *) =&gt; { $(
+            impl Atom for $t { fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt; { s.parse().map_err(|_| ParseError(s)) } }
+            impl IterParse for $t {
+                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
+                    it.next().map_or( Err(InputExhaust), &lt;Self as Atom&gt;::parse_from )
+                }
+            }
+        )* };
+    }
+
+    impl_trait_for_fromstr!(bool char String);
+    impl_trait_for_fromstr!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+    impl_trait_for_fromstr!(NonZeroI8 NonZeroI16 NonZeroI32 NonZeroI64 NonZeroI128 NonZeroIsize);
+    impl_trait_for_fromstr!(NonZeroU8 NonZeroU16 NonZeroU32 NonZeroU64 NonZeroU128 NonZeroUsize);
+
+    macro_rules! impl_iterparse_for_tuple {
+        ($($t:ident) *) =&gt; {
+            impl&lt;$($t),*&gt; IterParse for ($($t),*) where $($t: IterParse),* {
+                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
+                    Ok(( $($t::parse_from(it)?),* ))
+                }
+            }
+        };
+    }
+
+    impl_iterparse_for_tuple!();
+    impl_iterparse_for_tuple!(A B);
+    impl_iterparse_for_tuple!(A B C);
+    impl_iterparse_for_tuple!(A B C D);
+    impl_iterparse_for_tuple!(A B C D E);
+    impl_iterparse_for_tuple!(A B C D E F);
+    impl_iterparse_for_tuple!(A B C D E F G);
+    impl_iterparse_for_tuple!(A B C D E F G H);
+    impl_iterparse_for_tuple!(A B C D E F G H I);
+    impl_iterparse_for_tuple!(A B C D E F G H I J);
+    impl_iterparse_for_tuple!(A B C D E F G H I J K);
+    impl_iterparse_for_tuple!(A B C D E F G H I J K L);
+    impl_iterparse_for_tuple!(A B C D E F G H I J K L M);
+
+    pub struct Tokenizer&lt;It&gt; {
+        it: It,
+    }
+
+    impl&lt;'arg, 'str: 'arg, It&gt; Tokenizer&lt;It&gt; {
+        pub fn new(s: &amp;'str str, split: impl FnOnce(&amp;'arg str) -&gt; It) -&gt; Self {
             Self { it: split(s) }
         }
     }
 
-    impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Splitter&lt;I&gt; {
-        pub fn next&lt;T: FromStr&gt;(&amp;mut self) -&gt; T {
-            self.it.next().unwrap().parse().ok().unwrap()
+    impl&lt;'t, It&gt; Tokenizer&lt;It&gt;
+    where
+        It: Iterator&lt;Item = &amp;'t str&gt;,
+    {
+        pub fn next&lt;T: IterParse&gt;(&amp;mut self) -&gt; T {
+            T::parse_from(&amp;mut self.it).unwrap()
         }
-        pub fn next_str(&amp;mut self) -&gt; &amp;'a str {
+        pub fn next_str(&amp;mut self) -&gt; &amp;'t str {
             self.it.next().unwrap()
         }
-        pub fn next_opt&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-            self.it.next().and_then(|s| s.parse().ok())
+        pub fn next_ok&lt;T: IterParse&gt;(&amp;mut self) -&gt; Result&lt;T, InputError&lt;'t&gt;&gt; {
+            T::parse_from(&amp;mut self.it)
         }
-        pub fn next_str_opt(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
+        pub fn next_str_ok(&amp;mut self) -&gt; Option&lt;&amp;'t str&gt; {
             self.it.next()
+        }
+        pub fn next_iter&lt;T: IterParse&gt;(&amp;mut self) -&gt; impl Iterator&lt;Item = T&gt; + '_ {
+            std::iter::repeat_with(move || self.next_ok().ok()).map_while(|x| x)
         }
     }
 }</code></pre>
-<h3 id="for-windows-codeforces"><a class="header" href="#for-windows-codeforces">For Windows (Codeforces)</a></h3>
+<h3 id="for-older-versions-of-rust-atcoder"><a class="header" href="#for-older-versions-of-rust-atcoder">For Older Versions of Rust (AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
 
 #[no_mangle]
@@ -243,16 +336,12 @@ fn main() -&gt; i32 {
     // FastIO
     use fastio::*;
     let input_str = get_input();
-    let mut sc: Splitter&lt;_&gt; = Splitter::new(&amp;input_str, |s| s.split_ascii_whitespace());
-    use std::io::*;
+    let mut sc = Tokenizer::new(input_str, |s| s.split_ascii_whitespace());
+    use std::io::{stdout, BufWriter, Write};
     let stdout = stdout();
     let wr = &amp;mut BufWriter::new(stdout.lock());
 
     // FastIO Macros
-    macro_rules! next {
-        () =&gt; { sc.next() };
-        ($($t:ty) +) =&gt; { ($(sc.next::&lt;$t&gt;()),+) };
-    }
     macro_rules! out { ($($arg:tt)*) =&gt; { write!(wr, $($arg)*).ok(); }; }
     macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(wr, $($arg)*).ok(); }; }
 
@@ -262,37 +351,118 @@ fn main() -&gt; i32 {
     0
 }
 
+#[allow(unused)]
 mod fastio {
-    use std::{io::*, str::*};
+    use std::{fmt, io, num::*, slice::*, str::*};
 
-    pub fn get_input() -&gt; String {
+    #[link(name = &quot;c&quot;)]
+    extern &quot;C&quot; {}
+
+    pub fn get_input() -&gt; &amp;'static str {
+        use io::Read;
         let mut buf = String::new();
-        stdin().read_to_string(&amp;mut buf).unwrap();
-        buf
+        io::stdin().read_to_string(&amp;mut buf);
+        Box::leak(buf.into_boxed_str())
     }
 
-    pub struct Splitter&lt;I: Iterator&gt; {
-        it: I,
+    pub enum InputError&lt;'t&gt; {
+        InputExhaust,
+        ParseError(&amp;'t str),
+    }
+    use InputError::*;
+
+    impl&lt;'t&gt; fmt::Debug for InputError&lt;'t&gt; {
+        fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+            match self {
+                InputExhaust =&gt; f.debug_struct(&quot;InputExhaust&quot;).finish(),
+                ParseError(s) =&gt; f.debug_struct(&quot;ParseError&quot;).field(&quot;str&quot;, s).finish(),
+            }
+        }
     }
 
-    impl&lt;'a, 'b: 'a, T: Iterator&gt; Splitter&lt;T&gt; {
-        pub fn new(s: &amp;'b str, split: impl FnOnce(&amp;'a str) -&gt; T) -&gt; Self {
+    pub trait Atom: Sized {
+        fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt;;
+    }
+
+    pub trait IterParse: Sized {
+        fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt;
+        where
+            It: Iterator&lt;Item = &amp;'t str&gt;;
+    }
+
+    macro_rules! impl_trait_for_fromstr {
+        ($($t:ty) *) =&gt; { $(
+            impl Atom for $t { fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt; { s.parse().map_err(|_| ParseError(s)) } }
+            impl IterParse for $t {
+                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
+                    it.next().map_or( Err(InputExhaust), &lt;Self as Atom&gt;::parse_from )
+                }
+            }
+        )* };
+    }
+
+    impl_trait_for_fromstr!(bool char String);
+    impl_trait_for_fromstr!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
+    impl_trait_for_fromstr!(NonZeroI8 NonZeroI16 NonZeroI32 NonZeroI64 NonZeroI128 NonZeroIsize);
+    impl_trait_for_fromstr!(NonZeroU8 NonZeroU16 NonZeroU32 NonZeroU64 NonZeroU128 NonZeroUsize);
+
+    macro_rules! impl_iterparse_for_tuple {
+        ($($t:ident) *) =&gt; {
+            impl&lt;$($t),*&gt; IterParse for ($($t),*) where $($t: IterParse),* {
+                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
+                    Ok(( $($t::parse_from(it)?),* ))
+                }
+            }
+        };
+    }
+
+    impl_iterparse_for_tuple!();
+    impl_iterparse_for_tuple!(A B);
+    impl_iterparse_for_tuple!(A B C);
+    impl_iterparse_for_tuple!(A B C D);
+    impl_iterparse_for_tuple!(A B C D E);
+    impl_iterparse_for_tuple!(A B C D E F);
+    impl_iterparse_for_tuple!(A B C D E F G);
+    impl_iterparse_for_tuple!(A B C D E F G H);
+    impl_iterparse_for_tuple!(A B C D E F G H I);
+    impl_iterparse_for_tuple!(A B C D E F G H I J);
+    impl_iterparse_for_tuple!(A B C D E F G H I J K);
+    impl_iterparse_for_tuple!(A B C D E F G H I J K L);
+    impl_iterparse_for_tuple!(A B C D E F G H I J K L M);
+
+    pub struct Tokenizer&lt;It&gt; {
+        it: It,
+    }
+
+    impl&lt;'arg, 'str: 'arg, It&gt; Tokenizer&lt;It&gt; {
+        pub fn new(s: &amp;'str str, split: impl FnOnce(&amp;'arg str) -&gt; It) -&gt; Self {
             Self { it: split(s) }
         }
     }
 
-    impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Splitter&lt;I&gt; {
-        pub fn next&lt;T: FromStr&gt;(&amp;mut self) -&gt; T {
-            self.it.next().unwrap().parse().ok().unwrap()
+    impl&lt;'t, It&gt; Tokenizer&lt;It&gt;
+    where
+        It: Iterator&lt;Item = &amp;'t str&gt;,
+    {
+        pub fn next&lt;T: IterParse&gt;(&amp;mut self) -&gt; T {
+            T::parse_from(&amp;mut self.it).unwrap()
         }
-        pub fn next_str(&amp;mut self) -&gt; &amp;'a str {
+        pub fn next_str(&amp;mut self) -&gt; &amp;'t str {
             self.it.next().unwrap()
         }
-        pub fn next_opt&lt;T: FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-            self.it.next().and_then(|s| s.parse().ok())
+        pub fn next_ok&lt;T: IterParse&gt;(&amp;mut self) -&gt; Result&lt;T, InputError&lt;'t&gt;&gt; {
+            T::parse_from(&amp;mut self.it)
         }
-        pub fn next_str_opt(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
+        pub fn next_str_ok(&amp;mut self) -&gt; Option&lt;&amp;'t str&gt; {
             self.it.next()
+        }
+        pub fn next_iter&lt;'s, T: IterParse&gt;(&amp;'s mut self) -&gt; impl Iterator&lt;Item = T&gt; + '_
+        where
+            't: 's,
+        {
+            std::iter::repeat_with(move || self.next_ok())
+                .take_while(|x| x.is_ok())
+                .flatten()
         }
     }
 }</code></pre>
