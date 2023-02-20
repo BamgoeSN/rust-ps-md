@@ -9,6 +9,7 @@
 - [Chinese Remainder Theorem](./algebra/crt.md)
 - [Deterministic Miller-Rabin Primality Test](./algebra/millerrabin.md)
 - [Pollard's Rho Algorithm](./algebra/pollardrho.md)
+- [Number Theoretic Transform](./algebra/ntt.md)
 
 # Numerical Algorithms
 
