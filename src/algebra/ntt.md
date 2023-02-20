@@ -244,13 +244,7 @@ mod ntt {
     // 1,092,616,193    521    21       3
 
     fn ceil_pow2(n: usize) -> u32 {
-        let d = n.leading_zeros();
-        let c = usize::BITS - d - 1;
-        if (1 << c) == n {
-            c
-        } else {
-            c + 1
-        }
+        n.next_power_of_two().trailing_zeros()
     }
 
     /// Reverses k trailing bits of n. Assumes that the rest of usize::BITS-k bits are all zero.
