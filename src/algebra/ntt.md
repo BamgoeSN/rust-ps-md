@@ -243,23 +243,19 @@ mod ntt {
     //   104,857,601    25     22       3
     // 1,092,616,193    521    21       3
 
-    fn ceil_pow2(n: usize) -> usize {
-        let mut x: usize = 0;
-        while (1 << x) < n {
-            x += 1;
+    fn ceil_pow2(n: usize) -> u32 {
+        let d = n.leading_zeros();
+        let c = usize::BITS - d - 1;
+        if (1 << c) == n {
+            c
+        } else {
+            c + 1
         }
-        x
     }
 
-    /// Reverses k trailing bits of n.
+    /// Reverses k trailing bits of n. Assumes that the rest of usize::BITS-k bits are all zero.
     const fn reverse_trailing_bits(n: usize, k: u32) -> usize {
-        let mut r = 0;
-        let mut i = 0;
-        while i < k {
-            r |= ((n >> i) & 1) << (k - i - 1);
-            i += 1;
-        }
-        r
+        n.reverse_bits() >> (usize::BITS - k)
     }
 
     #[derive(Clone, Debug)]
@@ -345,8 +341,7 @@ mod ntt {
                         let tmp = (self.arr[i + j + s] * mult) % P;
                         self.arr[i + j + s] = (self.arr[i + j] + P - tmp) % P;
                         self.arr[i + j] = (self.arr[i + j] + tmp) % P;
-                        mult *= base;
-                        mult %= P;
+                        mult = mult * base % P;
                     }
                 }
             }
@@ -373,8 +368,7 @@ mod ntt {
                         let tmp = (self.arr[i + j + s] * mult) % P;
                         self.arr[i + j + s] = (self.arr[i + j] + P - tmp) % P;
                         self.arr[i + j] = (self.arr[i + j] + tmp) % P;
-                        mult *= base;
-                        mult %= P;
+                        mult = mult * base % P;
                     }
                 }
             }
