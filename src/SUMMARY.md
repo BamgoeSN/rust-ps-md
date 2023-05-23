@@ -38,6 +38,8 @@
   - [Weighted DSU](./graphs/wdsu.md)
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
+- [Flow](./graphs/flow/intro.md)
+  - [Dinic's Algorithm](./graphs/flow/dinic.md)
 
 # Strings
 
