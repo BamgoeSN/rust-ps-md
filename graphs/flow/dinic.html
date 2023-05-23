@@ -1,0 +1,437 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js nord_light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Dinic&#x27;s Algorithm - Rust Snippets for Competitive Programming</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "nord_dark" : "nord_light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('nord_light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Algebra</li><li class="chapter-item expanded "><a href="../../algebra/gcd.html"><strong aria-hidden="true">1.</strong> GCD, LCM</a></li><li class="chapter-item expanded "><a href="../../algebra/extgcd.html"><strong aria-hidden="true">2.</strong> Extended Euclidean Algorithm</a></li><li class="chapter-item expanded "><a href="../../algebra/crt.html"><strong aria-hidden="true">3.</strong> Chinese Remainder Theorem</a></li><li class="chapter-item expanded "><a href="../../algebra/millerrabin.html"><strong aria-hidden="true">4.</strong> Deterministic Miller-Rabin Primality Test</a></li><li class="chapter-item expanded "><a href="../../algebra/pollardrho.html"><strong aria-hidden="true">5.</strong> Pollard's Rho Algorithm</a></li><li class="chapter-item expanded "><a href="../../algebra/ntt.html"><strong aria-hidden="true">6.</strong> Number Theoretic Transform</a></li><li class="chapter-item expanded affix "><li class="part-title">Numerical Algorithms</li><li class="chapter-item expanded "><a href="../../numerical/isqrt.html"><strong aria-hidden="true">7.</strong> Integer Square Root</a></li><li class="chapter-item expanded "><a href="../../numerical/sieve.html"><strong aria-hidden="true">8.</strong> Sieve</a></li><li class="chapter-item expanded "><a href="../../numerical/linrec/intro.html"><strong aria-hidden="true">9.</strong> Linear Recurrence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../numerical/linrec/berlekamp.html"><strong aria-hidden="true">9.1.</strong> Berlekamp-Massey</a></li><li class="chapter-item expanded "><a href="../../numerical/linrec/kitamasa.html"><strong aria-hidden="true">9.2.</strong> Kitamasa</a></li><li class="chapter-item expanded "><a href="../../numerical/linrec/bostanmori.html"><strong aria-hidden="true">9.3.</strong> Bostan-Mori</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Data Structures</li><li class="chapter-item expanded "><a href="../../datastructure/bitarray.html"><strong aria-hidden="true">10.</strong> Bitset</a></li><li class="chapter-item expanded "><a href="../../datastructure/segtree/intro.html"><strong aria-hidden="true">11.</strong> Segment Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../datastructure/segtree/segtree.html"><strong aria-hidden="true">11.1.</strong> Segment Tree</a></li><li class="chapter-item expanded "><a href="../../datastructure/segtree/fenwick.html"><strong aria-hidden="true">11.2.</strong> Fenwick Tree</a></li><li class="chapter-item expanded "><a href="../../datastructure/segtree/lazyseg.html"><strong aria-hidden="true">11.3.</strong> Lazy Segment Tree</a></li></ol></li><li class="chapter-item expanded "><a href="../../datastructure/rope.html"><strong aria-hidden="true">12.</strong> Rope</a></li><li class="chapter-item expanded affix "><li class="part-title">Graphs</li><li class="chapter-item expanded "><a href="../../graphs/adjlist.html"><strong aria-hidden="true">13.</strong> Adjacency List Graph Representation</a></li><li class="chapter-item expanded "><a href="../../graphs/dijkstra.html"><strong aria-hidden="true">14.</strong> Dijkstra</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../graphs/dial.html"><strong aria-hidden="true">14.1.</strong> Dial</a></li></ol></li><li class="chapter-item expanded "><a href="../../graphs/dsu.html"><strong aria-hidden="true">15.</strong> Disjoint Set Union</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../graphs/wdsu.html"><strong aria-hidden="true">15.1.</strong> Weighted DSU</a></li></ol></li><li class="chapter-item expanded "><a href="../../graphs/scc.html"><strong aria-hidden="true">16.</strong> Strongly Connected Components</a></li><li class="chapter-item expanded "><a href="../../graphs/2sat.html"><strong aria-hidden="true">17.</strong> 2-SAT</a></li><li class="chapter-item expanded "><a href="../../graphs/flow/intro.html"><strong aria-hidden="true">18.</strong> Flow</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../graphs/flow/dinic.html" class="active"><strong aria-hidden="true">18.1.</strong> Dinic's Algorithm</a></li><li class="chapter-item expanded "><a href="../../graphs/flow/mcmf.html"><strong aria-hidden="true">18.2.</strong> MCMF</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Strings</li><li class="chapter-item expanded "><a href="../../strings/kmp.html"><strong aria-hidden="true">19.</strong> KMP</a></li><li class="chapter-item expanded "><a href="../../strings/manacher.html"><strong aria-hidden="true">20.</strong> Manacher</a></li><li class="chapter-item expanded "><a href="../../strings/salcp.html"><strong aria-hidden="true">21.</strong> Suffix Array and LCP Array</a></li><li class="chapter-item expanded affix "><li class="part-title">Geometry</li><li class="chapter-item expanded "><a href="../../geometry/convexhull.html"><strong aria-hidden="true">22.</strong> Convex Hull</a></li><li class="chapter-item expanded affix "><li class="part-title">Unclassified</li><li class="chapter-item expanded "><a href="../../unclass/valcomp.html"><strong aria-hidden="true">23.</strong> Value Compression</a></li><li class="chapter-item expanded "><a href="../../unclass/lis.html"><strong aria-hidden="true">24.</strong> Longest Increasing Subsequence</a></li><li class="chapter-item expanded "><a href="../../unclass/mos.html"><strong aria-hidden="true">25.</strong> Mo's</a></li><li class="chapter-item expanded "><a href="../../unclass/bigint.html"><strong aria-hidden="true">26.</strong> Arbitrary-Precision Integer</a></li><li class="chapter-item expanded affix "><li class="part-title">Misc</li><li class="chapter-item expanded "><a href="../../misc/fastio.html"><strong aria-hidden="true">27.</strong> Fast IO</a></li><li class="chapter-item expanded "><a href="../../misc/macro.html"><strong aria-hidden="true">28.</strong> Macros</a></li><li class="chapter-item expanded "><a href="../../misc/zero_one_trait.html"><strong aria-hidden="true">29.</strong> Zero/One Trait (Deprecated)</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="nord_light">Nord Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="nord_dark">Nord Dark</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust Snippets for Competitive Programming</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/BamgoeSN/rust-ps-md" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="dinics-algorithm"><a class="header" href="#dinics-algorithm">Dinic's Algorithm</a></h1>
+<p>Dinic's algorithm is a practically fast algorithm for computing the maximum flow in a flow network.</p>
+<p>User can create a network instance with <code>Dinic::new(n)</code> where <code>n</code> is the number of vertices in the network,
+and add edges with <code>Dinic::add_edges(&amp;mut self, src, dst, cap)</code> method where <code>cap</code> is the capacity of the edge being added.</p>
+<p>Calling <code>Dinic::max_flow(&amp;mut self, src, dst)</code> calculates the maximum flow from <code>src</code> to <code>dst</code>.
+After the calculation, remaining capacity of any edges can be found by directly inspecting into <code>cap</code> field of a wanted edge.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>The example below calculates maximum flow of a flow network shown on page 5 of <a href="https://github.com/justiceHui/SSU-SCCC-Study/blob/master/2022-winter-adv/slide/02.pdf">https://github.com/justiceHui/SSU-SCCC-Study/blob/master/2022-winter-adv/slide/02.pdf</a>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">use dinic::Dinic;
+</span><span class="boring">fn main() {
+</span>let mut dn = Dinic::new(4);
+for (src, dst, cap) in [(0, 1, 2), (0, 2, 2), (1, 2, 1), (1, 3, 2), (2, 3, 2)] {
+    dn.add_edge(src, dst, cap);
+}
+
+let (src, dst) = (0, 3);
+let max_flow = dn.max_flow(src, dst);
+println!(&quot;{max_flow}&quot;); // 4
+
+// Remaining capacity of an edge from 0 to 1
+let edge = dn.g[0].iter().filter(|e| e.dst == 1).next().unwrap();
+println!(&quot;{}&quot;, edge.cap); // 0
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">mod dinic {
+</span><span class="boring">    //! Reference: https://github.com/justiceHui/SSU-SCCC-Study/blob/master/2022-winter-adv/slide/04.pdf
+</span><span class="boring">
+</span><span class="boring">    use std::collections::VecDeque;
+</span><span class="boring">
+</span><span class="boring">    #[derive(Clone)]
+</span><span class="boring">    pub struct Edge {
+</span><span class="boring">        pub dst: u32,
+</span><span class="boring">        pub opp: u32,
+</span><span class="boring">        pub cap: u64,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl Edge {
+</span><span class="boring">        fn new(dst: usize, opp: usize, cap: u64) -&gt; Self {
+</span><span class="boring">            Self {
+</span><span class="boring">                dst: dst as u32,
+</span><span class="boring">                opp: opp as u32,
+</span><span class="boring">                cap,
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    pub struct Dinic {
+</span><span class="boring">        pub n: usize,
+</span><span class="boring">        pub g: Vec&lt;Vec&lt;Edge&gt;&gt;,
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl Dinic {
+</span><span class="boring">        pub fn new(n: usize) -&gt; Self {
+</span><span class="boring">            Self {
+</span><span class="boring">                n,
+</span><span class="boring">                g: vec![vec![]; n],
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn add_edge(&amp;mut self, s: usize, e: usize, cap: u64) {
+</span><span class="boring">            let sl = self.g[s].len();
+</span><span class="boring">            let el = self.g[e].len();
+</span><span class="boring">            self.g[s].push(Edge::new(e, el, cap));
+</span><span class="boring">            self.g[e].push(Edge::new(s, sl, 0));
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn bfs(&amp;mut self, s: u32, t: u32, lv: &amp;mut [u32]) -&gt; bool {
+</span><span class="boring">            lv.fill(0);
+</span><span class="boring">
+</span><span class="boring">            let mut queue = VecDeque::new();
+</span><span class="boring">            queue.push_back(s);
+</span><span class="boring">            lv[s as usize] = 1;
+</span><span class="boring">
+</span><span class="boring">            while let Some(v) = queue.pop_front() {
+</span><span class="boring">                for e in self.g[v as usize].iter() {
+</span><span class="boring">                    if lv[e.dst as usize] == 0 &amp;&amp; e.cap != 0 {
+</span><span class="boring">                        queue.push_back(e.dst);
+</span><span class="boring">                        lv[e.dst as usize] = lv[v as usize] + 1;
+</span><span class="boring">                    }
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            lv[t as usize] != 0
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        fn dfs(&amp;mut self, v: u32, t: u32, fl: u64, lv: &amp;[u32], idx: &amp;mut [u32]) -&gt; u64 {
+</span><span class="boring">            if v == t || fl == 0 {
+</span><span class="boring">                return fl;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            for i in idx[v as usize]..self.g[v as usize].len() as u32 {
+</span><span class="boring">                idx[v as usize] = i;
+</span><span class="boring">
+</span><span class="boring">                let Edge { dst, opp, cap } = self.g[v as usize][i as usize];
+</span><span class="boring">                if lv[dst as usize] != lv[v as usize] + 1 || cap == 0 {
+</span><span class="boring">                    continue;
+</span><span class="boring">                }
+</span><span class="boring">                let now = self.dfs(dst, t, fl.min(cap), lv, idx);
+</span><span class="boring">                if now == 0 {
+</span><span class="boring">                    continue;
+</span><span class="boring">                }
+</span><span class="boring">
+</span><span class="boring">                self.g[v as usize][i as usize].cap -= now;
+</span><span class="boring">                self.g[dst as usize][opp as usize].cap += now;
+</span><span class="boring">                return now;
+</span><span class="boring">            }
+</span><span class="boring">
+</span><span class="boring">            0
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        pub fn max_flow(&amp;mut self, src: usize, dst: usize) -&gt; u64 {
+</span><span class="boring">            let mut flow = 0;
+</span><span class="boring">            let mut aug;
+</span><span class="boring">            let mut lv = vec![0; self.n];
+</span><span class="boring">            let mut idx = vec![0; self.n];
+</span><span class="boring">
+</span><span class="boring">            while self.bfs(src as u32, dst as u32, &amp;mut lv) {
+</span><span class="boring">                idx.fill(0);
+</span><span class="boring">                loop {
+</span><span class="boring">                    aug = self.dfs(src as u32, dst as u32, u64::MAX, &amp;mut lv, &amp;mut idx);
+</span><span class="boring">                    if aug == 0 {
+</span><span class="boring">                        break;
+</span><span class="boring">                    }
+</span><span class="boring">                    flow += aug;
+</span><span class="boring">                }
+</span><span class="boring">            }
+</span><span class="boring">            flow
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">}</span></code></pre></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust noplayground">mod dinic {
+    //! Reference: https://github.com/justiceHui/SSU-SCCC-Study/blob/master/2022-winter-adv/slide/04.pdf
+
+    use std::collections::VecDeque;
+
+    #[derive(Clone)]
+    pub struct Edge {
+        pub dst: u32,
+        pub opp: u32,
+        pub cap: u64,
+    }
+
+    impl Edge {
+        fn new(dst: usize, opp: usize, cap: u64) -&gt; Self {
+            Self {
+                dst: dst as u32,
+                opp: opp as u32,
+                cap,
+            }
+        }
+    }
+
+    pub struct Dinic {
+        pub n: usize,
+        pub g: Vec&lt;Vec&lt;Edge&gt;&gt;,
+    }
+
+    impl Dinic {
+        pub fn new(n: usize) -&gt; Self {
+            Self {
+                n,
+                g: vec![vec![]; n],
+            }
+        }
+
+        pub fn add_edge(&amp;mut self, s: usize, e: usize, cap: u64) {
+            let sl = self.g[s].len();
+            let el = self.g[e].len();
+            self.g[s].push(Edge::new(e, el, cap));
+            self.g[e].push(Edge::new(s, sl, 0));
+        }
+
+        fn bfs(&amp;mut self, s: u32, t: u32, lv: &amp;mut [u32]) -&gt; bool {
+            lv.fill(0);
+
+            let mut queue = VecDeque::new();
+            queue.push_back(s);
+            lv[s as usize] = 1;
+
+            while let Some(v) = queue.pop_front() {
+                for e in self.g[v as usize].iter() {
+                    if lv[e.dst as usize] == 0 &amp;&amp; e.cap != 0 {
+                        queue.push_back(e.dst);
+                        lv[e.dst as usize] = lv[v as usize] + 1;
+                    }
+                }
+            }
+
+            lv[t as usize] != 0
+        }
+
+        fn dfs(&amp;mut self, v: u32, t: u32, fl: u64, lv: &amp;[u32], idx: &amp;mut [u32]) -&gt; u64 {
+            if v == t || fl == 0 {
+                return fl;
+            }
+
+            for i in idx[v as usize]..self.g[v as usize].len() as u32 {
+                idx[v as usize] = i;
+
+                let Edge { dst, opp, cap } = self.g[v as usize][i as usize];
+                if lv[dst as usize] != lv[v as usize] + 1 || cap == 0 {
+                    continue;
+                }
+                let now = self.dfs(dst, t, fl.min(cap), lv, idx);
+                if now == 0 {
+                    continue;
+                }
+
+                self.g[v as usize][i as usize].cap -= now;
+                self.g[dst as usize][opp as usize].cap += now;
+                return now;
+            }
+
+            0
+        }
+
+        pub fn max_flow(&amp;mut self, src: usize, dst: usize) -&gt; u64 {
+            let mut flow = 0;
+            let mut aug;
+            let mut lv = vec![0; self.n];
+            let mut idx = vec![0; self.n];
+
+            while self.bfs(src as u32, dst as u32, &amp;mut lv) {
+                idx.fill(0);
+                loop {
+                    aug = self.dfs(src as u32, dst as u32, u64::MAX, &amp;mut lv, &amp;mut idx);
+                    if aug == 0 {
+                        break;
+                    }
+                    flow += aug;
+                }
+            }
+            flow
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../graphs/flow/intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../../graphs/flow/mcmf.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../graphs/flow/intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../../graphs/flow/mcmf.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>
