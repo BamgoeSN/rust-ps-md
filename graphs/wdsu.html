@@ -148,71 +148,91 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="weighted-dsu"><a class="header" href="#weighted-dsu">Weighted DSU</a></h1>
-<p>Disjoint set union where vertices have their own &quot;potential value&quot;.</p>
+<p>Disjoint set union where vertices have their own &quot;potential value&quot;. The potential value of a vertex \(i\) is denoted as \(w(i)\), and the differences of potential values between vertices in a same group are always well defined.</p>
+<p><code>fn union(&amp;mut self, u: usize, v: usize, dw: i64)</code> addes a &quot;rule&quot; stating that \(u\) and \(v\) are in a same group, and \(w(u) - w(v) = dw\). Based on posed rules ahead, <code>fn get_pot_diff(&amp;mut self, u: usize, v: usize) -&gt; Option&lt;i64&gt;</code> returns \(w(u) - w(v)\) if \(u\) and \(v\) are in a same group.</p>
+<p><code>potdiff[i]</code> in the code is defined as \(w(i) - w(r_i)\), where \(r_i\) is a root of a group \(i\) is in.</p>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust noplayground">struct WeightDSU {
-    n: usize,
-    group_num: usize,
-    parent: Vec&lt;usize&gt;,
-    group_size: Vec&lt;usize&gt;,
-    potdiff: Vec&lt;i64&gt;,
+	parent: Vec&lt;usize&gt;,
+	size: Vec&lt;usize&gt;,
+	num: usize,
+	potdiff: Vec&lt;i64&gt;, // potdiff[x] == w(x) - w(p)
 }
 
 impl WeightDSU {
-    fn new(n: usize) -&gt; Self {
-        Self {
-            n,
-            group_num: n,
-            parent: vec![n; n],
-            group_size: vec![1; n],
-            potdiff: vec![0; n],
-        }
-    }
+	fn new(n: usize) -&gt; Self {
+		Self {
+			parent: (0..n).collect(),
+			size: vec![1; n],
+			num: n,
+			potdiff: vec![0; n],
+		}
+	}
 
-    /// Returns the root of u, and pot[u]-pot[root]
-    fn find(&amp;mut self, u: usize) -&gt; (usize, i64) {
-        let par = self.parent[u];
-        if par == self.n {
-            return (u, 0);
-        }
-        let (root, parpoten) = self.find(par);
-        self.potdiff[u] += parpoten;
-        self.parent[u] = root;
-        (root, self.potdiff[u])
-    }
+	// Returns the root of x.
+	fn find_root(&amp;mut self, mut x: usize) -&gt; usize {
+		while self.parent[x] != x {
+			let p = self.parent[x];
+			self.potdiff[x] += self.potdiff[p];
+			self.parent[x] = self.parent[p];
+			x = self.parent[x];
+		}
+		x
+	}
 
-    /// Returns pot[u]-pot[v]. Returns None if u and v aren't in the same group.
-    fn pot_differ(&amp;mut self, u: usize, v: usize) -&gt; Option&lt;i64&gt; {
-        let (ur, udiff) = self.find(u);
-        let (vr, vdiff) = self.find(v);
-        if ur != vr {
-            None
-        } else {
-            Some(udiff - vdiff)
-        }
-    }
+	// Returns the root of x, namely xr, with w(x) - w(xr).
+	fn find_root_with_pdiff(&amp;mut self, mut x: usize) -&gt; (usize, i64) {
+		let mut pd = 0;
+		while self.parent[x] != x {
+			let p = self.parent[x];
+			self.potdiff[x] += self.potdiff[p];
+			self.parent[x] = self.parent[p];
+			pd += self.potdiff[x];
+			x = self.parent[x];
+		}
+		(x, pd)
+	}
 
-    /// Unions u and v, with setting pot[u]-pot[v] = w.
-    /// Also puts the root of v under the root of u.
-    /// Returns false if u and v are already unioned and the relation is not consistent.
-    fn union(&amp;mut self, u: usize, v: usize, w: i64) -&gt; bool {
-        let (ur, udiff) = self.find(u);
-        let (vr, vdiff) = self.find(v);
-        if ur == vr {
-            udiff - vdiff == w
-        } else {
-            self.parent[vr] = ur;
-            self.potdiff[vr] = udiff - vdiff - w;
-            self.group_size[ur] += self.group_size[vr];
-            self.group_num -= 1;
-            true
-        }
-    }
+	// Unions groups of u and v, with w(u) - w(v) = dw. If u and v are already in a same group,
+	// if w(u) - w(v) == dv then it returns Some(true), otherwise Some(false). If they weren't
+	// in a same group, then it returns None and unions two groups following the given dw.
+	fn union(&amp;mut self, u: usize, v: usize, dw: i64) -&gt; Option&lt;bool&gt; {
+		let (ur, pu) = self.find_root_with_pdiff(u);
+		let (vr, pv) = self.find_root_with_pdiff(v);
+		let nw = dw - pu + pv;
+		if ur != vr {
+			self.num -= 1;
+			if self.size[ur] &lt; self.size[vr] {
+				self.parent[ur] = vr;
+				self.size[vr] += self.size[ur];
+				self.potdiff[ur] = nw;
+			} else {
+				self.parent[vr] = ur;
+				self.size[ur] += self.size[vr];
+				self.potdiff[vr] = -nw;
+			}
+			None
+		} else {
+			Some(nw == 0)
+		}
+	}
 
-    fn get_group_size(&amp;mut self, u: usize) -&gt; usize {
-        let r = self.find(u).0;
-        self.group_size[r]
-    }
+	// Returns the size of a group x is in.
+	fn get_size(&amp;mut self, x: usize) -&gt; usize {
+		let r = self.find_root(x);
+		self.size[r]
+	}
+
+	// Returns Some(w(u) - w(v)) if u and v are in the same group, otherwise None.
+	fn get_pot_diff(&amp;mut self, u: usize, v: usize) -&gt; Option&lt;i64&gt; {
+		let (ur, pu) = self.find_root_with_pdiff(u);
+		let (vr, pv) = self.find_root_with_pdiff(v);
+		if ur == vr {
+			Some(pu - pv)
+		} else {
+			None
+		}
+	}
 }</code></pre>
 
                     </main>
