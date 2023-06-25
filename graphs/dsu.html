@@ -150,97 +150,98 @@
                         <h1 id="disjoint-set-union"><a class="header" href="#disjoint-set-union">Disjoint Set Union</a></h1>
 <p>Disjoint set union data structure.</p>
 <h2 id="example"><a class="header" href="#example">Example</a></h2>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">struct UnionFind {
-</span><span class="boring">    n: usize,
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>let mut uf = UnionFind::new(10);
+println!(&quot;{}&quot;, uf.find_root(2) == uf.find_root(6)); // false
+uf.union(2, 6);
+println!(&quot;{}&quot;, uf.find_root(2) == uf.find_root(6)); // true
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">struct UnionFind {
 </span><span class="boring">    parent: Vec&lt;usize&gt;,
-</span><span class="boring">    group_num: usize,
-</span><span class="boring">    group_size: Vec&lt;usize&gt;,
+</span><span class="boring">    size: Vec&lt;usize&gt;,
+</span><span class="boring">    num: usize,
 </span><span class="boring">}
+</span><span class="boring">
 </span><span class="boring">impl UnionFind {
 </span><span class="boring">    fn new(n: usize) -&gt; Self {
 </span><span class="boring">        Self {
-</span><span class="boring">            n,
-</span><span class="boring">            parent: vec![n; n],
-</span><span class="boring">            group_num: n,
-</span><span class="boring">            group_size: vec![1; n],
+</span><span class="boring">            parent: (0..n).collect(),
+</span><span class="boring">            size: vec![1; n],
+</span><span class="boring">            num: n,
 </span><span class="boring">        }
 </span><span class="boring">    }
-</span><span class="boring">    fn find(&amp;mut self, u: usize) -&gt; usize {
-</span><span class="boring">        let par = self.parent[u];
-</span><span class="boring">        if par == self.n {
-</span><span class="boring">            return u;
+</span><span class="boring">
+</span><span class="boring">    fn find_root(&amp;mut self, mut x: usize) -&gt; usize {
+</span><span class="boring">        while self.parent[x] != x {
+</span><span class="boring">            self.parent[x] = self.parent[self.parent[x]];
+</span><span class="boring">            x = self.parent[x];
 </span><span class="boring">        }
-</span><span class="boring">        self.parent[u] = self.find(par);
-</span><span class="boring">        self.parent[u]
+</span><span class="boring">        x
 </span><span class="boring">    }
-</span><span class="boring">    fn is_differ(&amp;mut self, u: usize, v: usize) -&gt; bool {
-</span><span class="boring">        self.find(u) != self.find(v)
-</span><span class="boring">    }
+</span><span class="boring">
 </span><span class="boring">    fn union(&amp;mut self, u: usize, v: usize) {
-</span><span class="boring">        let (ur, vr) = (self.find(u), self.find(v));
-</span><span class="boring">        if ur != vr {
-</span><span class="boring">            self.parent[vr] = ur;
-</span><span class="boring">            self.group_size[ur] += self.group_size[vr];
-</span><span class="boring">            self.group_num -= 1;
+</span><span class="boring">        let u = self.find_root(u);
+</span><span class="boring">        let v = self.find_root(v);
+</span><span class="boring">        if u != v {
+</span><span class="boring">            self.num -= 1;
+</span><span class="boring">            if self.size[u] &lt; self.size[v] {
+</span><span class="boring">                self.parent[u] = v;
+</span><span class="boring">                self.size[v] += self.size[u];
+</span><span class="boring">            } else {
+</span><span class="boring">                self.parent[v] = u;
+</span><span class="boring">                self.size[u] += self.size[v];
+</span><span class="boring">            }
 </span><span class="boring">        }
 </span><span class="boring">    }
-</span><span class="boring">    fn get_group_size(&amp;mut self, u: usize) -&gt; usize {
-</span><span class="boring">        let r = self.find(u);
-</span><span class="boring">        self.group_size[r]
+</span><span class="boring">
+</span><span class="boring">    fn get_size(&amp;mut self, x: usize) -&gt; usize {
+</span><span class="boring">        let r = self.find_root(x);
+</span><span class="boring">        self.size[r]
 </span><span class="boring">    }
-</span><span class="boring">}
-</span><span class="boring">fn main() {
-</span>let mut uf = UnionFind::new(10);
-println!(&quot;{}&quot;, uf.is_differ(2, 6)); // true
-uf.union(2, 6);
-println!(&quot;{}&quot;, uf.is_differ(2, 6)); // false
-<span class="boring">}</span></code></pre></pre>
+</span><span class="boring">}</span></code></pre></pre>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust noplayground">struct UnionFind {
-    n: usize,
     parent: Vec&lt;usize&gt;,
-    group_num: usize,
-    group_size: Vec&lt;usize&gt;,
+    size: Vec&lt;usize&gt;,
+    num: usize,
 }
 
 impl UnionFind {
     fn new(n: usize) -&gt; Self {
         Self {
-            n,
-            parent: vec![n; n],
-            group_num: n,
-            group_size: vec![1; n],
+            parent: (0..n).collect(),
+            size: vec![1; n],
+            num: n,
         }
     }
 
-    /// Returns the root of a group u is in
-    fn find(&amp;mut self, u: usize) -&gt; usize {
-        let par = self.parent[u];
-        if par == self.n {
-            return u;
+    fn find_root(&amp;mut self, mut x: usize) -&gt; usize {
+        while self.parent[x] != x {
+            self.parent[x] = self.parent[self.parent[x]];
+            x = self.parent[x];
         }
-        self.parent[u] = self.find(par);
-        self.parent[u]
+        x
     }
 
-    /// Returns true if u and v are in different groups, false otherwise.
-    fn is_differ(&amp;mut self, u: usize, v: usize) -&gt; bool {
-        self.find(u) != self.find(v)
-    }
-
-    /// The group of v is merged into the group of u
     fn union(&amp;mut self, u: usize, v: usize) {
-        let (ur, vr) = (self.find(u), self.find(v));
-        if ur != vr {
-            self.parent[vr] = ur;
-            self.group_size[ur] += self.group_size[vr];
-            self.group_num -= 1;
+        let u = self.find_root(u);
+        let v = self.find_root(v);
+        if u != v {
+            self.num -= 1;
+            if self.size[u] &lt; self.size[v] {
+                self.parent[u] = v;
+                self.size[v] += self.size[u];
+            } else {
+                self.parent[v] = u;
+                self.size[u] += self.size[v];
+            }
         }
     }
 
-    fn get_group_size(&amp;mut self, u: usize) -&gt; usize {
-        let r = self.find(u);
-        self.group_size[r]
+    fn get_size(&amp;mut self, x: usize) -&gt; usize {
+        let r = self.find_root(x);
+        self.size[r]
     }
 }</code></pre>
 
