@@ -18,6 +18,7 @@ Clicking on the search icon <i class="fa fa-search"></i> in the menu bar, or pre
 
 - [Contest Algorithms in Rust by EbTech](https://github.com/EbTech/rust-algorithms)
 - [kiwiyou's Snippets Collection](https://snippets.kiwiyou.dev/)
+- [jh05013's Snippets Collection](https://jh05013.github.io/ps-snippets/)
 
 ### C++
 
