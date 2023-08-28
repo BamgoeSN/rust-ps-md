@@ -8718,7 +8718,7 @@ where I: Iterator&lt;Item = S&gt;, J: Iterator&lt;Item = T&gt; + Clone, S: Clone
     a.flat_map(move |a| b.clone().map(move |b| (a.clone(), b)))
 }</code></pre>
 <h2 id="intersperse"><a class="header" href="#intersperse">Intersperse</a></h2>
-<p><code>intersperse(iter, v)</code> returns an iterator which alternates between elements of <code>iter</code> and <code>v</code>.</p>
+<p><code>intersperse(iter, v)</code> returns an iterator which places <code>v</code> between elements of <code>iter</code>.</p>
 <pre><code class="language-rust noplayground">fn intersperse&lt;T: Clone&gt;(iter: impl Iterator&lt;Item = T&gt;, with: T) -&gt; impl Iterator&lt;Item = T&gt; {
     iter.map(move |v| [with.clone(), v].into_iter()).flatten().skip(1)
 }</code></pre>
