@@ -47,7 +47,7 @@ where I: Iterator<Item = S>, J: Iterator<Item = T> + Clone, S: Clone {
 ```
 
 ## Intersperse
-`intersperse(iter, v)` returns an iterator which alternates between elements of `iter` and `v`.
+`intersperse(iter, v)` returns an iterator which places `v` between elements of `iter`.
 
 ```rust,noplayground
 fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterator<Item = T> {
