@@ -47,10 +47,19 @@ where I: Iterator<Item = S>, J: Iterator<Item = T> + Clone, S: Clone {
 ```
 
 ## Intersperse
-`intersperse(iter, v)` returns an iterator which places `v` between elements of `iter`.
+`intersperse(iter, v)` returns an iterator which inserts `v` between elements of `iter`.
 
 ```rust,noplayground
 fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterator<Item = T> {
     iter.map(move |v| [with.clone(), v].into_iter()).flatten().skip(1)
+}
+```
+
+## Intersperse With
+`intersperse_with(iter, f)` returns an iterator which inserts returned values of `f` between elements of `iter`.
+
+```rust,noplayground
+fn intersperse_with<T>(iter: impl Iterator<Item = T>, mut with: impl FnMut() -> T) -> impl Iterator<Item = T> {
+    iter.map(move |v| [with(), v].into_iter()).flatten().skip(1)
 }
 ```
