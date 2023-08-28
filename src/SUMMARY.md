@@ -62,5 +62,6 @@
 # Misc
 
 - [Fast IO](./misc/fastio.md)
+- [Iterator Tools](./misc/itertools.md)
 - [Macros](./misc/macro.md)
 - [Zero/One Trait (Deprecated)](./misc/zero_one_trait.md)
