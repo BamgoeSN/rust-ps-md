@@ -51,7 +51,7 @@ where I: Iterator<Item = S>, J: Iterator<Item = T> + Clone, S: Clone {
 
 ```rust,noplayground
 fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterator<Item = T> {
-    iter.map(move |v| [with.clone(), v].into_iter()).flatten().skip(1)
+    iter.map(move |v| [with.clone(), v]).flatten().skip(1)
 }
 ```
 
@@ -60,6 +60,6 @@ fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterato
 
 ```rust,noplayground
 fn intersperse_with<T>(iter: impl Iterator<Item = T>, mut with: impl FnMut() -> T) -> impl Iterator<Item = T> {
-    iter.map(move |v| [with(), v].into_iter()).flatten().skip(1)
+    iter.map(move |v| [with(), v]).flatten().skip(1)
 }
 ```
