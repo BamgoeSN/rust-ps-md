@@ -8720,12 +8720,12 @@ where I: Iterator&lt;Item = S&gt;, J: Iterator&lt;Item = T&gt; + Clone, S: Clone
 <h2 id="intersperse"><a class="header" href="#intersperse">Intersperse</a></h2>
 <p><code>intersperse(iter, v)</code> returns an iterator which inserts <code>v</code> between elements of <code>iter</code>.</p>
 <pre><code class="language-rust noplayground">fn intersperse&lt;T: Clone&gt;(iter: impl Iterator&lt;Item = T&gt;, with: T) -&gt; impl Iterator&lt;Item = T&gt; {
-    iter.map(move |v| [with.clone(), v].into_iter()).flatten().skip(1)
+    iter.map(move |v| [with.clone(), v]).flatten().skip(1)
 }</code></pre>
 <h2 id="intersperse-with"><a class="header" href="#intersperse-with">Intersperse With</a></h2>
 <p><code>intersperse_with(iter, f)</code> returns an iterator which inserts returned values of <code>f</code> between elements of <code>iter</code>.</p>
 <pre><code class="language-rust noplayground">fn intersperse_with&lt;T&gt;(iter: impl Iterator&lt;Item = T&gt;, mut with: impl FnMut() -&gt; T) -&gt; impl Iterator&lt;Item = T&gt; {
-    iter.map(move |v| [with(), v].into_iter()).flatten().skip(1)
+    iter.map(move |v| [with(), v]).flatten().skip(1)
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="macros"><a class="header" href="#macros">Macros</a></h1>
 <h2 id="hashmap"><a class="header" href="#hashmap">HashMap</a></h2>
