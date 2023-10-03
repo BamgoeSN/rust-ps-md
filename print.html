@@ -788,194 +788,188 @@ println!(&quot;{}&quot;, factors.iter().product::&lt;u32&gt;()); // 1237172
 </span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
 <h2 id="code-4"><a class="header" href="#code-4">Code</a></h2>
-<pre><code class="language-rust noplayground">trait PollardRho: MillerRabin + std::ops::ShrAssign + std::ops::BitAnd&lt;Output = Self&gt; + Clone {
-    fn rho(self, arr: &amp;mut Vec&lt;Self&gt;, rng: &amp;mut rng::RNG);
-    fn factorize(mut self, rng: &amp;mut rng::RNG) -&gt; Vec&lt;Self&gt; {
-        let mut arr: Vec&lt;Self&gt; = Vec::new();
-        if self &lt;= 1.into() {
-            return arr;
-        }
-        while self.clone() &amp; 1.into() == 0.into() {
-            self &gt;&gt;= 1.into();
-            arr.push(2.into());
-        }
-        self.rho(&amp;mut arr, rng);
-        arr
-    }
+<pre><code class="language-rust noplayground">mod factorization {
+	use super::millerrabin::Primality;
+	use std::ops::*;
+
+	trait PollardRho: Primality + From&lt;u8&gt; + PartialOrd + ShrAssign + BitAnd&lt;Output = Self&gt; + Clone {
+		fn rho(self, arr: &amp;mut Vec&lt;Self&gt;, rng: &amp;mut rng::RNG);
+		fn factorize(mut self, rng: &amp;mut rng::RNG) -&gt; Vec&lt;Self&gt; {
+			let mut arr: Vec&lt;Self&gt; = Vec::new();
+			if self &lt;= 1.into() {
+				return arr;
+			}
+			while self.clone() &amp; 1.into() == 0.into() {
+				self &gt;&gt;= 1.into();
+				arr.push(2.into());
+			}
+			self.rho(&amp;mut arr, rng);
+			arr
+		}
+	}
+
+	macro_rules! impl_pollardrho {
+		($t:ty, $u:ty, $reset:expr) =&gt; {
+			impl PollardRho for $t {
+				fn rho(self, arr: &amp;mut Vec&lt;Self&gt;, rng: &amp;mut rng::RNG) {
+					if self &lt;= 1 {
+						return;
+					} else if self.is_prime() {
+						arr.push(self);
+						return;
+					}
+
+					let mut i: u64 = 0;
+					let mut x: $t = (rng.next_u64() % self as u64) as $t;
+					let mut y: $t = x;
+					let mut k: u64 = 2;
+					let mut d: $t;
+					let mut reset_limit: u64 = $reset;
+
+					loop {
+						i += 1;
+						x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
+						d = gcd(y.abs_diff(x), self);
+						if d == self || i &gt;= reset_limit {
+							// Reset
+							reset_limit = reset_limit * 3 / 2;
+							i = 0;
+							x = (rng.next_u64() % self as u64) as $t;
+							y = x;
+						}
+						if d != 1 {
+							break;
+						}
+						if i == k {
+							y = x;
+							k &lt;&lt;= 1;
+						}
+					}
+
+					if d != self {
+						d.rho(arr, rng);
+						(self / d).rho(arr, rng);
+						return;
+					}
+
+					let mut i = 3;
+					while i * i &lt;= self {
+						if self % i == 0 {
+							i.rho(arr, rng);
+							(d / i).rho(arr, rng);
+							return;
+						}
+						i += 2;
+					}
+				}
+			}
+		};
+	}
+
+	impl_pollardrho!(u8, u16, 100000);
+	impl_pollardrho!(u16, u32, 100000);
+	impl_pollardrho!(u32, u64, 100000);
+	impl_pollardrho!(u64, u128, 100000);
+
+	pub fn gcd&lt;T&gt;(x: T, y: T) -&gt; T
+	where
+		T: Copy + PartialEq + PartialOrd + core::ops::Rem&lt;Output = T&gt; + From&lt;u8&gt;,
+	{
+		if y == 0.into() {
+			x
+		} else {
+			let v = x % y;
+			gcd(y, v)
+		}
+	}
+
+	mod rng {
+		pub struct RNG {
+			val: u64,
+		}
+		impl RNG {
+			pub fn new(seed: u64) -&gt; Self {
+				Self { val: seed }
+			}
+			pub fn next_u64(&amp;mut self) -&gt; u64 {
+				let mut x = self.val;
+				x ^= x &lt;&lt; 13;
+				x ^= x &gt;&gt; 7;
+				x ^= x &lt;&lt; 17;
+				self.val = x;
+				x
+			}
+		}
+	}
 }
 
-macro_rules! impl_pollardrho {
-    ($t:ty, $u:ty, $reset:expr) =&gt; {
-        impl PollardRho for $t {
-            fn rho(self, arr: &amp;mut Vec&lt;Self&gt;, rng: &amp;mut rng::RNG) {
-                if self &lt;= 1 {
-                    return;
-                } else if self.is_prime() {
-                    arr.push(self);
-                    return;
-                }
+mod millerrabin {
+	pub trait Primality {
+		fn is_prime(self) -&gt; bool;
+	}
 
-                let mut i: u64 = 0;
-                let mut x: $t = (rng.next_u64() % self as u64) as $t;
-                let mut y: $t = x;
-                let mut k: u64 = 2;
-                let mut d: $t;
-                let mut reset_limit: u64 = $reset;
+	macro_rules! impl_primality {
+		($t:ty, $u:ty, $thres:expr, $bcnt:expr, $($basis:expr),+) =&gt; {
+			impl Primality for $t {
+				fn is_prime(self) -&gt; bool {
+					if self &lt;= 1 {
+						return false;
+					} else if self &amp; 1 == 0 {
+						return self == 2;
+					}
 
-                loop {
-                    i += 1;
-                    x = (((x as $u * x as $u % self as $u) + (self - 1) as $u) % self as $u) as $t;
-                    d = gcd(y.abs_diff(x), self);
-                    if d == self || i &gt;= reset_limit {
-                        // Reset
-                        reset_limit = reset_limit * 3 / 2;
-                        i = 0;
-                        x = (rng.next_u64() % self as u64) as $t;
-                        y = x;
-                    }
-                    if d != 1 {
-                        break;
-                    }
-                    if i == k {
-                        y = x;
-                        k &lt;&lt;= 1;
-                    }
-                }
+					const THRES: $t = $thres;
+					const TEST: [$t; $bcnt] = [$($basis,)+];
 
-                if d != self {
-                    d.rho(arr, rng);
-                    (self / d).rho(arr, rng);
-                    return;
-                }
+					if self &lt;= THRES {
+						for p in (2..).take_while(|&amp;p| p * p &lt;= self) {
+							if self % p == 0 {
+								return false;
+							}
+						}
+						return true;
+					}
 
-                let mut i = 3;
-                while i * i &lt;= self {
-                    if self % i == 0 {
-                        i.rho(arr, rng);
-                        (d / i).rho(arr, rng);
-                        return;
-                    }
-                    i += 2;
-                }
-            }
-        }
-    };
-}
+					let pow = |base: $t, mut exp: $t| -&gt; $t {
+						let mut base = base as $u;
+						let mut ret = 1 as $u;
+						while exp != 0 {
+							if exp &amp; 1 != 0 {
+								ret = (ret * base) % self as $u;
+							}
+							exp &gt;&gt;= 1;
+							base = (base * base) % self as $u;
+						}
+						ret as $t
+					};
 
-impl_pollardrho!(u8, u16, 100000);
-impl_pollardrho!(u16, u32, 100000);
-impl_pollardrho!(u32, u64, 100000);
-impl_pollardrho!(u64, u128, 100000);
+					let s = (self - 1).trailing_zeros();
+					let d = (self - 1) &gt;&gt; s;
 
-trait MillerRabin: From&lt;u8&gt; + PartialOrd {
-    const MR_THRES: Self;
-    fn naive_primality(self) -&gt; bool;
-    fn miller_rabin_test(self, a: Self) -&gt; bool;
-    fn miller_primality(self) -&gt; bool;
-    fn is_prime(self) -&gt; bool {
-        if self &lt;= 1.into() {
-            false
-        } else if self &lt;= Self::MR_THRES {
-            self.naive_primality()
-        } else {
-            self.miller_primality()
-        }
-    }
-}
+					for &amp;a in TEST.iter().take_while(|&amp;&amp;a| a &lt; self - 1) {
+						let mut x = pow(a, d);
+						for _ in 0..s {
+							let y = ((x as $u).pow(2) % self as $u) as $t;
+							if y == 1 &amp;&amp; x != 1 &amp;&amp; x != self - 1 {
+								return false;
+							}
+							x = y;
+						}
+						if x != 1 {
+							return false;
+						}
+					}
 
-macro_rules! impl_millerrabin {
-        ($t:ty, $u:ty, $thres:expr, $($x:expr),*) =&gt; {
-            impl MillerRabin for $t {
-                const MR_THRES: Self = $thres;
+					true
+				}
+			}
+		};
+	}
 
-                #[inline(always)]
-                fn naive_primality(self) -&gt; bool {
-                    for i in (2..).take_while(|&amp;i| i * i &lt;= self) {
-                        if self % i == 0 {
-                            return false;
-                        }
-                    }
-                    true
-                }
-
-                #[inline(always)]
-                fn miller_rabin_test(self, a: Self) -&gt; bool {
-                    let d = self - 1;
-                    let mut p = d &gt;&gt; (d.trailing_zeros());
-
-                    let mut t = {
-                        let mut base = a as $u;
-                        let mut exp = p as $u;
-                        let rem = self as $u;
-                        let mut ret: $u = 1;
-                        while exp != 0 {
-                            if exp &amp; 1 != 0 {
-                                ret = ret * base % rem;
-                            }
-                            base = base*base%rem;
-                            exp &gt;&gt;= 1;
-                        }
-                        ret as $t
-                    };
-
-                    let at_last = t == d || t == 1;
-
-                    while p != d {
-                        p &lt;&lt;= 1;
-                        t = ((t as $u * t as $u) % self as $u) as $t;
-                        if t == self - 1 {
-                            return true;
-                        }
-                    }
-                    at_last
-                }
-
-                fn miller_primality(self) -&gt; bool {
-                    $(
-                        if !self.miller_rabin_test($x) {
-                            return false;
-                        }
-                    )*
-                    true
-                }
-            }
-        };
-    }
-
-impl_millerrabin!(u8, u16, 254, 2);
-impl_millerrabin!(u16, u32, 2000, 2, 3);
-impl_millerrabin!(u32, u64, 7000, 2, 7, 61);
-impl_millerrabin!(u64, u128, 300000, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
-
-pub fn gcd&lt;T&gt;(x: T, y: T) -&gt; T
-where
-    T: Copy + PartialEq + PartialOrd + std::ops::Rem&lt;Output = T&gt; + From&lt;u8&gt;,
-{
-    if y == 0.into() {
-        x
-    } else {
-        let v = x % y;
-        gcd(y, v)
-    }
-}
-
-mod rng {
-    pub struct RNG {
-        val: u64,
-    }
-    impl RNG {
-        pub fn new(seed: u64) -&gt; Self {
-            Self { val: seed }
-        }
-        pub fn next_u64(&amp;mut self) -&gt; u64 {
-            let mut x = self.val;
-            x ^= x &lt;&lt; 13;
-            x ^= x &gt;&gt; 7;
-            x ^= x &lt;&lt; 17;
-            self.val = x;
-            x
-        }
-    }
+	impl_primality!(u8, u16, 255, 1, 2);
+	impl_primality!(u16, u32, 2000, 2, 2, 3);
+	impl_primality!(u32, u64, 7000, 3, 2, 7, 61);
+	impl_primality!(u64, u128, 300000, 7, 2, 325, 9375, 28178, 450775, 9780504, 1795265022);
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="number-theoretic-transform-ntt"><a class="header" href="#number-theoretic-transform-ntt">Number Theoretic Transform (NTT)</a></h1>
 <p>Number Theoretic Transform (NTT) is an alternative of FFT where the domain of numbers is \(\mathbb{Z}_p\) where \(p\) is a prime with a form of \(p = a \times 2^b + 1\).</p>
