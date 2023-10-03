@@ -196,6 +196,7 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">        }
 </span><span class="boring">
 </span><span class="boring">        pub fn new(num: I, den: U) -&gt; Self {
+</span><span class="boring">            assert_ne!(den, 0);
 </span><span class="boring">            Self { num, den }.simplify()
 </span><span class="boring">        }
 </span><span class="boring">
@@ -546,6 +547,7 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 		}
 
 		pub fn new(num: I, den: U) -&gt; Self {
+            assert_ne!(den, 0);
 			Self { num, den }.simplify()
 		}
 
