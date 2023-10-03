@@ -50,6 +50,7 @@ println!("{lf:.5} {rf:.5}");
 #         }
 # 
 #         pub fn new(num: I, den: U) -> Self {
+#             assert_ne!(den, 0);
 #             Self { num, den }.simplify()
 #         }
 # 
@@ -403,6 +404,7 @@ mod frac {
 		}
 
 		pub fn new(num: I, den: U) -> Self {
+            assert_ne!(den, 0);
 			Self { num, den }.simplify()
 		}
 
