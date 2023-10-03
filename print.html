@@ -8234,7 +8234,7 @@ println!(&quot;{}&quot;, y);</code></pre>
 <h2 id="example-24"><a class="header" href="#example-24">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>use frac::*;
-let mut a = Frac::new(8374927, 2983178);
+let mut a = Frac::new(8374927, 2983178).simplify();
 println!(&quot;{a}&quot;);
 
 let b: i64 = 31;
@@ -8251,18 +8251,26 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 <span class="boring">}
 </span><span class="boring">
 </span><span class="boring">mod frac {
+</span><span class="boring">    /// Note: Basic arithmetics on the fraction types do not simplify the fraction to reduce calls of GCD.
+</span><span class="boring">    /// Simplifications should all be done manually.
 </span><span class="boring">    use std::{fmt::Display, ops::*};
 </span><span class="boring">
-</span><span class="boring">    type I = i64;
-</span><span class="boring">    type U = u64;
+</span><span class="boring">    /// Numerator type
+</span><span class="boring">    pub type I = i64;
+</span><span class="boring">    /// Denominator type
+</span><span class="boring">    pub type U = u64;
 </span><span class="boring">
+</span><span class="boring">    /// Fraction type.
 </span><span class="boring">    #[derive(Clone, Copy, Debug)]
 </span><span class="boring">    pub struct Frac {
+</span><span class="boring">        /// Numerator
 </span><span class="boring">        pub num: I,
+</span><span class="boring">        /// Denominator
 </span><span class="boring">        pub den: U,
 </span><span class="boring">    }
 </span><span class="boring">
 </span><span class="boring">    impl Frac {
+</span><span class="boring">        /// Simplifies the fraction to the minimum denomicator.
 </span><span class="boring">        pub fn simplify(self) -&gt; Self {
 </span><span class="boring">            fn gcd(mut a: U, mut b: U) -&gt; U {
 </span><span class="boring">                while b != 0 {
@@ -8270,54 +8278,71 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">                }
 </span><span class="boring">                a
 </span><span class="boring">            }
-</span><span class="boring">            let g = gcd(self.num.abs() as U, self.den);
+</span><span class="boring">            let g = gcd(self.num.unsigned_abs(), self.den);
 </span><span class="boring">            Self {
 </span><span class="boring">                num: self.num / g as I,
 </span><span class="boring">                den: self.den / g,
 </span><span class="boring">            }
 </span><span class="boring">        }
 </span><span class="boring">
-</span><span class="boring">        pub fn new(num: I, den: U) -&gt; Self {
-</span><span class="boring">            assert_ne!(den, 0);
-</span><span class="boring">            Self { num, den }.simplify()
-</span><span class="boring">        }
-</span><span class="boring">
-</span><span class="boring">        pub fn recip(self) -&gt; Self {
-</span><span class="boring">            if self.num &lt; 0 {
+</span><span class="boring">        /// Returns a fraction from a given numerator and denominator
+</span><span class="boring">        pub fn new(num: I, den: I) -&gt; Self {
+</span><span class="boring">            debug_assert_ne!(den, 0);
+</span><span class="boring">            if den &lt; 0 {
 </span><span class="boring">                Self {
-</span><span class="boring">                    num: -(self.den as I),
-</span><span class="boring">                    den: (-self.num) as U,
+</span><span class="boring">                    num: -num,
+</span><span class="boring">                    den: (-den) as U,
 </span><span class="boring">                }
 </span><span class="boring">            } else {
-</span><span class="boring">                Self {
-</span><span class="boring">                    num: self.den as I,
-</span><span class="boring">                    den: self.num as U,
-</span><span class="boring">                }
+</span><span class="boring">                Self { num, den: den as U }
 </span><span class="boring">            }
 </span><span class="boring">        }
 </span><span class="boring">
+</span><span class="boring">        /// Returns a reciprocal of the fraction
+</span><span class="boring">        pub fn recip(self) -&gt; Self {
+</span><span class="boring">            use std::cmp::Ordering::*;
+</span><span class="boring">            match self.num.cmp(&amp;0) {
+</span><span class="boring">                Less =&gt; Self {
+</span><span class="boring">                    num: -(self.den as I),
+</span><span class="boring">                    den: (-self.num) as U,
+</span><span class="boring">                },
+</span><span class="boring">                Equal =&gt; panic!(&quot;Reciprocal of zero&quot;),
+</span><span class="boring">                Greater =&gt; Self {
+</span><span class="boring">                    num: self.den as I,
+</span><span class="boring">                    den: self.num as U,
+</span><span class="boring">                },
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">
+</span><span class="boring">        /// Returns a floor of the fraction in an integer form
 </span><span class="boring">        pub fn floor(self) -&gt; I {
 </span><span class="boring">            let Self { num, den } = self;
 </span><span class="boring">            let den = den as I;
 </span><span class="boring">            num.div_euclid(den)
 </span><span class="boring">        }
 </span><span class="boring">
+</span><span class="boring">        /// Returns a ceil of the fraction in an integer form
 </span><span class="boring">        pub fn ceil(self) -&gt; I {
 </span><span class="boring">            let Self { num, den } = self;
 </span><span class="boring">            let den = den as I;
 </span><span class="boring">            (num + den - 1).div_euclid(den)
 </span><span class="boring">        }
 </span><span class="boring">
+</span><span class="boring">        /// Returns a rounded fraction in an integer form
 </span><span class="boring">        pub fn round(self) -&gt; I {
 </span><span class="boring">            let Self { num, den } = self;
 </span><span class="boring">            let den = den as I;
 </span><span class="boring">            (2 * num + den).div_euclid(2 * den)
 </span><span class="boring">        }
 </span><span class="boring">
+</span><span class="boring">        /// Returns self - self.floor()
 </span><span class="boring">        pub fn fract(self) -&gt; Self {
 </span><span class="boring">            self - self.floor()
 </span><span class="boring">        }
 </span><span class="boring">
+</span><span class="boring">        /// Returns two closest fractions to `x` given a maximum possible value for denominators.
+</span><span class="boring">        /// If the fraction is equal to `x` when converted to f64, then the both bounds are equal.
+</span><span class="boring">        /// This behavior is subject to change for more accurate approximation.
 </span><span class="boring">        pub fn wrap(x: f64, max_den: U) -&gt; (Self, Self) {
 </span><span class="boring">            let ipart = x.floor() as I;
 </span><span class="boring">            let d = x.fract();
@@ -8348,8 +8373,8 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">                }
 </span><span class="boring">            }
 </span><span class="boring">
-</span><span class="boring">            let l = Self::new(ln as I, ld) + ipart;
-</span><span class="boring">            let r = Self::new(rn as I, rd) + ipart;
+</span><span class="boring">            let l = Self::new(ln as I, ld as I) + ipart;
+</span><span class="boring">            let r = Self::new(rn as I, rd as I) + ipart;
 </span><span class="boring">            if x == l.into() {
 </span><span class="boring">                (l, l)
 </span><span class="boring">            } else if x == r.into() {
@@ -8359,6 +8384,10 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">            }
 </span><span class="boring">        }
 </span><span class="boring">
+</span><span class="boring">        /// Returns two fractions `(l, r)` where `l &lt;= self`, `r &gt;= self`, and `l`, `r` both being
+</span><span class="boring">        /// the closest to `self` given a maximum value of denominators. This function can be
+</span><span class="boring">        /// used for approximating the fraction when the numberator or denominator is getting too
+</span><span class="boring">        /// large, but you don't need an exact value of the fraction.
 </span><span class="boring">        pub fn lower_den(self, max_den: U) -&gt; (Self, Self) {
 </span><span class="boring">            if self.den &lt;= max_den {
 </span><span class="boring">                return (self, self);
@@ -8391,8 +8420,8 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">                }
 </span><span class="boring">            }
 </span><span class="boring">
-</span><span class="boring">            let l = Self::new(ln as I, ld) + ipart;
-</span><span class="boring">            let r = Self::new(rn as I, rd) + ipart;
+</span><span class="boring">            let l = Self::new(ln as I, ld as I) + ipart;
+</span><span class="boring">            let r = Self::new(rn as I, rd as I) + ipart;
 </span><span class="boring">            (l, r)
 </span><span class="boring">        }
 </span><span class="boring">    }
@@ -8438,7 +8467,6 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">                num: self.num * rhs.den as I + self.den as I * rhs.num,
 </span><span class="boring">                den: self.den * rhs.den,
 </span><span class="boring">            }
-</span><span class="boring">            .simplify()
 </span><span class="boring">        }
 </span><span class="boring">    }
 </span><span class="boring">
@@ -8449,7 +8477,6 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">                num: self.num * rhs.den as I - self.den as I * rhs.num,
 </span><span class="boring">                den: self.den * rhs.den,
 </span><span class="boring">            }
-</span><span class="boring">            .simplify()
 </span><span class="boring">        }
 </span><span class="boring">    }
 </span><span class="boring">
@@ -8460,7 +8487,6 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">                num: self.num * rhs.num,
 </span><span class="boring">                den: self.den * rhs.den,
 </span><span class="boring">            }
-</span><span class="boring">            .simplify()
 </span><span class="boring">        }
 </span><span class="boring">    }
 </span><span class="boring">
@@ -8468,26 +8494,6 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">        type Output = Self;
 </span><span class="boring">        fn div(self, rhs: Self) -&gt; Self::Output {
 </span><span class="boring">            self * rhs.recip()
-</span><span class="boring">        }
-</span><span class="boring">    }
-</span><span class="boring">
-</span><span class="boring">    impl PartialEq for Frac {
-</span><span class="boring">        fn eq(&amp;self, rhs: &amp;Self) -&gt; bool {
-</span><span class="boring">            (self.num * rhs.den as I).eq(&amp;(rhs.num * self.den as I))
-</span><span class="boring">        }
-</span><span class="boring">    }
-</span><span class="boring">
-</span><span class="boring">    impl Eq for Frac {}
-</span><span class="boring">
-</span><span class="boring">    impl PartialOrd for Frac {
-</span><span class="boring">        fn partial_cmp(&amp;self, rhs: &amp;Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
-</span><span class="boring">            (self.num * rhs.den as I).partial_cmp(&amp;(rhs.num * self.den as I))
-</span><span class="boring">        }
-</span><span class="boring">    }
-</span><span class="boring">
-</span><span class="boring">    impl Ord for Frac {
-</span><span class="boring">        fn cmp(&amp;self, rhs: &amp;Self) -&gt; std::cmp::Ordering {
-</span><span class="boring">            (self.num * rhs.den as I).cmp(&amp;(rhs.num * self.den as I))
 </span><span class="boring">        }
 </span><span class="boring">    }
 </span><span class="boring">
@@ -8599,383 +8605,459 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 </span><span class="boring">            *self = *self / rhs;
 </span><span class="boring">        }
 </span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl PartialEq for Frac {
+</span><span class="boring">        fn eq(&amp;self, rhs: &amp;Self) -&gt; bool {
+</span><span class="boring">            (self.num * rhs.den as I).eq(&amp;(rhs.num * self.den as I))
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl Eq for Frac {}
+</span><span class="boring">
+</span><span class="boring">    impl PartialOrd for Frac {
+</span><span class="boring">        fn partial_cmp(&amp;self, rhs: &amp;Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
+</span><span class="boring">            (self.num * rhs.den as I).partial_cmp(&amp;(rhs.num * self.den as I))
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl Ord for Frac {
+</span><span class="boring">        fn cmp(&amp;self, rhs: &amp;Self) -&gt; std::cmp::Ordering {
+</span><span class="boring">            (self.num * rhs.den as I).cmp(&amp;(rhs.num * self.den as I))
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl PartialEq&lt;I&gt; for Frac {
+</span><span class="boring">        fn eq(&amp;self, rhs: &amp;I) -&gt; bool {
+</span><span class="boring">            let rhs: Frac = (*rhs).into();
+</span><span class="boring">            self.eq(&amp;rhs)
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl PartialOrd&lt;I&gt; for Frac {
+</span><span class="boring">        fn partial_cmp(&amp;self, rhs: &amp;I) -&gt; Option&lt;std::cmp::Ordering&gt; {
+</span><span class="boring">            let rhs: Frac = (*rhs).into();
+</span><span class="boring">            self.partial_cmp(&amp;rhs)
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl PartialEq&lt;Frac&gt; for I {
+</span><span class="boring">        fn eq(&amp;self, rhs: &amp;Frac) -&gt; bool {
+</span><span class="boring">            let lhs: Frac = (*self).into();
+</span><span class="boring">            lhs.eq(rhs)
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    impl PartialOrd&lt;Frac&gt; for I {
+</span><span class="boring">        fn partial_cmp(&amp;self, rhs: &amp;Frac) -&gt; Option&lt;std::cmp::Ordering&gt; {
+</span><span class="boring">            let lhs: Frac = (*self).into();
+</span><span class="boring">            lhs.partial_cmp(rhs)
+</span><span class="boring">        }
+</span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
 <h2 id="code-27"><a class="header" href="#code-27">Code</a></h2>
 <pre><code class="language-rust noplayground">mod frac {
-	use std::{fmt::Display, ops::*};
+    /// Note: Basic arithmetics on the fraction types do not simplify the fraction to reduce calls of GCD.
+    /// Simplifications should all be done manually.
+    use std::{fmt::Display, ops::*};
 
-	type I = i64;
-	type U = u64;
+    /// Numerator type
+    pub type I = i64;
+    /// Denominator type
+    pub type U = u64;
 
-	#[derive(Clone, Copy, Debug)]
-	pub struct Frac {
-		pub num: I,
-		pub den: U,
-	}
+    /// Fraction type.
+    #[derive(Clone, Copy, Debug)]
+    pub struct Frac {
+        /// Numerator
+        pub num: I,
+        /// Denominator
+        pub den: U,
+    }
 
-	impl Frac {
-		pub fn simplify(self) -&gt; Self {
-			fn gcd(mut a: U, mut b: U) -&gt; U {
-				while b != 0 {
-					(a, b) = (b, a % b);
-				}
-				a
-			}
-			let g = gcd(self.num.abs() as U, self.den);
-			Self {
-				num: self.num / g as I,
-				den: self.den / g,
-			}
-		}
+    impl Frac {
+        /// Simplifies the fraction to the minimum denomicator.
+        pub fn simplify(self) -&gt; Self {
+            fn gcd(mut a: U, mut b: U) -&gt; U {
+                while b != 0 {
+                    (a, b) = (b, a % b);
+                }
+                a
+            }
+            let g = gcd(self.num.unsigned_abs(), self.den);
+            Self {
+                num: self.num / g as I,
+                den: self.den / g,
+            }
+        }
 
-		pub fn new(num: I, den: U) -&gt; Self {
-			assert_ne!(den, 0);
-			Self { num, den }.simplify()
-		}
+        /// Returns a fraction from a given numerator and denominator
+        pub fn new(num: I, den: I) -&gt; Self {
+            debug_assert_ne!(den, 0);
+            if den &lt; 0 {
+                Self {
+                    num: -num,
+                    den: (-den) as U,
+                }
+            } else {
+                Self { num, den: den as U }
+            }
+        }
 
-		pub fn recip(self) -&gt; Self {
-			use std::cmp::Ordering::*;
-			match self.num.cmp(&amp;0) {
-				Less =&gt; Self {		
-					num: -(self.den as I),
-					den: (-self.num) as U,
-				},
-				Equal =&gt; panic!(&quot;Reciprocal of zero&quot;),
-				Greater =&gt; Self {
-					num: self.den as I,
-					den: self.num as U,
-				},
-			}
-		}
+        /// Returns a reciprocal of the fraction
+        pub fn recip(self) -&gt; Self {
+            use std::cmp::Ordering::*;
+            match self.num.cmp(&amp;0) {
+                Less =&gt; Self {
+                    num: -(self.den as I),
+                    den: (-self.num) as U,
+                },
+                Equal =&gt; panic!(&quot;Reciprocal of zero&quot;),
+                Greater =&gt; Self {
+                    num: self.den as I,
+                    den: self.num as U,
+                },
+            }
+        }
 
-		pub fn floor(self) -&gt; I {
-			let Self { num, den } = self;
-			let den = den as I;
-			num.div_euclid(den)
-		}
+        /// Returns a floor of the fraction in an integer form
+        pub fn floor(self) -&gt; I {
+            let Self { num, den } = self;
+            let den = den as I;
+            num.div_euclid(den)
+        }
 
-		pub fn ceil(self) -&gt; I {
-			let Self { num, den } = self;
-			let den = den as I;
-			(num + den - 1).div_euclid(den)
-		}
+        /// Returns a ceil of the fraction in an integer form
+        pub fn ceil(self) -&gt; I {
+            let Self { num, den } = self;
+            let den = den as I;
+            (num + den - 1).div_euclid(den)
+        }
 
-		pub fn round(self) -&gt; I {
-			let Self { num, den } = self;
-			let den = den as I;
-			(2 * num + den).div_euclid(2 * den)
-		}
+        /// Returns a rounded fraction in an integer form
+        pub fn round(self) -&gt; I {
+            let Self { num, den } = self;
+            let den = den as I;
+            (2 * num + den).div_euclid(2 * den)
+        }
 
-		pub fn fract(self) -&gt; Self {
-			self - self.floor()
-		}
+        /// Returns self - self.floor()
+        pub fn fract(self) -&gt; Self {
+            self - self.floor()
+        }
 
-		pub fn wrap(x: f64, max_den: U) -&gt; (Self, Self) {
-			let ipart = x.floor() as I;
-			let d = x.fract();
-			if d == 0. {
-				return (ipart.into(), ipart.into());
-			}
+        /// Returns two closest fractions to `x` given a maximum possible value for denominators.
+        /// If the fraction is equal to `x` when converted to f64, then the both bounds are equal.
+        /// This behavior is subject to change for more accurate approximation.
+        pub fn wrap(x: f64, max_den: U) -&gt; (Self, Self) {
+            let ipart = x.floor() as I;
+            let d = x.fract();
+            if d == 0. {
+                return (ipart.into(), ipart.into());
+            }
 
-			let [(mut ln, mut ld), (mut rn, mut rd)]: [(U, U); 2] = [(0, 1), (1, 1)];
-			while (ln, ld) != (rn, rd) {
-				let (pl, pr) = ((ln, ld), (rn, rd));
+            let [(mut ln, mut ld), (mut rn, mut rd)]: [(U, U); 2] = [(0, 1), (1, 1)];
+            while (ln, ld) != (rn, rd) {
+                let (pl, pr) = ((ln, ld), (rn, rd));
 
-				// Update l
-				let k1 = (ld as f64 * d - ln as f64).div_euclid(rn as f64 - rd as f64 * d) as U;
-				let k2 = (max_den - ld).div_euclid(rd);
-				let k = k1.min(k2);
-				ln += k * rn;
-				ld += k * rd;
+                // Update l
+                let k1 = (ld as f64 * d - ln as f64).div_euclid(rn as f64 - rd as f64 * d) as U;
+                let k2 = (max_den - ld).div_euclid(rd);
+                let k = k1.min(k2);
+                ln += k * rn;
+                ld += k * rd;
 
-				// Update r
-				let k1 = (rn as f64 - rd as f64 * d).div_euclid(ld as f64 * d - ln as f64) as U;
-				let k2 = (max_den - rd).div_euclid(ld);
-				let k = k1.min(k2);
-				rn += k * ln;
-				rd += k * ld;
+                // Update r
+                let k1 = (rn as f64 - rd as f64 * d).div_euclid(ld as f64 * d - ln as f64) as U;
+                let k2 = (max_den - rd).div_euclid(ld);
+                let k = k1.min(k2);
+                rn += k * ln;
+                rd += k * ld;
 
-				if pl == (ln, ld) &amp;&amp; pr == (rn, rd) {
-					break;
-				}
-			}
+                if pl == (ln, ld) &amp;&amp; pr == (rn, rd) {
+                    break;
+                }
+            }
 
-			let l = Self::new(ln as I, ld) + ipart;
-			let r = Self::new(rn as I, rd) + ipart;
-			if x == l.into() {
-				(l, l)
-			} else if x == r.into() {
-				(r, r)
-			} else {
-				(l, r)
-			}
-		}
+            let l = Self::new(ln as I, ld as I) + ipart;
+            let r = Self::new(rn as I, rd as I) + ipart;
+            if x == l.into() {
+                (l, l)
+            } else if x == r.into() {
+                (r, r)
+            } else {
+                (l, r)
+            }
+        }
 
-		pub fn lower_den(self, max_den: U) -&gt; (Self, Self) {
-			if self.den &lt;= max_den {
-				return (self, self);
-			}
+        /// Returns two fractions `(l, r)` where `l &lt;= self`, `r &gt;= self`, and `l`, `r` both being
+        /// the closest to `self` given a maximum value of denominators. This function can be
+        /// used for approximating the fraction when the numberator or denominator is getting too
+        /// large, but you don't need an exact value of the fraction.
+        pub fn lower_den(self, max_den: U) -&gt; (Self, Self) {
+            if self.den &lt;= max_den {
+                return (self, self);
+            }
 
-			let ipart = self.floor();
-			let Self { num: dn, den: dd } = self.fract();
-			let dn = dn as U;
+            let ipart = self.floor();
+            let Self { num: dn, den: dd } = self.fract();
+            let dn = dn as U;
 
-			let [(mut ln, mut ld), (mut rn, mut rd)]: [(U, U); 2] = [(0, 1), (1, 1)];
-			while (ln, ld) != (rn, rd) {
-				let (pl, pr) = ((ln, ld), (rn, rd));
+            let [(mut ln, mut ld), (mut rn, mut rd)]: [(U, U); 2] = [(0, 1), (1, 1)];
+            while (ln, ld) != (rn, rd) {
+                let (pl, pr) = ((ln, ld), (rn, rd));
 
-				// Update l
-				let k1 = (ld * dn - ln * dd).div_euclid(rn * dd - rd * dn);
-				let k2 = (max_den - ld).div_euclid(rd);
-				let k = k1.min(k2);
-				ln += k * rn;
-				ld += k * rd;
+                // Update l
+                let k1 = (ld * dn - ln * dd).div_euclid(rn * dd - rd * dn);
+                let k2 = (max_den - ld).div_euclid(rd);
+                let k = k1.min(k2);
+                ln += k * rn;
+                ld += k * rd;
 
-				// Update r
-				let k1 = (rn * dd - rd * dn).div_euclid(ld * dn - ln * dd);
-				let k2 = (max_den - rd).div_euclid(ld);
-				let k = k1.min(k2);
-				rn += k * ln;
-				rd += k * ld;
+                // Update r
+                let k1 = (rn * dd - rd * dn).div_euclid(ld * dn - ln * dd);
+                let k2 = (max_den - rd).div_euclid(ld);
+                let k = k1.min(k2);
+                rn += k * ln;
+                rd += k * ld;
 
-				if pl == (ln, ld) &amp;&amp; pr == (rn, rd) {
-					break;
-				}
-			}
+                if pl == (ln, ld) &amp;&amp; pr == (rn, rd) {
+                    break;
+                }
+            }
 
-			let l = Self::new(ln as I, ld) + ipart;
-			let r = Self::new(rn as I, rd) + ipart;
-			(l, r)
-		}
-	}
+            let l = Self::new(ln as I, ld as I) + ipart;
+            let r = Self::new(rn as I, rd as I) + ipart;
+            (l, r)
+        }
+    }
 
-	impl Default for Frac {
-		fn default() -&gt; Self {
-			Frac { num: 0, den: 1 }
-		}
-	}
+    impl Default for Frac {
+        fn default() -&gt; Self {
+            Frac { num: 0, den: 1 }
+        }
+    }
 
-	impl Display for Frac {
-		fn fmt(&amp;self, f: &amp;mut std::fmt::Formatter&lt;'_&gt;) -&gt; std::fmt::Result {
-			write!(f, &quot;{}/{}&quot;, self.num, self.den)
-		}
-	}
+    impl Display for Frac {
+        fn fmt(&amp;self, f: &amp;mut std::fmt::Formatter&lt;'_&gt;) -&gt; std::fmt::Result {
+            write!(f, &quot;{}/{}&quot;, self.num, self.den)
+        }
+    }
 
-	impl From&lt;I&gt; for Frac {
-		fn from(num: I) -&gt; Self {
-			Self { num, den: 1 }
-		}
-	}
+    impl From&lt;I&gt; for Frac {
+        fn from(num: I) -&gt; Self {
+            Self { num, den: 1 }
+        }
+    }
 
-	impl From&lt;Frac&gt; for f64 {
-		fn from(value: Frac) -&gt; Self {
-			value.num as f64 / value.den as f64
-		}
-	}
+    impl From&lt;Frac&gt; for f64 {
+        fn from(value: Frac) -&gt; Self {
+            value.num as f64 / value.den as f64
+        }
+    }
 
-	impl Neg for Frac {
-		type Output = Self;
-		fn neg(self) -&gt; Self::Output {
-			Self { num: -self.num, den: self.den }
-		}
-	}
+    impl Neg for Frac {
+        type Output = Self;
+        fn neg(self) -&gt; Self::Output {
+            Self {
+                num: -self.num,
+                den: self.den,
+            }
+        }
+    }
 
-	impl Add for Frac {
-		type Output = Self;
-		fn add(self, rhs: Self) -&gt; Self::Output {
-			Self {
-				num: self.num * rhs.den as I + self.den as I * rhs.num,
-				den: self.den * rhs.den,
-			}
-			.simplify()
-		}
-	}
+    impl Add for Frac {
+        type Output = Self;
+        fn add(self, rhs: Self) -&gt; Self::Output {
+            Self {
+                num: self.num * rhs.den as I + self.den as I * rhs.num,
+                den: self.den * rhs.den,
+            }
+        }
+    }
 
-	impl Sub for Frac {
-		type Output = Self;
-		fn sub(self, rhs: Self) -&gt; Self::Output {
-			Self {
-				num: self.num * rhs.den as I - self.den as I * rhs.num,
-				den: self.den * rhs.den,
-			}
-			.simplify()
-		}
-	}
+    impl Sub for Frac {
+        type Output = Self;
+        fn sub(self, rhs: Self) -&gt; Self::Output {
+            Self {
+                num: self.num * rhs.den as I - self.den as I * rhs.num,
+                den: self.den * rhs.den,
+            }
+        }
+    }
 
-	impl Mul for Frac {
-		type Output = Self;
-		fn mul(self, rhs: Self) -&gt; Self::Output {
-			Self {
-				num: self.num * rhs.num,
-				den: self.den * rhs.den,
-			}
-			.simplify()
-		}
-	}
+    impl Mul for Frac {
+        type Output = Self;
+        fn mul(self, rhs: Self) -&gt; Self::Output {
+            Self {
+                num: self.num * rhs.num,
+                den: self.den * rhs.den,
+            }
+        }
+    }
 
-	impl Div for Frac {
-		type Output = Self;
-		fn div(self, rhs: Self) -&gt; Self::Output {
-			self * rhs.recip()
-		}
-	}
+    impl Div for Frac {
+        type Output = Self;
+        fn div(self, rhs: Self) -&gt; Self::Output {
+            self * rhs.recip()
+        }
+    }
 
-	impl Add&lt;I&gt; for Frac {
-		type Output = Self;
-		fn add(self, rhs: I) -&gt; Self::Output {
-			let rhs: Frac = rhs.into();
-			self + rhs
-		}
-	}
+    impl Add&lt;I&gt; for Frac {
+        type Output = Self;
+        fn add(self, rhs: I) -&gt; Self::Output {
+            let rhs: Frac = rhs.into();
+            self + rhs
+        }
+    }
 
-	impl Sub&lt;I&gt; for Frac {
-		type Output = Self;
-		fn sub(self, rhs: I) -&gt; Self::Output {
-			let rhs: Frac = rhs.into();
-			self - rhs
-		}
-	}
+    impl Sub&lt;I&gt; for Frac {
+        type Output = Self;
+        fn sub(self, rhs: I) -&gt; Self::Output {
+            let rhs: Frac = rhs.into();
+            self - rhs
+        }
+    }
 
-	impl Mul&lt;I&gt; for Frac {
-		type Output = Self;
-		fn mul(self, rhs: I) -&gt; Self::Output {
-			let rhs: Frac = rhs.into();
-			self * rhs
-		}
-	}
+    impl Mul&lt;I&gt; for Frac {
+        type Output = Self;
+        fn mul(self, rhs: I) -&gt; Self::Output {
+            let rhs: Frac = rhs.into();
+            self * rhs
+        }
+    }
 
-	impl Div&lt;I&gt; for Frac {
-		type Output = Self;
-		fn div(self, rhs: I) -&gt; Self::Output {
-			let rhs: Frac = rhs.into();
-			self / rhs
-		}
-	}
+    impl Div&lt;I&gt; for Frac {
+        type Output = Self;
+        fn div(self, rhs: I) -&gt; Self::Output {
+            let rhs: Frac = rhs.into();
+            self / rhs
+        }
+    }
 
-	impl Add&lt;Frac&gt; for I {
-		type Output = Frac;
-		fn add(self, rhs: Frac) -&gt; Self::Output {
-			rhs + self
-		}
-	}
+    impl Add&lt;Frac&gt; for I {
+        type Output = Frac;
+        fn add(self, rhs: Frac) -&gt; Self::Output {
+            rhs + self
+        }
+    }
 
-	impl Sub&lt;Frac&gt; for I {
-		type Output = Frac;
-		fn sub(self, rhs: Frac) -&gt; Self::Output {
-			-rhs + self
-		}
-	}
+    impl Sub&lt;Frac&gt; for I {
+        type Output = Frac;
+        fn sub(self, rhs: Frac) -&gt; Self::Output {
+            -rhs + self
+        }
+    }
 
-	impl Mul&lt;Frac&gt; for I {
-		type Output = Frac;
-		fn mul(self, rhs: Frac) -&gt; Self::Output {
-			rhs * self
-		}
-	}
+    impl Mul&lt;Frac&gt; for I {
+        type Output = Frac;
+        fn mul(self, rhs: Frac) -&gt; Self::Output {
+            rhs * self
+        }
+    }
 
-	impl Div&lt;Frac&gt; for I {
-		type Output = Frac;
-		fn div(self, rhs: Frac) -&gt; Self::Output {
-			let lhs: Frac = self.into();
-			lhs / rhs
-		}
-	}
+    impl Div&lt;Frac&gt; for I {
+        type Output = Frac;
+        fn div(self, rhs: Frac) -&gt; Self::Output {
+            let lhs: Frac = self.into();
+            lhs / rhs
+        }
+    }
 
-	impl AddAssign for Frac {
-		fn add_assign(&amp;mut self, rhs: Self) {
-			*self = *self + rhs;
-		}
-	}
+    impl AddAssign for Frac {
+        fn add_assign(&amp;mut self, rhs: Self) {
+            *self = *self + rhs;
+        }
+    }
 
-	impl SubAssign for Frac {
-		fn sub_assign(&amp;mut self, rhs: Self) {
-			*self = *self - rhs;
-		}
-	}
+    impl SubAssign for Frac {
+        fn sub_assign(&amp;mut self, rhs: Self) {
+            *self = *self - rhs;
+        }
+    }
 
-	impl MulAssign for Frac {
-		fn mul_assign(&amp;mut self, rhs: Self) {
-			*self = *self * rhs;
-		}
-	}
+    impl MulAssign for Frac {
+        fn mul_assign(&amp;mut self, rhs: Self) {
+            *self = *self * rhs;
+        }
+    }
 
-	impl DivAssign for Frac {
-		fn div_assign(&amp;mut self, rhs: Self) {
-			*self = *self / rhs;
-		}
-	}
+    impl DivAssign for Frac {
+        fn div_assign(&amp;mut self, rhs: Self) {
+            *self = *self / rhs;
+        }
+    }
 
-	impl AddAssign&lt;I&gt; for Frac {
-		fn add_assign(&amp;mut self, rhs: I) {
-			*self = *self + rhs;
-		}
-	}
+    impl AddAssign&lt;I&gt; for Frac {
+        fn add_assign(&amp;mut self, rhs: I) {
+            *self = *self + rhs;
+        }
+    }
 
-	impl SubAssign&lt;I&gt; for Frac {
-		fn sub_assign(&amp;mut self, rhs: I) {
-			*self = *self - rhs;
-		}
-	}
+    impl SubAssign&lt;I&gt; for Frac {
+        fn sub_assign(&amp;mut self, rhs: I) {
+            *self = *self - rhs;
+        }
+    }
 
-	impl MulAssign&lt;I&gt; for Frac {
-		fn mul_assign(&amp;mut self, rhs: I) {
-			*self = *self * rhs;
-		}
-	}
+    impl MulAssign&lt;I&gt; for Frac {
+        fn mul_assign(&amp;mut self, rhs: I) {
+            *self = *self * rhs;
+        }
+    }
 
-	impl DivAssign&lt;I&gt; for Frac {
-		fn div_assign(&amp;mut self, rhs: I) {
-			*self = *self / rhs;
-		}
-	}
+    impl DivAssign&lt;I&gt; for Frac {
+        fn div_assign(&amp;mut self, rhs: I) {
+            *self = *self / rhs;
+        }
+    }
 
-	impl PartialEq for Frac {
-		fn eq(&amp;self, rhs: &amp;Self) -&gt; bool {
-			(self.num * rhs.den as I).eq(&amp;(rhs.num * self.den as I))
-		}
-	}
+    impl PartialEq for Frac {
+        fn eq(&amp;self, rhs: &amp;Self) -&gt; bool {
+            (self.num * rhs.den as I).eq(&amp;(rhs.num * self.den as I))
+        }
+    }
 
-	impl Eq for Frac {}
+    impl Eq for Frac {}
 
-	impl PartialOrd for Frac {
-		fn partial_cmp(&amp;self, rhs: &amp;Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
-			(self.num * rhs.den as I).partial_cmp(&amp;(rhs.num * self.den as I))
-		}
-	}
+    impl PartialOrd for Frac {
+        fn partial_cmp(&amp;self, rhs: &amp;Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
+            (self.num * rhs.den as I).partial_cmp(&amp;(rhs.num * self.den as I))
+        }
+    }
 
-	impl Ord for Frac {
-		fn cmp(&amp;self, rhs: &amp;Self) -&gt; std::cmp::Ordering {
-			(self.num * rhs.den as I).cmp(&amp;(rhs.num * self.den as I))
-		}
-	}
+    impl Ord for Frac {
+        fn cmp(&amp;self, rhs: &amp;Self) -&gt; std::cmp::Ordering {
+            (self.num * rhs.den as I).cmp(&amp;(rhs.num * self.den as I))
+        }
+    }
 
-	impl PartialEq&lt;I&gt; for Frac {
-		fn eq(&amp;self, rhs: &amp;I) -&gt; bool {
-			let rhs: Frac = (*rhs).into();
-			self.eq(&amp;rhs)
-		}
-	}
+    impl PartialEq&lt;I&gt; for Frac {
+        fn eq(&amp;self, rhs: &amp;I) -&gt; bool {
+            let rhs: Frac = (*rhs).into();
+            self.eq(&amp;rhs)
+        }
+    }
 
-	impl PartialOrd&lt;I&gt; for Frac {
-		fn partial_cmp(&amp;self, rhs: &amp;I) -&gt; Option&lt;std::cmp::Ordering&gt; {
-			let rhs: Frac = (*rhs).into();
-			self.partial_cmp(&amp;rhs)
-		}
-	}
+    impl PartialOrd&lt;I&gt; for Frac {
+        fn partial_cmp(&amp;self, rhs: &amp;I) -&gt; Option&lt;std::cmp::Ordering&gt; {
+            let rhs: Frac = (*rhs).into();
+            self.partial_cmp(&amp;rhs)
+        }
+    }
 
-	impl PartialEq&lt;Frac&gt; for I {
-		fn eq(&amp;self, rhs: &amp;Frac) -&gt; bool {
-			let lhs: Frac = (*self).into();
-			lhs.eq(rhs)
-		}
-	}
+    impl PartialEq&lt;Frac&gt; for I {
+        fn eq(&amp;self, rhs: &amp;Frac) -&gt; bool {
+            let lhs: Frac = (*self).into();
+            lhs.eq(rhs)
+        }
+    }
 
-	impl PartialOrd&lt;Frac&gt; for I {
-		fn partial_cmp(&amp;self, rhs: &amp;Frac) -&gt; Option&lt;std::cmp::Ordering&gt; {
-			let lhs: Frac = (*self).into();
-			lhs.partial_cmp(rhs)
-		}
-	}
+    impl PartialOrd&lt;Frac&gt; for I {
+        fn partial_cmp(&amp;self, rhs: &amp;Frac) -&gt; Option&lt;std::cmp::Ordering&gt; {
+            let lhs: Frac = (*self).into();
+            lhs.partial_cmp(rhs)
+        }
+    }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fast-io"><a class="header" href="#fast-io">Fast IO</a></h1>
 <ul>
