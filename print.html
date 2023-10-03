@@ -8629,21 +8629,22 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 		}
 
 		pub fn new(num: I, den: U) -&gt; Self {
-            assert_ne!(den, 0);
+			assert_ne!(den, 0);
 			Self { num, den }.simplify()
 		}
 
 		pub fn recip(self) -&gt; Self {
-			if self.num &lt; 0 {
-				Self {
+			use std::cmp::Ordering::*;
+			match self.num.cmp(&amp;0) {
+				Less =&gt; Self {		
 					num: -(self.den as I),
 					den: (-self.num) as U,
-				}
-			} else {
-				Self {
+				},
+				Equal =&gt; panic!(&quot;Reciprocal of zero&quot;),
+				Greater =&gt; Self {
 					num: self.den as I,
 					den: self.num as U,
-				}
+				},
 			}
 		}
 
@@ -8819,26 +8820,6 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 		}
 	}
 
-	impl PartialEq for Frac {
-		fn eq(&amp;self, rhs: &amp;Self) -&gt; bool {
-			(self.num * rhs.den as I).eq(&amp;(rhs.num * self.den as I))
-		}
-	}
-
-	impl Eq for Frac {}
-
-	impl PartialOrd for Frac {
-		fn partial_cmp(&amp;self, rhs: &amp;Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
-			(self.num * rhs.den as I).partial_cmp(&amp;(rhs.num * self.den as I))
-		}
-	}
-
-	impl Ord for Frac {
-		fn cmp(&amp;self, rhs: &amp;Self) -&gt; std::cmp::Ordering {
-			(self.num * rhs.den as I).cmp(&amp;(rhs.num * self.den as I))
-		}
-	}
-
 	impl Add&lt;I&gt; for Frac {
 		type Output = Self;
 		fn add(self, rhs: I) -&gt; Self::Output {
@@ -8945,6 +8926,54 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
 	impl DivAssign&lt;I&gt; for Frac {
 		fn div_assign(&amp;mut self, rhs: I) {
 			*self = *self / rhs;
+		}
+	}
+
+	impl PartialEq for Frac {
+		fn eq(&amp;self, rhs: &amp;Self) -&gt; bool {
+			(self.num * rhs.den as I).eq(&amp;(rhs.num * self.den as I))
+		}
+	}
+
+	impl Eq for Frac {}
+
+	impl PartialOrd for Frac {
+		fn partial_cmp(&amp;self, rhs: &amp;Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
+			(self.num * rhs.den as I).partial_cmp(&amp;(rhs.num * self.den as I))
+		}
+	}
+
+	impl Ord for Frac {
+		fn cmp(&amp;self, rhs: &amp;Self) -&gt; std::cmp::Ordering {
+			(self.num * rhs.den as I).cmp(&amp;(rhs.num * self.den as I))
+		}
+	}
+
+	impl PartialEq&lt;I&gt; for Frac {
+		fn eq(&amp;self, rhs: &amp;I) -&gt; bool {
+			let rhs: Frac = (*rhs).into();
+			self.eq(&amp;rhs)
+		}
+	}
+
+	impl PartialOrd&lt;I&gt; for Frac {
+		fn partial_cmp(&amp;self, rhs: &amp;I) -&gt; Option&lt;std::cmp::Ordering&gt; {
+			let rhs: Frac = (*rhs).into();
+			self.partial_cmp(&amp;rhs)
+		}
+	}
+
+	impl PartialEq&lt;Frac&gt; for I {
+		fn eq(&amp;self, rhs: &amp;Frac) -&gt; bool {
+			let lhs: Frac = (*self).into();
+			lhs.eq(rhs)
+		}
+	}
+
+	impl PartialOrd&lt;Frac&gt; for I {
+		fn partial_cmp(&amp;self, rhs: &amp;Frac) -&gt; Option&lt;std::cmp::Ordering&gt; {
+			let lhs: Frac = (*self).into();
+			lhs.partial_cmp(rhs)
 		}
 	}
 }</code></pre>
