@@ -54,3 +54,7 @@ fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterato
     iter.map(move |v| [with.clone(), v]).flatten().skip(1)
 }
 ```
+
+---
+
+Last updated on 231008.

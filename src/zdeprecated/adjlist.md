@@ -49,3 +49,7 @@ impl<'g, T> Iterator for Neighbor<'g, T> {
     }
 }
 ```
+
+---
+
+Last updated on 231008.
