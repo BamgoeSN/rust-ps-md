@@ -1,62 +1,45 @@
 # Extended Euclidean Algorithm
 
-`ext_gcd(a, b)` returns \\(g, s, t\\) such that \\(g = \gcd(a, b)\\) and \\(as+bt=g\\).
+`egcd(a, b)` returns \\(g, s, t\\) such that \\(g = \gcd(a, b)\\) and \\(as+bt=g\\).
 
 ## Example
 
 ```rust
 # fn main() {
-let (a, b) = (4, 11);
-let (g, s, t) = ext_gcd(a, b);
-println!("{} {} {}", g, s, t); // 1 3 -1
-println!("{} == {}", g, a * s + b * t);
+for (a, b) in [(2, 5), (11, 17), (20, 35)] {
+    let (g, s, t) = egcd(a, b);
+    println!("gcd({a}, {b}) = {g}");
+    println!("{a}*({s}) + {b}*({t}) = {g}");
+}
 # }
-#
-# // Extended Euclidean Algorithm
-# // Reference: PyRival https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/gcd.py
-#
-# fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
-#     let (mut s, mut old_s) = (0, 1);
-#     let (mut g, mut old_g) = (b, a);
-#     while g != 0 {
-#         let q = old_g / g;
-#         let (new_r, new_s) = (old_g - q * g, old_s - q * s);
-#         old_g = g; // Not using destructuring to support low version
-#         g = new_r; // AtCoder is using 1.42.0
-#         old_s = s;
-#         s = new_s;
+# 
+# /// Returns `(g, s, t)` such that `g == gcd(a, b)` and `a*s + t*b == g`.
+# fn egcd(mut a: i64, mut b: i64) -> (i64, i64, i64) {
+#     let (mut sa, mut ta, mut sb, mut tb) = (1, 0, 0, 1);
+#     while b != 0 {
+#         let (q, r) = (a / b, a % b);
+#         (sa, ta, sb, tb) = (sb, tb, sa - q * sb, ta - q * tb);
+#         (a, b) = (b, r);
 #     }
-#
-#     (
-#         old_g,
-#         old_s,
-#         if b != 0 { (old_g - old_s * a) / b } else { 0 },
-#     )
+#     (a, sa, ta)
 # }
 ```
 
 ## Code
 
 ```rust,noplayground
-// Extended Euclidean Algorithm
-// Reference: PyRival https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/gcd.py
-
-fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
-    let (mut s, mut old_s) = (0, 1);
-    let (mut g, mut old_g) = (b, a);
-    while g != 0 {
-        let q = old_g / g;
-        let (new_r, new_s) = (old_g - q * g, old_s - q * s);
-        old_g = g; // Not using destructuring to support low version
-        g = new_r; // AtCoder is using 1.42.0
-        old_s = s;
-        s = new_s;
+/// Returns `(g, s, t)` such that `g == gcd(a, b)` and `a*s + t*b == g`.
+fn egcd(mut a: i64, mut b: i64) -> (i64, i64, i64) {
+    let (mut sa, mut ta, mut sb, mut tb) = (1, 0, 0, 1);
+    while b != 0 {
+        let (q, r) = (a / b, a % b);
+        (sa, ta, sb, tb) = (sb, tb, sa - q * sb, ta - q * tb);
+        (a, b) = (b, r);
     }
-
-    (
-        old_g,
-        old_s,
-        if b != 0 { (old_g - old_s * a) / b } else { 0 },
-    )
+    (a, sa, ta)
 }
 ```
+
+---
+
+Last updated on 231008.
