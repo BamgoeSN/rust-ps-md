@@ -5,19 +5,33 @@ The usage is exactly the same with Dijkstra algorithm, except that the name of t
 
 ## Code
 ```rust,noplayground
-use std::num::*;
+trait HasNz {
+    type NzType;
+    fn into_nz(self) -> Option<Self::NzType>;
+    fn retrieve(nz: Self::NzType) -> Self;
+}
+
+macro_rules! impl_hasnz {
+    ($($t:ty, $n:ty);*) => { $(
+        impl HasNz for $t {
+            type NzType = $n;
+            fn into_nz(self) -> Option<$n> { <$n>::new(self) }
+            fn retrieve(nz: $n) -> Self { nz.get() }
+        }
+    )* };
+}
+
 impl_hasnz!(i8, NonZeroI8; i16, NonZeroI16; i32, NonZeroI32; i64, NonZeroI64; i128, NonZeroI128; isize, NonZeroIsize);
 impl_hasnz!(u8, NonZeroU8; u16, NonZeroU16; u32, NonZeroU32; u64, NonZeroU64; u128, NonZeroU128; usize, NonZeroUsize);
 
-use std::ops::*;
-fn dial<T>(graph: &Graph<T>, src: usize) -> Vec<Option<T>>
+fn dial<T>(graph: &[Vec<(usize, T)>], src: usize) -> Vec<Option<T>>
 where
     T: Copy + From<u8> + Into<u32> + Add<Output = T> + Sub<Output = T> + Eq + Ord + HasNz,
-    <T as HasNz>::Nz: Copy,
+    <T as HasNz>::NzType: Copy,
 {
-    let max_cost: u32 = graph.edge.iter().map(|x| x.2.into()).max().unwrap_or(0);
+    let max_cost: u32 = graph.iter().map(|list| list.iter().map(|&(_, v)| v.into())).flatten().max().unwrap_or(0);
 
-    let mut dist: Vec<Option<T::Nz>> = vec![None; graph.n];
+    let mut dist: Vec<Option<T::NzType>> = vec![None; graph.len()];
     dist[src] = {
         let one: T = 1.into();
         one.into_nz()
@@ -41,7 +55,7 @@ where
                 continue;
             }
 
-            for (next, &weight) in graph.neighbor(curr as usize) {
+            for &(next, weight) in graph[curr as usize].iter() {
                 let next_cost = curr_cost + weight;
 
                 if dist[next].map_or(true, |x| T::retrieve(x) > next_cost) {
@@ -60,8 +74,6 @@ where
         queue.push_back(hand);
     }
 
-    dist.iter()
-        .map(|x| x.map(|x| T::retrieve(x) - 1.into()))
-        .collect()
+    dist.iter().map(|x| x.map(|x| T::retrieve(x) - 1.into())).collect()
 }
 ```
