@@ -1,67 +1,63 @@
 # Convex Hull
 
-`cvh(pts: &[Point])` returns indices of points included in a convex hull of `pts`.
-It's implemented based on monotone chain algorithm, a much intuitive and straightforward convex hull
-algorithm compared to the well-known Graham scan.
+`convex_hull` finds a convex hull of a given array.
+It's implemented based on monotone chain algorithm, a much intuitive and straightforward convex hull algorithm compared to the well-known Graham scan.
 
-The code below excludes the points on the sides of the hull, but by simply changing `>=` from lines calling `ccw` to `>`,
-one can change its behavior to include such points.
+If `COLINEAR` is set to `false`, then every point which lies on a vertex of a convex hull, but not at the endpoints of it, is excluded. If it's set to `true`, then those points are all included.
 
-If `pts` includes duplicates and those happen to be on the convex hull, then only one of them is included in the result.
+The result is sorted in clockwise direction.
+
+If the input includes duplicates and those happen to be on the convex hull, then only one of them is included in the result.
 
 ## Code
 
 ```rust,noplayground
-type Coord = i32;
-type CCWOut = i64;
-type Point = (Coord, Coord);
+type Point = (i64, i64);
 
-fn ccw(a: &Point, b: &Point, c: &Point) -> CCWOut {
-    let ba = (b.0 as CCWOut - a.0 as CCWOut, b.1 as CCWOut - a.1 as CCWOut);
-    let cb = (c.0 as CCWOut - b.0 as CCWOut, c.1 as CCWOut - b.1 as CCWOut);
-    ba.0 * cb.1 - ba.1 * cb.0
-}
-
-fn cvh(pts: &[Point]) -> Vec<usize> {
-    if pts.is_empty() {
-        return vec![];
-    } else if pts.len() == 1 {
-        return vec![0];
+/// Returns a convex hull of `arr`.
+/// If `COLINEAR` is set to `false`, then every point which lies on a vertex of a convex hull, but not at the endpoints of it, is excluded.
+/// If `COLINEAR` is set to `true`, then such points are all included.
+/// The result is sorted in clockwise direction.
+///
+/// The implementation utilizes monotone-chain convex hull algorithm.
+fn convex_hull<const COLINEAR: bool>(arr: &[Point]) -> Vec<Point> {
+    let mut arr = arr.to_owned();
+    arr.sort_unstable();
+    arr.dedup();
+    if arr.len() <= 1 {
+        return arr.to_vec();
     }
+    let mut ret = vec![];
 
-    let n = pts.len();
-
-    let mut refs: Vec<_> = (0..n).collect();
-    refs.sort_unstable_by_key(|&i| pts[i]);
-    refs.dedup_by_key(|i| pts[*i]);
-
-    let mut upper = vec![refs[0]];
-    for &pt in refs.iter().skip(1) {
-        while upper.len() > 1 {
-            let ul = upper.len();
-            if ccw(&pts[upper[ul - 2]], &pts[upper[ul - 1]], &pts[pt]) > 0 {
-                upper.pop();
-            } else {
-                break;
+    fn monotone<const COLINEAR: bool>(it: impl Iterator<Item = Point>) -> Vec<Point> {
+        let sub = |(a, b): Point, (c, d): Point| (a - c, b - d);
+        let cross = |(a, b): Point, (c, d): Point| a as i128 * d as i128 - b as i128 * c as i128;
+        let ccw = |a: Point, b: Point, c: Point| cross(sub(b, a), sub(c, b));
+        let mut dl = vec![];
+        for p in it {
+            while dl.len() >= 2 {
+                let n = dl.len();
+                let v = ccw(dl[n - 2], dl[n - 1], p);
+                if v > 0 || (!COLINEAR && v == 0) {
+                    dl.pop();
+                } else {
+                    break;
+                }
             }
+            dl.push(p);
         }
-        upper.push(pt);
+        dl
     }
 
-    let mut lower = vec![*refs.last().unwrap()];
-    for &pt in refs.iter().rev().skip(1) {
-        while lower.len() > 1 {
-            let ll = lower.len();
-            if ccw(&pts[lower[ll - 2]], &pts[lower[ll - 1]], &pts[pt]) > 0 {
-                lower.pop();
-            } else {
-                break;
-            }
-        }
-        lower.push(pt);
-    }
+    ret.extend(monotone::<COLINEAR>(arr.iter().copied()));
+    ret.pop();
+    ret.extend(monotone::<COLINEAR>(arr.iter().copied().rev()));
+    ret.pop();
 
-    lower.pop();
-    upper.into_iter().chain(lower.into_iter().skip(1)).collect()
+    ret
 }
 ```
+
+---
+
+Last updated on 231008.

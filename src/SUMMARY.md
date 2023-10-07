@@ -47,6 +47,7 @@
 # Geometry
 
 - [Convex Hull](./geometry/convexhull.md)
+- [Line Intersection](./geometry/line_intersection.md)
 
 # Unclassified
 
