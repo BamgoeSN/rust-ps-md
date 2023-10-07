@@ -1,5 +1,7 @@
 # Adjacency List Graph Representation
 
+Deprecated because it's way easier to use `Vec<Vec<(usize, T)>>`. The performance gain isn't worth giving up usability.
+
 Credits to kiwiyou
 
 ```rust,noplayground

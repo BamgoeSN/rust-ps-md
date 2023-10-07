@@ -1,6 +1,6 @@
-# Zero/One Trait (Deprecated)
+# Zero/One Trait
 
-This trait was used for representing numeric values, but the author has learned that `Into` and `From` traits exist, hence this trait is now deprecated. Any other templates which includes or requires to include this trait will be fixed soon.
+Deprecated because letting the generic type to implement either `From<u8>` or `From<i8>` is enough.
 
 ```rust,noplayground
 pub trait ZeroOne: Sized + Copy {

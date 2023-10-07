@@ -54,12 +54,3 @@ fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterato
     iter.map(move |v| [with.clone(), v]).flatten().skip(1)
 }
 ```
-
-## Intersperse With
-`intersperse_with(iter, f)` returns an iterator which inserts returned values of `f` between elements of `iter`.
-
-```rust,noplayground
-fn intersperse_with<T>(iter: impl Iterator<Item = T>, mut with: impl FnMut() -> T) -> impl Iterator<Item = T> {
-    iter.map(move |v| [with(), v]).flatten().skip(1)
-}
-```

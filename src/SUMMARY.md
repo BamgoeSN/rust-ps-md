@@ -2,40 +2,36 @@
 
 [Introduction](./intro.md)
 
-# Algebra
+# Math
 
-- [GCD, LCM](./algebra/gcd.md)
-- [Extended Euclidean Algorithm](./algebra/extgcd.md)
-- [Chinese Remainder Theorem](./algebra/crt.md)
-- [Deterministic Miller-Rabin Primality Test](./algebra/millerrabin.md)
-- [Pollard's Rho Algorithm](./algebra/pollardrho.md)
-- [Number Theoretic Transform](./algebra/ntt.md)
-
-# Numerical Algorithms
-
-- [Integer Square Root](./numerical/isqrt.md)
-- [Sieve](./numerical/sieve.md)
-- [Linear Recurrence](./numerical/linrec/intro.md)
-  - [Berlekamp-Massey](./numerical/linrec/berlekamp.md)
-  - [Kitamasa](./numerical/linrec/kitamasa.md)
-  - [Bostan-Mori](./numerical/linrec/bostanmori.md)
+- [Sieve](./math/sieve.md)
+- [GCD, LCM](./math/gcd.md)
+- [Extended Euclidean Algorithm](./math/extgcd.md)
+- [Chinese Remainder Theorem](./math/crt.md)
+- [Deterministic Miller-Rabin Primality Test](./math/millerrabin.md)
+- [Pollard's Rho Algorithm](./math/pollardrho.md)
+- [Number Theoretic Transform](./math/ntt.md)
+- [Linear Recurrence](./math/linrec/intro.md)
+  - [Berlekamp-Massey](./math/linrec/berlekamp.md)
+  - [Kitamasa](./math/linrec/kitamasa.md)
+  - [Bostan-Mori](./math/linrec/bostanmori.md)
+- [Integer Square Root](./math/isqrt.md)
 
 # Data Structures
 
-- [Bitset](./datastructure/bitarray.md)
+- [Disjoint Set Union](./datastructure/dsu.md)
+  - [Weighted DSU](./datastructure/wdsu.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
   - [Segment Tree](./datastructure/segtree/segtree.md)
   - [Fenwick Tree](./datastructure/segtree/fenwick.md)
   - [Lazy Segment Tree](./datastructure/segtree/lazyseg.md)
 - [Rope](./datastructure/rope.md)
+- [Bitset](./datastructure/bitarray.md)
 
 # Graphs
 
-- [Adjacency List Graph Representation](./graphs/adjlist.md)
 - [Dijkstra](./graphs/dijkstra.md)
   - [Dial](./graphs/dial.md)
-- [Disjoint Set Union](./graphs/dsu.md)
-  - [Weighted DSU](./graphs/wdsu.md)
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
 - [Flow](./graphs/flow/intro.md)
@@ -65,4 +61,9 @@
 - [Fast IO](./misc/fastio.md)
 - [Iterator Tools](./misc/itertools.md)
 - [Macros](./misc/macro.md)
-- [Zero/One Trait (Deprecated)](./misc/zero_one_trait.md)
+
+# Deprecated
+
+- [Adjacency List Graph Representation](./zdeprecated/adjlist.md)
+- [Zero/One Trait](./zdeprecated/zero_one_trait.md)
+- [Deprecated Macros](./zdeprecated/deprecated_macros.md)

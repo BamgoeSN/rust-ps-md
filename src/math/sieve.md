@@ -62,3 +62,33 @@ fn phi_sieve(max_val: usize) -> (Vec<bool>, Vec<usize>, Vec<usize>) {
     (is_prime, phi, primes)
 }
 ```
+
+## With Möbius Function
+```rust,noplayground
+fn mobius_sieve(max_val: usize) -> (Vec<i8>, Vec<usize>) {
+    let mut primes = vec![];
+    let mut mu = vec![2i8; max_val + 1];
+    (mu[0], mu[1]) = (0, 1);
+
+    for i in 2..=max_val {
+        if mu[i] == 2 {
+            primes.push(i);
+            mu[i] = -1;
+        }
+        for &p in primes.iter() {
+            let v = i * p;
+            if v > max_val {
+                break;
+            }
+            if i % p == 0 {
+                mu[v] = 0;
+                break;
+            } else {
+                mu[v] = -mu[i];
+            }
+        }
+    }
+
+    (mu, primes)
+}
+```
