@@ -17,7 +17,7 @@ assuming that calculating the product of two elements takes \\(O(1)\\) time.
 ## Example
 
 ```rust
-use segtree::SegTree;
+use segtree::*;
 
 # fn main() {
 // Product segment tree with size of 10 and all elements being 1
@@ -53,6 +53,11 @@ println!("{}", st.partition_point(1, |x| x < 5)); // 5
 # mod segtree {
 #     use std::ops::RangeBounds;
 # 
+#     /// A segment tree is a data structure for a monoid type `T`.
+#     ///
+#     /// Given all the constraints written in the comment of `SegTree::new`, a segment tree can process the following queries in O(TlogN) time assuming `op` all run in O(T).
+#     /// - Changing the value of an element
+#     /// - Calculating the product of elements in an interval, combined with `op`
 #     pub struct SegTree<T, O> {
 #         n: usize,
 #         data: Vec<T>,
@@ -86,6 +91,29 @@ println!("{}", st.partition_point(1, |x| x < 5)); // 5
 #             self.data[k] = (self.op)(self.data[k * 2], self.data[(k * 2) + 1]);
 #         }
 # 
+#         /// Returns a new segment tree of size `n` built from `iter`.
+#         ///
+#         /// The meanings of parameters and some generic types are as follows.
+#         /// - `T` is a type of values in the array the segment tree represents.
+#         /// - `n` is a number of elements in the array.
+#         /// - `iter` is an iterator returning initial values of the array.
+#         ///   - If `iter.count() < n`, then the rest is filled with `e`.
+#         ///   - If `iter.count() > n`, the array is truncated down to the length of `n`.
+#         /// - `op: impl Fn(T, T) -> T` is a binary operator for `T`.
+#         /// - `e` is an identity for `op`.
+#         ///
+#         /// The following notations will be used from now on.
+#         /// - `op(a, b)` is denoted as `a*b`.
+#         ///
+#         /// Constraints of parameters are as follows.
+#         /// - `op` and `e` must make `T` a monoid. That is, `op` and `e` should be given so that `T` can satisfy the following conditions.
+#         ///   - `T` is associative under `op`. That is, `(a*b)*c == a*(b*c)` for all `[a, b, c]: [T; 3]`.
+#         ///   - `T` has `e` as an identity element under `op`. That is, `a*e == e*a == a` for all `a: T`.
+#         ///
+#         /// For example, a generic range sum segment tree with every value initialized with `0` and of length `n` can be constucted as follows.
+#         /// ```no_run
+#         /// let mut st = SegTree::new(n, None, 0i64, |x, y| x + y);
+#         /// ```
 #         pub fn new(n: usize, iter: impl IntoIterator<Item = T>, e: T, op: O) -> Self {
 #             let size = n.next_power_of_two();
 #             let log = size.trailing_zeros();
@@ -94,24 +122,19 @@ println!("{}", st.partition_point(1, |x| x < 5)); // 5
 #             data.extend(iter.into_iter().take(n));
 #             data.resize(2 * size, e);
 # 
-#             let mut st = Self {
-#                 n,
-#                 data,
-#                 e,
-#                 op,
-#                 size,
-#                 log,
-#             };
+#             let mut st = Self { n, data, e, op, size, log };
 #             for i in (1..size).rev() {
 #                 st.upd(i);
 #             }
 #             st
 #         }
 # 
+#         /// Returns the length of the array.
 #         pub fn len(&self) -> usize {
 #             self.n
 #         }
 # 
+#         /// Returns the `i`-th value of the array.
 #         pub fn get(&self, i: usize) -> T {
 #             self.data[i + self.size]
 #         }
@@ -125,8 +148,7 @@ println!("{}", st.partition_point(1, |x| x < 5)); // 5
 #             }
 #         }
 # 
-#         /// Returns the product of elements in the given range.
-#         /// Even if the range includes indices out of bounds, it automatically cuts the range to be in bounds.
+#         /// Returns the product of elements in `range`.
 #         pub fn prod(&self, range: impl RangeBounds<usize>) -> T {
 #             let (mut l, mut r) = self.get_bounds(range);
 #             (l += self.size, r += self.size);
@@ -286,6 +308,11 @@ println!("{}", st.partition_point(1, |x| x < 5)); // 5
 mod segtree {
     use std::ops::RangeBounds;
 
+    /// A segment tree is a data structure for a monoid type `T`.
+    ///
+    /// Given all the constraints written in the comment of `SegTree::new`, a segment tree can process the following queries in O(TlogN) time assuming `op` all run in O(T).
+    /// - Changing the value of an element
+    /// - Calculating the product of elements in an interval, combined with `op`
     pub struct SegTree<T, O> {
         n: usize,
         data: Vec<T>,
@@ -319,6 +346,29 @@ mod segtree {
             self.data[k] = (self.op)(self.data[k * 2], self.data[(k * 2) + 1]);
         }
 
+        /// Returns a new segment tree of size `n` built from `iter`.
+        ///
+        /// The meanings of parameters and some generic types are as follows.
+        /// - `T` is a type of values in the array the segment tree represents.
+        /// - `n` is a number of elements in the array.
+        /// - `iter` is an iterator returning initial values of the array.
+        ///   - If `iter.count() < n`, then the rest is filled with `e`.
+        ///   - If `iter.count() > n`, the array is truncated down to the length of `n`.
+        /// - `op: impl Fn(T, T) -> T` is a binary operator for `T`.
+        /// - `e` is an identity for `op`.
+        ///
+        /// The following notations will be used from now on.
+        /// - `op(a, b)` is denoted as `a*b`.
+        ///
+        /// Constraints of parameters are as follows.
+        /// - `op` and `e` must make `T` a monoid. That is, `op` and `e` should be given so that `T` can satisfy the following conditions.
+        ///   - `T` is associative under `op`. That is, `(a*b)*c == a*(b*c)` for all `[a, b, c]: [T; 3]`.
+        ///   - `T` has `e` as an identity element under `op`. That is, `a*e == e*a == a` for all `a: T`.
+        ///
+        /// For example, a generic range sum segment tree with every value initialized with `0` and of length `n` can be constucted as follows.
+        /// ```no_run
+        /// let mut st = SegTree::new(n, None, 0i64, |x, y| x + y);
+        /// ```
         pub fn new(n: usize, iter: impl IntoIterator<Item = T>, e: T, op: O) -> Self {
             let size = n.next_power_of_two();
             let log = size.trailing_zeros();
@@ -334,10 +384,12 @@ mod segtree {
             st
         }
 
+        /// Returns the length of the array.
         pub fn len(&self) -> usize {
             self.n
         }
 
+        /// Returns the `i`-th value of the array.
         pub fn get(&self, i: usize) -> T {
             self.data[i + self.size]
         }
@@ -351,8 +403,7 @@ mod segtree {
             }
         }
 
-        /// Returns the product of elements in the given range.
-        /// Even if the range includes indices out of bounds, it automatically cuts the range to be in bounds.
+        /// Returns the product of elements in `range`.
         pub fn prod(&self, range: impl RangeBounds<usize>) -> T {
             let (mut l, mut r) = self.get_bounds(range);
             (l += self.size, r += self.size);
@@ -506,8 +557,6 @@ mod segtree {
 }
 ```
 
-## APIs
-
-TODO
+---
 
 Last updated on 231007

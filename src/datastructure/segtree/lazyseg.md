@@ -2,12 +2,12 @@
 
 Reference: AtCoder library <https://atcoder.github.io/ac-library/production/document_en/index.html>
 
-A lazy segment tree is a data struture for a pair of [a monoid](./segtree.md) \\( (S, \cdot : S \times S \rightarrow S, e \in S) \\) and a set \\(F\\) of \\(S \rightarrow S\\) mappings that satisfies the following properties:
-- \\(F\\) contains the identity mapping \\(Id\\) such that \\( Id(x) = x \\) for all \\(x\in S\\).
+A lazy segment tree is a data struture for a pair of a [monoid](./segtree.md) \\( (T, \cdot : T \times T \rightarrow T, e \in T) \\) and a set \\(F\\) of \\(T \rightarrow T\\) mappings that satisfies the following properties:
+- \\(F\\) contains the identity mapping \\(Id\\) such that \\( Id(x) = x \\) for all \\(x\in T\\).
 - \\(F\\) is closed under composition. That is, \\( f \circ g \in F \\) for all \\( f, g \in F \\).
-- \\( f (x \cdot y) = f(x) \cdot f(y) \\) hold for all \\(f \in F \\) and \\( x, y \in S \\).
+- \\( f (x \cdot y) = f(x) \cdot f(y) \\) hold for all \\(f \in F \\) and \\( x, y \in T \\).
 
-Given an array \\(A\\) of length \\(n\\) consists of the monoid \\(S\\) as described above, a segment tree on it can process the following queries in \\(O (\log{n})\\) time:
+Given an array \\(A\\) of length \\(n\\) consists of the monoid \\(T\\) as described above, a segment tree on it can process the following queries in \\(O (\log{n})\\) time:
 - Apply the mapping \\( f \in F \\) on all the elements of an interval
 - Calculate the product of the elements of an interval
 
@@ -16,207 +16,216 @@ assuming that calculating the product of two elements takes \\(O(1)\\) time.
 ## Example
 
 ```rust
-# use lazyseg::*;
-# 
-// ax+b lazy segment tree
-type P = (i64, i64);
-
-// P = (sum, len)
-impl LzMonoid for P {
-    fn e() -> Self { (0, 0) }
-    fn opr_lhs(&mut self, rhs: &Self) {
-        self.0 += rhs.0; self.1 += rhs.1;
-    }
-    fn opr_rhs(&mut self, lhs: &Self) {
-        self.0 += lhs.0; self.1 += lhs.1;
-    }
-}
-
-// P = (a, b) equiv. to applying ax+b on LzMonoids
-impl LzMap<P> for P {
-    fn id() -> Self { (1, 0) }
-    fn map(&self, apply: &mut P) {
-        apply.0 = self.0 * apply.0 + self.1 * apply.1;
-    }
-    fn compos_lhs(&mut self, rhs: &Self) {
-        let (a, b, c, d) = (self.0, self.1, rhs.0, rhs.1);
-        *self = (a * c, a * d + b);
-    }
-    fn compos_rhs(&mut self, lhs: &Self) {
-        let (a, b, c, d) = (lhs.0, lhs.1, self.0, self.1);
-        *self = (a * c, a * d + b);
-    }
-}
+use lazyseg::*;
 
 # fn main() {
-let mut st: LazySeg<_, P> = LazySeg::new((0..10).map(|v| (v, 1)).collect());
-println!("{}", st.get(3).0); // 3
-println!("{}", st.prod(2..6).0); // 14
+// Generic range addition, range sum lazy segment tree
+let mut ls = LazySeg::new(
+    10,
+    (0..10).map(|i| (i, 1)),
+    |(x, l), (y, m)| (x + y, l + m),
+    (0i64, 0i64),
+    |a, (x, l)| (x + a * l, l),
+    |a, b| a + b,
+    0i64,
+);
 
-// Add 5 to 1..6
-st.apply_range(1..6, &(1, 5));
-// Multiply 6.. by 4
-st.apply_range(6.., &(4, 0));
-// 0 6 7 8 9 10 24 28 32 36
+println!("{}", ls.prod(2..8).0); // 27
+ls.apply_range(3..6, 3);
+println!("{}", ls.prod(2..8).0); // 36
 
-let r = st.max_right(4, |&(v, _)| v < 43);
-println!("{}", r); // 6
-let l = st.min_left(6, |&(v, _)| v < 32);
-println!("{}", l); // 3
+for r in 3..=10 {
+    print!("{} ", ls.prod(3..r).0);
+}
+println!(); // 0 6 13 21 27 34 42 51
+println!("{}", ls.partition_point(3, |(x, _)| x < 40)); // 9
+
+for l in 0..=7 {
+    print!("{} ", ls.prod(l..7).0);
+}
+println!(); // 30 30 29 27 21 14 6 0
+println!("{}", ls.left_partition_point(7, |(x, _)| x < 25)); // 4
 # }
 # 
 # mod lazyseg {
 #     use std::ops::RangeBounds;
 # 
-#     fn ceil_pow2(n: usize) -> u32 {
-#         let mut x = 0;
-#         while 1 << x < n {
-#             x += 1;
-#         }
-#         x
-#     }
-# 
-#     fn range_to_bounds(n: usize, range: impl RangeBounds<usize>) -> (usize, usize) {
-#         use std::ops::Bound::*;
-# 
-#         let l = match range.start_bound() {
-#             Included(&v) => v,
-#             Excluded(&v) => v + 1,
-#             Unbounded => 0,
-#         };
-# 
-#         let r = match range.end_bound() {
-#             Included(&v) => v + 1,
-#             Excluded(&v) => v,
-#             Unbounded => n,
-#         };
-# 
-#         (l, r)
-#     }
-# 
-#     pub trait LzMonoid: Sized {
-#         fn e() -> Self;
-#         fn opr_lhs(&mut self, rhs: &Self);
-#         fn opr_rhs(&mut self, lhs: &Self);
-#         fn opr(lhs: &Self, rhs: &Self) -> Self {
-#             let mut ret = Self::e();
-#             ret.opr_rhs(lhs);
-#             ret.opr_lhs(rhs);
-#             ret
-#         }
-#         fn opr_set(&mut self, lhs: &Self, rhs: &Self) {
-#             *self = Self::opr(lhs, rhs);
-#         }
-#     }
-# 
-#     pub trait LzMap<S>: Sized {
-#         fn id() -> Self;
-#         fn map(&self, apply: &mut S);
-#         fn compos_lhs(&mut self, rhs: &Self);
-#         fn compos_rhs(&mut self, lhs: &Self);
-#         fn compos(lhs: &Self, rhs: &Self) -> Self {
-#             let mut ret = Self::id();
-#             ret.compos_rhs(lhs);
-#             ret.compos_lhs(rhs);
-#             ret
-#         }
-#         fn opr_self(&mut self, lhs: &Self, rhs: &Self) {
-#             *self = Self::compos(lhs, rhs);
-#         }
-#     }
-# 
-#     pub struct LazySeg<S, F> {
+#     /// A lazy segment tree is a data structure for a monoid type `T` and a mapping `F` that maps a `T` value to another `T` value.
+#     ///
+#     /// Given all the constraints written in the comments of `LazySeg::new`, a lazy segment tree can process the following queries in O(TlogN) time assuming `op`, `map`, `compos` all run in O(T).
+#     /// - Applying the map `f: U` onto all the elements in an interval
+#     /// - Calculating the product of elements in an interval, combined with `op`
+#     pub struct LazySeg<T, O, F, M, C> {
 #         n: usize,
+#         data: Vec<T>,
+#         lazy: Vec<F>,
+#         e: T,
+#         op: O,
+#         id: F,
+#         map: M,
+#         compos: C,
 #         size: usize,
 #         log: u32,
-#         data: Vec<S>,
-#         lazy: Vec<F>,
 #     }
 # 
-#     impl<S, F> LazySeg<S, F>
+#     impl<T, O, F, M, C> LazySeg<T, O, F, M, C>
 #     where
-#         S: LzMonoid,
-#         F: LzMap<S>,
+#         T: Copy,
+#         O: Fn(T, T) -> T,
+#         F: Copy,
+#         M: Fn(F, T) -> T,
+#         C: Fn(F, F) -> F,
 #     {
-#         fn update(&mut self, k: usize) {
-#             let val = S::opr(&self.data[k << 1], &self.data[(k << 1) + 1]);
-#             self.data[k] = val;
-#         }
-# 
-#         fn all_apply(&mut self, k: usize, f: &F) {
-#             f.map(&mut self.data[k]);
-#             if k < self.size {
-#                 self.lazy[k].compos_rhs(f);
+#         fn get_bounds(&self, range: impl RangeBounds<usize>) -> (usize, usize) {
+#             use std::ops::Bound::*;
+#             let n = self.len();
+#             let l = match range.start_bound() {
+#                 Included(&v) => v,
+#                 Excluded(&v) => v + 1,
+#                 Unbounded => 0,
+#             };
+#             let r = match range.end_bound() {
+#                 Included(&v) => (v + 1).min(n),
+#                 Excluded(&v) => v.min(n),
+#                 Unbounded => n,
+#             };
+#             if l > r {
+#                 return (l, l);
 #             }
+#             (l, r)
 #         }
 # 
-#         fn all_apply_unsafe(size: usize, k: usize, f: usize, data: &mut [S], lazy: &mut [F]) {
-#             // f < k
-#             lazy[f].map(&mut data[k]);
-#             if k < size {
-#                 let (fs, ks) = lazy.split_at_mut(k);
-#                 ks[0].compos_rhs(&fs[f]);
+#         fn upd(&mut self, k: usize) {
+#             self.data[k] = (self.op)(self.data[k * 2], self.data[k * 2 + 1]);
+#         }
+# 
+#         fn all_apply(&mut self, k: usize, f: F) {
+#             self.data[k] = (self.map)(f, self.data[k]);
+#             if k < self.size {
+#                 self.lazy[k] = (self.compos)(f, self.lazy[k]);
 #             }
 #         }
 # 
 #         fn push(&mut self, k: usize) {
-#             Self::all_apply_unsafe(self.size, k << 1, k, &mut self.data, &mut self.lazy);
-#             Self::all_apply_unsafe(self.size, (k << 1) + 1, k, &mut self.data, &mut self.lazy);
-#             self.lazy[k] = F::id();
+#             self.all_apply(k * 2, self.lazy[k]);
+#             self.all_apply(k * 2 + 1, self.lazy[k]);
+#             self.lazy[k] = self.id;
 #         }
 # 
-#         pub fn new(arr: Vec<S>) -> Self {
-#             let n = arr.len();
-#             let log = ceil_pow2(n);
-#             let size = 1 << log;
-#             let stsize = 1 << (log + 1);
+#         /// Returns a new lazy segment tree of size `n` built from `iter`.
+#         ///
+#         /// The meanings of parameters and some generic types are as follows.
+#         /// - `T` is a type of values in the array the lazy segment tree represents.
+#         /// - `F` is a type of mappings for the array.
+#         /// - `n` is a number of elements in the array.
+#         /// - `iter` is an iterator returning initial values of the array.
+#         ///   - If `iter.count() < n`, then the rest is filled with `e`.
+#         ///   - If `iter.count() > n`, the array is truncated down to the length of `n`.
+#         /// - `op: impl Fn(T, T) -> T` is a binary operator for `T`.
+#         /// - `e` is an identity for `op`.
+#         /// - `map: impl Fn(F, T) -> T` defines how to map `T` to another `T` based on the `F` value.
+#         /// - `compos: impl Fn(F, F) -> F` defines how to compose two `F`'s.
+#         /// - `id` defines an identity for `compos`.
+#         ///
+#         /// The following notations will be used from now on.
+#         /// - `op(a, b)` is denoted as `a*b`.
+#         /// - `map(f, a)` is denoted as `f.a`.
+#         /// - `map(g, map(f, a))` is denoted as `g.f.a`.
+#         ///
+#         /// Constraints of parameters are as follows.
+#         /// - `op` and `e` must make `T` a monoid. That is, `op` and `e` should be given so that `T` can satisfy the following conditions.
+#         ///   - `T` is associative under `op`. That is, `(a*b)*c == a*(b*c)` for all `[a, b, c]: [T; 3]`.
+#         ///   - `T` has `e` as an identity element under `op`. That is, `a*e == e*a == a` for all `a: T`.
+#         /// - `map`, `compos`, and `id` must satisfy the following conditions.
+#         ///   - `compos` should be properly defined. That is, if `compos(g, f) == h`, then `g.f.a == h.a` must hold.
+#         ///   - `id` must be a proper identity for `F` under `compos`. That is, `f.id.a == id.f.a == f.a` for all `a: T` and `f: F`.
+#         ///   - IMPORTANT: `map` must satisfy `f.(x*y) == f.x * f.y`.
+#         ///
+#         /// For example, a generic range addition range sum lazy segment tree with every value initialized with `0` and of length `n` can be constructed as follows.
+#         /// ```no_run
+#         /// let mut ls = LazySeg::new(
+#         ///     n,
+#         ///     (0..n).map(|_| (0, 1)),
+#         ///     |(x, l), (y, m)| (x + y, l + m),
+#         ///     (0i64, 0i64),
+#         ///     |a, (x, l)| (x + a * l, l),
+#         ///     |a, b| a + b,
+#         ///     0i64,
+#         /// );
+#         /// ```
+#         /// A so-called "ax+b" lazy segment tree starting with an array of `vec![0; n]` can be constructed as follows.
+#         /// ```no_run
+#         /// let mut ls = LazySeg::new(
+#         ///     n,
+#         ///     (0..n).map(|_| (0, 1)),
+#         ///     |(x, l), (y, m)| (x + y, l + m),
+#         ///     (0i64, 0i64),
+#         ///     |(a, b), (x, l)| (a * x, b * l),
+#         ///     |(a, b), (c, d)| (a * c, a * d + b),
+#         ///     (1i64, 0i64),
+#         /// );
+#         /// ```
+#         pub fn new(n: usize, iter: impl IntoIterator<Item = T>, op: O, e: T, map: M, compos: C, id: F) -> Self {
+#             let size = n.next_power_of_two();
+#             let log = size.trailing_zeros();
 # 
-#             let mut data = Vec::with_capacity(stsize);
-#             data.extend((0..size).map(|_| S::e()));
-#             data.extend(arr.into_iter());
-#             data.extend((data.len()..stsize).map(|_| S::e()));
+#             let mut data = vec![e; size];
+#             data.extend(iter.into_iter().take(n));
+#             data.resize(2 * size, e);
 # 
 #             let mut ls = Self {
 #                 n,
-#                 log,
-#                 size,
 #                 data,
-#                 lazy: Vec::from_iter((0..size).map(|_| F::id())),
+#                 lazy: vec![id; size],
+#                 e,
+#                 op,
+#                 id,
+#                 map,
+#                 compos,
+#                 size,
+#                 log,
 #             };
 #             for i in (1..size).rev() {
-#                 ls.update(i);
+#                 ls.upd(i);
 #             }
 #             ls
 #         }
 # 
-#         pub fn set(&mut self, i: usize, v: S) {
+#         /// Returns the length of the array.
+#         pub fn len(&self) -> usize {
+#             self.n
+#         }
+# 
+#         /// Returns the `i`-th value of the array.
+#         pub fn get(&mut self, i: usize) -> T {
 #             let i = i + self.size;
 #             for j in (1..=self.log).rev() {
 #                 self.push(i >> j);
 #             }
-#             self.data[i] = v;
+#             self.data[i]
+#         }
+# 
+#         /// Assign `upd_to(self.get(i))` to the `i`-th element.
+#         pub fn update(&mut self, i: usize, upd_to: impl Fn(T) -> T) {
+#             let i = i + self.size;
+#             for j in (1..=self.log).rev() {
+#                 self.push(i >> j);
+#             }
+#             self.data[i] = upd_to(self.data[i]);
 #             for j in 1..=self.log {
-#                 self.update(i >> j);
+#                 self.upd(i >> j);
 #             }
 #         }
 # 
-#         pub fn get(&mut self, i: usize) -> &S {
-#             let i = i + self.size;
-#             for j in (1..=self.log).rev() {
-#                 self.push(i >> j);
-#             }
-#             &self.data[i]
-#         }
-# 
-#         pub fn prod(&mut self, range: impl RangeBounds<usize>) -> S {
-#             let (l, r) = range_to_bounds(self.size, range);
+#         /// Returns the product of elements in `range`.
+#         pub fn prod(&mut self, range: impl RangeBounds<usize>) -> T {
+#             let (l, r) = self.get_bounds(range);
 # 
 #             if l == 0 && r == self.size {
-#                 let mut ret = S::e();
-#                 ret.opr_lhs(&self.data[1]);
+#                 let ret = (self.op)(self.e, self.data[1]);
 #                 return ret;
 #             } else if l == r {
-#                 return S::e();
+#                 return self.e;
 #             }
 # 
 #             let (mut l, mut r) = (l + self.size, r + self.size);
@@ -230,38 +239,25 @@ println!("{}", l); // 3
 #                 }
 #             }
 # 
-#             let (mut sml, mut smr) = (S::e(), S::e());
+#             let (mut sml, mut smr) = (self.e, self.e);
 #             while l < r {
 #                 if l & 1 == 1 {
-#                     sml.opr_lhs(&self.data[l]);
+#                     sml = (self.op)(sml, self.data[l]);
 #                     l += 1;
 #                 }
 #                 if r & 1 == 1 {
 #                     r -= 1;
-#                     smr.opr_rhs(&self.data[r]);
+#                     smr = (self.op)(self.data[r], smr);
 #                 }
-#                 l >>= 1;
-#                 r >>= 1;
+#                 (l >>= 1, r >>= 1);
 #             }
-# 
-#             S::opr(&sml, &smr)
+#             (self.op)(sml, smr)
 #         }
 # 
-#         pub fn apply(&mut self, i: usize, f: &F) {
-#             let i = i + self.size;
-#             for j in (1..=self.log).rev() {
-#                 self.push(i >> j);
-#             }
-#             f.map(&mut self.data[i]);
-#             for j in 1..=self.log {
-#                 self.update(i >> j);
-#             }
-#         }
-# 
-#         pub fn apply_range(&mut self, range: impl RangeBounds<usize>, f: &F) {
-#             let (l, r) = range_to_bounds(self.size, range);
-# 
-#             if l == r {
+#         /// Changes every element `x` in `range` of the array to `map.x`.
+#         pub fn apply_range(&mut self, range: impl RangeBounds<usize>, map: F) {
+#             let (l, r) = self.get_bounds(range);
+#             if l >= r {
 #                 return;
 #             }
 # 
@@ -279,12 +275,12 @@ println!("{}", l); // 3
 #             let (l2, r2) = (l, r);
 #             while l < r {
 #                 if l & 1 == 1 {
-#                     self.all_apply(l, f);
+#                     self.all_apply(l, map);
 #                     l += 1;
 #                 }
 #                 if r & 1 == 1 {
 #                     r -= 1;
-#                     self.all_apply(r, f);
+#                     self.all_apply(r, map);
 #                 }
 #                 l >>= 1;
 #                 r >>= 1;
@@ -294,16 +290,45 @@ println!("{}", l); // 3
 # 
 #             for i in 1..=self.log {
 #                 if ((l >> i) << i) != l {
-#                     self.update(l >> i);
+#                     self.upd(l >> i);
 #                 }
 #                 if ((r >> i) << i) != r {
-#                     self.update((r - 1) >> i);
+#                     self.upd((r - 1) >> i);
 #                 }
 #             }
 #         }
 # 
-#         pub fn max_right(&mut self, l: usize, g: impl Fn(&S) -> bool) -> usize {
+#         /// For a function `pred` which has a nonnegative value `x`, such that `pred(self.prod(l..r))` is `false` if and only if `x <= r`, `self.partition_point(l, pred)` returns the value of such `x`.
+#         /// That is, this is the minimum value of `r` such that `pred(self.prod(l..r))` starts to be `false`.
+#         /// If `pred(self.e)` is `true`, then this function assumes that `pred(self.prod(l..r))` is always `true` for any `r` in range `l..=self.len()` and returns `l`.
+#         /// However, it's recommended to always set `pred(self.e)` to be `true` to avoid unnecessary case works.
+#         ///
+#         /// ## Constraints
+#         /// - `0 <= l <= self.len()`
+#         ///
+#         /// ## Examples
+#         /// `f(r) := pred(self.prod(l..r))`
+#         ///
+#         /// Given that `self.len() == 7`, calling `self.partition_point(0)` returns values written below.
+#         /// ```text
+#         ///    r |     0     1     2     3     4     5     6     7     8
+#         ///
+#         /// f(r) |  true  true  true  true false false false false   N/A
+#         ///                             returns^
+#         ///
+#         /// f(r) | false false false false false false false false   N/A
+#         ///     returns^
+#         ///
+#         /// f(r) |  true  true  true  true  true  true  true  true   N/A
+#         ///                                                     returns^
+#         /// ```
+#         pub fn partition_point(&mut self, l: usize, pred: impl Fn(T) -> bool) -> usize {
+#             if !pred(self.e) {
+#                 return l;
+#             }
+# 
 #             if l == self.n {
+#                 // `pred(self.e)` has already been checked that it's `true`.
 #                 return self.n;
 #             }
 # 
@@ -311,35 +336,62 @@ println!("{}", l); // 3
 #             for i in (1..=self.log).rev() {
 #                 self.push(l >> i);
 #             }
+#             let mut sm = self.e;
 # 
-#             let mut sm = S::e();
 #             loop {
 #                 l >>= l.trailing_zeros();
-#                 if !g(&S::opr(&sm, &self.data[l])) {
+#                 if !pred((self.op)(sm, self.data[l])) {
 #                     while l < self.size {
 #                         self.push(l);
 #                         l <<= 1;
-#                         let tmp = S::opr(&sm, &self.data[l]);
-#                         if g(&tmp) {
+#                         let tmp = (self.op)(sm, self.data[l]);
+#                         if pred(tmp) {
 #                             sm = tmp;
 #                             l += 1;
 #                         }
 #                     }
-#                     return l - self.size;
+#                     return l + 1 - self.size;
 #                 }
-#                 sm.opr_lhs(&self.data[l]);
+#                 sm = (self.op)(sm, self.data[l]);
 #                 l += 1;
-# 
-#                 if l & ((!l) + 1) != l {
+#                 if l & ((!l) + 1) == l {
 #                     break;
 #                 }
 #             }
-# 
-#             self.n
+#             self.n + 1
 #         }
 # 
-#         pub fn min_left(&mut self, r: usize, g: impl Fn(&S) -> bool) -> usize {
+#         /// For a function `pred` which has a value `x` less than or equal to `r`, such that `pred(self.prod(l..r))` is `true` if and only if `x <= l`, `self.left_partition_point(r, pred)` returns the value of such `x`.
+#         /// That is, this is the minimum value of `l` such that `pred(self.prod(l..r))` starts to be `true`.
+#         /// If `pred(self.e)` is `false`, then this function assumes that `pred(self.prod(l..r))` is always `false` for any `l` in range `0..=r` and returns `r+1`.
+#         /// However, it's recommended to always set `pred(self.e)` to be `true` to avoid unnecessary case works.
+#         ///
+#         /// ## Constraints
+#         /// - `0 <= r <= self.len()`
+#         ///
+#         /// ## Examples
+#         /// `f(l) := pred(self.prod(l..r))`
+#         ///
+#         /// Calling `self.left_partition_point(7)` returns values written below.
+#         /// ```text
+#         ///    l |     0     1     2     3     4     5     6     7     8
+#         ///
+#         /// f(l) | false false false false  true  true  true  true   N/A
+#         ///                             returns^
+#         ///
+#         /// f(l) |  true  true  true  true  true  true  true  true   N/A
+#         ///     returns^
+#         ///
+#         /// f(l) | false false false false false false false false   N/A
+#         ///                                                     returns^
+#         /// ```
+#         pub fn left_partition_point(&mut self, r: usize, pred: impl Fn(T) -> bool) -> usize {
+#             if !pred(self.e) {
+#                 return r + 1;
+#             }
+# 
 #             if r == 0 {
+#                 // `pred(self.e)` has already been checked that it's `true`.
 #                 return 0;
 #             }
 # 
@@ -348,32 +400,30 @@ println!("{}", l); // 3
 #                 self.push((r - 1) >> i);
 #             }
 # 
-#             let mut sm = S::e();
+#             let mut sm = self.e;
 #             loop {
 #                 r -= 1;
 #                 while r > 1 && r & 1 == 1 {
 #                     r >>= 1;
 #                 }
 # 
-#                 if !g(&S::opr(&self.data[r], &sm)) {
+#                 if !pred((self.op)(self.data[r], sm)) {
 #                     while r < self.size {
 #                         self.push(r);
 #                         r = (r << 1) + 1;
-#                         let tmp = S::opr(&self.data[r], &sm);
-#                         if g(&tmp) {
+#                         let tmp = (self.op)(self.data[r], sm);
+#                         if pred(tmp) {
 #                             sm = tmp;
 #                             r -= 1;
 #                         }
 #                     }
 #                     return r + 1 - self.size;
 #                 }
-#                 sm.opr_rhs(&self.data[r]);
-# 
+#                 sm = (self.op)(self.data[r], sm);
 #                 if r & ((!r) + 1) == r {
 #                     break;
 #                 }
 #             }
-# 
 #             0
 #         }
 #     }
@@ -386,155 +436,182 @@ println!("{}", l); // 3
 mod lazyseg {
     use std::ops::RangeBounds;
 
-    fn ceil_pow2(n: usize) -> u32 {
-        let mut x = 0;
-        while 1 << x < n {
-            x += 1;
-        }
-        x
-    }
-
-    fn range_to_bounds(n: usize, range: impl RangeBounds<usize>) -> (usize, usize) {
-        use std::ops::Bound::*;
-
-        let l = match range.start_bound() {
-            Included(&v) => v,
-            Excluded(&v) => v + 1,
-            Unbounded => 0,
-        };
-
-        let r = match range.end_bound() {
-            Included(&v) => v + 1,
-            Excluded(&v) => v,
-            Unbounded => n,
-        };
-
-        (l, r)
-    }
-
-    pub trait LzMonoid: Sized {
-        fn e() -> Self;
-        fn opr_lhs(&mut self, rhs: &Self);
-        fn opr_rhs(&mut self, lhs: &Self);
-        fn opr(lhs: &Self, rhs: &Self) -> Self {
-            let mut ret = Self::e();
-            ret.opr_rhs(lhs);
-            ret.opr_lhs(rhs);
-            ret
-        }
-        fn opr_set(&mut self, lhs: &Self, rhs: &Self) {
-            *self = Self::opr(lhs, rhs);
-        }
-    }
-
-    pub trait LzMap<S>: Sized {
-        fn id() -> Self;
-        fn map(&self, apply: &mut S);
-        fn compos_lhs(&mut self, rhs: &Self);
-        fn compos_rhs(&mut self, lhs: &Self);
-        fn compos(lhs: &Self, rhs: &Self) -> Self {
-            let mut ret = Self::id();
-            ret.compos_rhs(lhs);
-            ret.compos_lhs(rhs);
-            ret
-        }
-        fn opr_self(&mut self, lhs: &Self, rhs: &Self) {
-            *self = Self::compos(lhs, rhs);
-        }
-    }
-
-    pub struct LazySeg<S, F> {
+    /// A lazy segment tree is a data structure for a monoid type `T` and a mapping `F` that maps a `T` value to another `T` value.
+    ///
+    /// Given all the constraints written in the comments of `LazySeg::new`, a lazy segment tree can process the following queries in O(TlogN) time assuming `op`, `map`, `compos` all run in O(T).
+    /// - Applying the map `f: U` onto all the elements in an interval
+    /// - Calculating the product of elements in an interval, combined with `op`
+    pub struct LazySeg<T, O, F, M, C> {
         n: usize,
+        data: Vec<T>,
+        lazy: Vec<F>,
+        e: T,
+        op: O,
+        id: F,
+        map: M,
+        compos: C,
         size: usize,
         log: u32,
-        data: Vec<S>,
-        lazy: Vec<F>,
     }
 
-    impl<S, F> LazySeg<S, F>
+    impl<T, O, F, M, C> LazySeg<T, O, F, M, C>
     where
-        S: LzMonoid,
-        F: LzMap<S>,
+        T: Copy,
+        O: Fn(T, T) -> T,
+        F: Copy,
+        M: Fn(F, T) -> T,
+        C: Fn(F, F) -> F,
     {
-        fn update(&mut self, k: usize) {
-            let val = S::opr(&self.data[k << 1], &self.data[(k << 1) + 1]);
-            self.data[k] = val;
-        }
-
-        fn all_apply(&mut self, k: usize, f: &F) {
-            f.map(&mut self.data[k]);
-            if k < self.size {
-                self.lazy[k].compos_rhs(f);
+        fn get_bounds(&self, range: impl RangeBounds<usize>) -> (usize, usize) {
+            use std::ops::Bound::*;
+            let n = self.len();
+            let l = match range.start_bound() {
+                Included(&v) => v,
+                Excluded(&v) => v + 1,
+                Unbounded => 0,
+            };
+            let r = match range.end_bound() {
+                Included(&v) => (v + 1).min(n),
+                Excluded(&v) => v.min(n),
+                Unbounded => n,
+            };
+            if l > r {
+                return (l, l);
             }
+            (l, r)
         }
 
-        fn all_apply_unsafe(size: usize, k: usize, f: usize, data: &mut [S], lazy: &mut [F]) {
-            // f < k
-            lazy[f].map(&mut data[k]);
-            if k < size {
-                let (fs, ks) = lazy.split_at_mut(k);
-                ks[0].compos_rhs(&fs[f]);
+        fn upd(&mut self, k: usize) {
+            self.data[k] = (self.op)(self.data[k * 2], self.data[k * 2 + 1]);
+        }
+
+        fn all_apply(&mut self, k: usize, f: F) {
+            self.data[k] = (self.map)(f, self.data[k]);
+            if k < self.size {
+                self.lazy[k] = (self.compos)(f, self.lazy[k]);
             }
         }
 
         fn push(&mut self, k: usize) {
-            Self::all_apply_unsafe(self.size, k << 1, k, &mut self.data, &mut self.lazy);
-            Self::all_apply_unsafe(self.size, (k << 1) + 1, k, &mut self.data, &mut self.lazy);
-            self.lazy[k] = F::id();
+            self.all_apply(k * 2, self.lazy[k]);
+            self.all_apply(k * 2 + 1, self.lazy[k]);
+            self.lazy[k] = self.id;
         }
 
-        pub fn new(arr: Vec<S>) -> Self {
-            let n = arr.len();
-            let log = ceil_pow2(n);
-            let size = 1 << log;
-            let stsize = 1 << (log + 1);
+        /// Returns a new lazy segment tree of size `n` built from `iter`.
+        ///
+        /// The meanings of parameters and some generic types are as follows.
+        /// - `T` is a type of values in the array the lazy segment tree represents.
+        /// - `F` is a type of mappings for the array.
+        /// - `n` is a number of elements in the array.
+        /// - `iter` is an iterator returning initial values of the array.
+        ///   - If `iter.count() < n`, then the rest is filled with `e`.
+        ///   - If `iter.count() > n`, the array is truncated down to the length of `n`.
+        /// - `op: impl Fn(T, T) -> T` is a binary operator for `T`.
+        /// - `e` is an identity for `op`.
+        /// - `map: impl Fn(F, T) -> T` defines how to map `T` to another `T` based on the `F` value.
+        /// - `compos: impl Fn(F, F) -> F` defines how to compose two `F`'s.
+        /// - `id` defines an identity for `compos`.
+        ///
+        /// The following notations will be used from now on.
+        /// - `op(a, b)` is denoted as `a*b`.
+        /// - `map(f, a)` is denoted as `f.a`.
+        /// - `map(g, map(f, a))` is denoted as `g.f.a`.
+        ///
+        /// Constraints of parameters are as follows.
+        /// - `op` and `e` must make `T` a monoid. That is, `op` and `e` should be given so that `T` can satisfy the following conditions.
+        ///   - `T` is associative under `op`. That is, `(a*b)*c == a*(b*c)` for all `[a, b, c]: [T; 3]`.
+        ///   - `T` has `e` as an identity element under `op`. That is, `a*e == e*a == a` for all `a: T`.
+        /// - `map`, `compos`, and `id` must satisfy the following conditions.
+        ///   - `compos` should be properly defined. That is, if `compos(g, f) == h`, then `g.f.a == h.a` must hold.
+        ///   - `id` must be a proper identity for `F` under `compos`. That is, `f.id.a == id.f.a == f.a` for all `a: T` and `f: F`.
+        ///   - IMPORTANT: `map` must satisfy `f.(x*y) == f.x * f.y`.
+        ///
+        /// For example, a generic range addition range sum lazy segment tree with every value initialized with `0` and of length `n` can be constructed as follows.
+        /// ```no_run
+        /// let mut ls = LazySeg::new(
+        ///     n,
+        ///     (0..n).map(|_| (0, 1)),
+        ///     |(x, l), (y, m)| (x + y, l + m),
+        ///     (0i64, 0i64),
+        ///     |a, (x, l)| (x + a * l, l),
+        ///     |a, b| a + b,
+        ///     0i64,
+        /// );
+        /// ```
+        /// A so-called "ax+b" lazy segment tree starting with an array of `vec![0; n]` can be constructed as follows.
+        /// ```no_run
+        /// let mut ls = LazySeg::new(
+        ///     n,
+        ///     (0..n).map(|_| (0, 1)),
+        ///     |(x, l), (y, m)| (x + y, l + m),
+        ///     (0i64, 0i64),
+        ///     |(a, b), (x, l)| (a * x, b * l),
+        ///     |(a, b), (c, d)| (a * c, a * d + b),
+        ///     (1i64, 0i64),
+        /// );
+        /// ```
+        pub fn new(n: usize, iter: impl IntoIterator<Item = T>, op: O, e: T, map: M, compos: C, id: F) -> Self {
+            let size = n.next_power_of_two();
+            let log = size.trailing_zeros();
 
-            let mut data = Vec::with_capacity(stsize);
-            data.extend((0..size).map(|_| S::e()));
-            data.extend(arr.into_iter());
-            data.extend((data.len()..stsize).map(|_| S::e()));
+            let mut data = vec![e; size];
+            data.extend(iter.into_iter().take(n));
+            data.resize(2 * size, e);
 
             let mut ls = Self {
                 n,
-                log,
-                size,
                 data,
-                lazy: Vec::from_iter((0..size).map(|_| F::id())),
+                lazy: vec![id; size],
+                e,
+                op,
+                id,
+                map,
+                compos,
+                size,
+                log,
             };
             for i in (1..size).rev() {
-                ls.update(i);
+                ls.upd(i);
             }
             ls
         }
 
-        pub fn set(&mut self, i: usize, v: S) {
+        /// Returns the length of the array.
+        pub fn len(&self) -> usize {
+            self.n
+        }
+
+        /// Returns the `i`-th value of the array.
+        pub fn get(&mut self, i: usize) -> T {
             let i = i + self.size;
             for j in (1..=self.log).rev() {
                 self.push(i >> j);
             }
-            self.data[i] = v;
+            self.data[i]
+        }
+
+        /// Assign `upd_to(self.get(i))` to the `i`-th element.
+        pub fn update(&mut self, i: usize, upd_to: impl Fn(T) -> T) {
+            let i = i + self.size;
+            for j in (1..=self.log).rev() {
+                self.push(i >> j);
+            }
+            self.data[i] = upd_to(self.data[i]);
             for j in 1..=self.log {
-                self.update(i >> j);
+                self.upd(i >> j);
             }
         }
 
-        pub fn get(&mut self, i: usize) -> &S {
-            let i = i + self.size;
-            for j in (1..=self.log).rev() {
-                self.push(i >> j);
-            }
-            &self.data[i]
-        }
-
-        pub fn prod(&mut self, range: impl RangeBounds<usize>) -> S {
-            let (l, r) = range_to_bounds(self.size, range);
+        /// Returns the product of elements in `range`.
+        pub fn prod(&mut self, range: impl RangeBounds<usize>) -> T {
+            let (l, r) = self.get_bounds(range);
 
             if l == 0 && r == self.size {
-                let mut ret = S::e();
-                ret.opr_lhs(&self.data[1]);
+                let ret = (self.op)(self.e, self.data[1]);
                 return ret;
             } else if l == r {
-                return S::e();
+                return self.e;
             }
 
             let (mut l, mut r) = (l + self.size, r + self.size);
@@ -548,38 +625,25 @@ mod lazyseg {
                 }
             }
 
-            let (mut sml, mut smr) = (S::e(), S::e());
+            let (mut sml, mut smr) = (self.e, self.e);
             while l < r {
                 if l & 1 == 1 {
-                    sml.opr_lhs(&self.data[l]);
+                    sml = (self.op)(sml, self.data[l]);
                     l += 1;
                 }
                 if r & 1 == 1 {
                     r -= 1;
-                    smr.opr_rhs(&self.data[r]);
+                    smr = (self.op)(self.data[r], smr);
                 }
-                l >>= 1;
-                r >>= 1;
+                (l >>= 1, r >>= 1);
             }
-
-            S::opr(&sml, &smr)
+            (self.op)(sml, smr)
         }
 
-        pub fn apply(&mut self, i: usize, f: &F) {
-            let i = i + self.size;
-            for j in (1..=self.log).rev() {
-                self.push(i >> j);
-            }
-            f.map(&mut self.data[i]);
-            for j in 1..=self.log {
-                self.update(i >> j);
-            }
-        }
-
-        pub fn apply_range(&mut self, range: impl RangeBounds<usize>, f: &F) {
-            let (l, r) = range_to_bounds(self.size, range);
-
-            if l == r {
+        /// Changes every element `x` in `range` of the array to `map.x`.
+        pub fn apply_range(&mut self, range: impl RangeBounds<usize>, map: F) {
+            let (l, r) = self.get_bounds(range);
+            if l >= r {
                 return;
             }
 
@@ -597,12 +661,12 @@ mod lazyseg {
             let (l2, r2) = (l, r);
             while l < r {
                 if l & 1 == 1 {
-                    self.all_apply(l, f);
+                    self.all_apply(l, map);
                     l += 1;
                 }
                 if r & 1 == 1 {
                     r -= 1;
-                    self.all_apply(r, f);
+                    self.all_apply(r, map);
                 }
                 l >>= 1;
                 r >>= 1;
@@ -612,16 +676,45 @@ mod lazyseg {
 
             for i in 1..=self.log {
                 if ((l >> i) << i) != l {
-                    self.update(l >> i);
+                    self.upd(l >> i);
                 }
                 if ((r >> i) << i) != r {
-                    self.update((r - 1) >> i);
+                    self.upd((r - 1) >> i);
                 }
             }
         }
 
-        pub fn max_right(&mut self, l: usize, g: impl Fn(&S) -> bool) -> usize {
+        /// For a function `pred` which has a nonnegative value `x`, such that `pred(self.prod(l..r))` is `false` if and only if `x <= r`, `self.partition_point(l, pred)` returns the value of such `x`.
+        /// That is, this is the minimum value of `r` such that `pred(self.prod(l..r))` starts to be `false`.
+        /// If `pred(self.e)` is `true`, then this function assumes that `pred(self.prod(l..r))` is always `true` for any `r` in range `l..=self.len()` and returns `l`.
+        /// However, it's recommended to always set `pred(self.e)` to be `true` to avoid unnecessary case works.
+        ///
+        /// ## Constraints
+        /// - `0 <= l <= self.len()`
+        ///
+        /// ## Examples
+        /// `f(r) := pred(self.prod(l..r))`
+        ///
+        /// Given that `self.len() == 7`, calling `self.partition_point(0)` returns values written below.
+        /// ```text
+        ///    r |     0     1     2     3     4     5     6     7     8
+        ///
+        /// f(r) |  true  true  true  true false false false false   N/A
+        ///                             returns^
+        ///
+        /// f(r) | false false false false false false false false   N/A
+        ///     returns^
+        ///
+        /// f(r) |  true  true  true  true  true  true  true  true   N/A
+        ///                                                     returns^
+        /// ```
+        pub fn partition_point(&mut self, l: usize, pred: impl Fn(T) -> bool) -> usize {
+            if !pred(self.e) {
+                return l;
+            }
+
             if l == self.n {
+                // `pred(self.e)` has already been checked that it's `true`.
                 return self.n;
             }
 
@@ -629,35 +722,62 @@ mod lazyseg {
             for i in (1..=self.log).rev() {
                 self.push(l >> i);
             }
+            let mut sm = self.e;
 
-            let mut sm = S::e();
             loop {
                 l >>= l.trailing_zeros();
-                if !g(&S::opr(&sm, &self.data[l])) {
+                if !pred((self.op)(sm, self.data[l])) {
                     while l < self.size {
                         self.push(l);
                         l <<= 1;
-                        let tmp = S::opr(&sm, &self.data[l]);
-                        if g(&tmp) {
+                        let tmp = (self.op)(sm, self.data[l]);
+                        if pred(tmp) {
                             sm = tmp;
                             l += 1;
                         }
                     }
-                    return l - self.size;
+                    return l + 1 - self.size;
                 }
-                sm.opr_lhs(&self.data[l]);
+                sm = (self.op)(sm, self.data[l]);
                 l += 1;
-
-                if l & ((!l) + 1) != l {
+                if l & ((!l) + 1) == l {
                     break;
                 }
             }
-
-            self.n
+            self.n + 1
         }
 
-        pub fn min_left(&mut self, r: usize, g: impl Fn(&S) -> bool) -> usize {
+        /// For a function `pred` which has a value `x` less than or equal to `r`, such that `pred(self.prod(l..r))` is `true` if and only if `x <= l`, `self.left_partition_point(r, pred)` returns the value of such `x`.
+        /// That is, this is the minimum value of `l` such that `pred(self.prod(l..r))` starts to be `true`.
+        /// If `pred(self.e)` is `false`, then this function assumes that `pred(self.prod(l..r))` is always `false` for any `l` in range `0..=r` and returns `r+1`.
+        /// However, it's recommended to always set `pred(self.e)` to be `true` to avoid unnecessary case works.
+        ///
+        /// ## Constraints
+        /// - `0 <= r <= self.len()`
+        ///
+        /// ## Examples
+        /// `f(l) := pred(self.prod(l..r))`
+        ///
+        /// Calling `self.left_partition_point(7)` returns values written below.
+        /// ```text
+        ///    l |     0     1     2     3     4     5     6     7     8
+        ///
+        /// f(l) | false false false false  true  true  true  true   N/A
+        ///                             returns^
+        ///
+        /// f(l) |  true  true  true  true  true  true  true  true   N/A
+        ///     returns^
+        ///
+        /// f(l) | false false false false false false false false   N/A
+        ///                                                     returns^
+        /// ```
+        pub fn left_partition_point(&mut self, r: usize, pred: impl Fn(T) -> bool) -> usize {
+            if !pred(self.e) {
+                return r + 1;
+            }
+
             if r == 0 {
+                // `pred(self.e)` has already been checked that it's `true`.
                 return 0;
             }
 
@@ -666,60 +786,36 @@ mod lazyseg {
                 self.push((r - 1) >> i);
             }
 
-            let mut sm = S::e();
+            let mut sm = self.e;
             loop {
                 r -= 1;
                 while r > 1 && r & 1 == 1 {
                     r >>= 1;
                 }
 
-                if !g(&S::opr(&self.data[r], &sm)) {
+                if !pred((self.op)(self.data[r], sm)) {
                     while r < self.size {
                         self.push(r);
                         r = (r << 1) + 1;
-                        let tmp = S::opr(&self.data[r], &sm);
-                        if g(&tmp) {
+                        let tmp = (self.op)(self.data[r], sm);
+                        if pred(tmp) {
                             sm = tmp;
                             r -= 1;
                         }
                     }
                     return r + 1 - self.size;
                 }
-                sm.opr_rhs(&self.data[r]);
-
+                sm = (self.op)(self.data[r], sm);
                 if r & ((!r) + 1) == r {
                     break;
                 }
             }
-
             0
         }
     }
 }
 ```
 
-## APIs
+---
 
-Will be done soon. For `max_right` and `min_left`, either check the explanation from [the segment tree documentation](./segtree.md#apis), or see the below mathematical definitions (which will be replaced with better explanation).
-
-### `max_right`
-Given an index \\(l\\) and a check function \\( f : S \rightarrow bool \\), `max_right` finds an index \\(r\\) such that satisfies both of the following conditions:
-- \\(r=l\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\)
-- \\(r=n\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_r \right) = false \\)
-
-If \\(f\\) is monotone, this is the maximum \\(r\\) that satisfies \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\).
-
-It should be guaranteed that \\(f(e)\\) is true, \\(0 \leq l \leq n\\), and \\(f\\) has no side effects i.e. calling \\(f\\) for the same value should always return the same result.
-
-The search for \\(r\\) is done by binary search, so the time complexity of this function is \\( O(\log{n}) \\).
-
-### `min_left`
-Given an index \\(r\\) and a check function \\( f : S \rightarrow bool \\), `max_right` finds an index \\(l\\) such that satisfies both of the following conditions:
-- \\(l=r\\) or \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\)
-- \\(l=0\\) or \\( f \left( A_{l-1} \cdot A_l \cdots A_{r-1} \right) = false \\)
-
-If \\(f\\) is monotone, this is the minimum \\(l\\) that satisfies \\( f \left( A_l \cdot A_{l+1} \cdots A_{r-1} \right) = true \\).
-
-It should be guaranteed that \\(f(e)\\) is true, \\(0 \leq r \leq n\\), and \\(f\\) has no side effects i.e. calling \\(f\\) for the same value should always return the same result.
-
-The search for \\(l\\) is done by binary search, so the time complexity of this function is \\( O(\log{n}) \\).
+Last updated on 231007.
