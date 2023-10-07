@@ -94,4 +94,4 @@ fn crt(a: &[i64], m: &[i64]) -> Option<i64> {
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

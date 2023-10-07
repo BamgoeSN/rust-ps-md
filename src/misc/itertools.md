@@ -57,4 +57,4 @@ fn intersperse<T: Clone>(iter: impl Iterator<Item = T>, with: T) -> impl Iterato
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

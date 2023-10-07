@@ -108,4 +108,4 @@ fn intersect(l1: Line, l2: Line) -> IntersectType {
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

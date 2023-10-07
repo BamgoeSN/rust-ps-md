@@ -332,4 +332,4 @@ mod factorization {
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

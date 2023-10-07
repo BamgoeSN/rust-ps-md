@@ -129,4 +129,4 @@ fn kmp_search<T: PartialEq>(haystack: &[T], pattern: &[T], failure: &[usize]) ->
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

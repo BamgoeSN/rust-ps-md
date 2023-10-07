@@ -42,4 +42,4 @@ fn egcd(mut a: i64, mut b: i64) -> (i64, i64, i64) {
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

@@ -60,4 +60,4 @@ fn convex_hull<const COLINEAR: bool>(arr: &[Point]) -> Vec<Point> {
 
 ---
 
-Last updated on 231008.
+Last modified on 231008.

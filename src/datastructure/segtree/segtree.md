@@ -559,4 +559,4 @@ mod segtree {
 
 ---
 
-Last updated on 231007
+Last modified on 231007
