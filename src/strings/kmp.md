@@ -1,161 +1,132 @@
 # KMP
 
-Given an array \\(P\\), `KMPNeedle::new(P)` returns a `KMPNeedle` instance for searching \\(P\\) in any array, using `KMPMatcher`.
+Given an array `pattern`, `failure_function(pattern)` returns a failure function `failure` of `pattern`.
 
-Given a `KMPNeedle` instance `p` and an array target \\(T\\), `KMPMatcher::new(&p, T)` returns an iterator yielding indicies where \\(P\\) appears within \\(T\\). Even if some ranges where \\(P\\) exists within \\(T\\) overlap with each other, they are still all yielded as shown in the second string from the example `"ABCDABCDABCD"`.
+Given an array `haystack`, `kmp_search(haystack, pattern, failure)` returns a result of searching `pattern` in `haystack`, given that `failure` is a proper failure function of `pattern`. Denoting the returned array as `result` and the length of `pattern` as `n`, if `result[i + n] == n`, then `result[i..n] == pattern`.
 
-`KMPNeedle::new(P)` runs in a time complexity of \\(O(\left| P \right|)\\) and `KMPMatcher::new(T)` takes a time complexity of \\(O(\left| T \right|)\\) to be consumed. `KMPMatcher` searches for a pattern lazily, so it only takes time of total searched length in \\(T\\).
-
-A single `KMPNeedle` instance can be used to search \\(P\\) in multiple arrays as shown in the example.
+The API looks like this, as the failure function itself is needed in many algorithm problems, rather than directly using KMP for a string searching.
 
 ## Example
 
 ```rust
 # fn main() {
-let pattern = "ABCDABC";
-let targets = vec!["ABDABCDABCE", "ABCDABCDABCD", "ABBCCABCDABDABCDABC"];
+let pattern = b"ABCDABC";
+let targets = ["ABDABCDABCE", "ABCDABCDABCD", "ABBCCABCDABDABCDABC"].map(|b| b.as_bytes());
 
-let needle = KMPNeedle::new(pattern.as_bytes());
-for &t in targets.iter() {
-    let kmp = KMPMatcher::new(&needle, t.as_bytes());
-    for v in kmp {
-        print!("{} ", v);
+let failure = failure_function(pattern);
+for &t in &targets {
+    let result = kmp_search(t, pattern, &failure);
+    println!("{:?}", result);
+    for i in 0..result.len() - pattern.len() {
+        if result[i + pattern.len()] == pattern.len() {
+            print!("{} ", i);
+        }
     }
     println!();
 }
 # }
 # 
-# struct KMPNeedle<'a, T: PartialEq> {
-#     p: &'a [T],
-#     c: Vec<usize>,
-# }
-# 
-# impl<'a, T: PartialEq> KMPNeedle<'a, T> {
-#     fn new(p: &'a [T]) -> Self {
-#         let mut c: Vec<usize> = vec![0; p.len() + 1];
-# 
-#         let mut l = 0;
-#         for (r, v) in p.iter().enumerate().skip(1) {
-#             while l > 0 && p[l] != *v {
-#                 l = c[l];
+# /// Returns a failure function of `pattern`.
+# fn failure_function<T: PartialEq>(pattern: &[T]) -> Vec<usize> {
+#     let n = pattern.len();
+#     let mut c = vec![0, 0];
+#     let mut x;
+#     for i in 1..n {
+#         x = c[i];
+#         loop {
+#             if pattern[i] == pattern[x] {
+#                 c.push(x + 1);
+#                 break;
 #             }
-#             if p[l] == *v {
-#                 c[r + 1] = l + 1;
-#                 l += 1;
+#             if x == 0 {
+#                 c.push(0);
+#                 break;
 #             }
-#         }
-# 
-#         Self { p, c }
-#     }
-# }
-# 
-# struct KMPMatcher<'a, 'b: 'a, 'c: 'b, T: PartialEq> {
-#     needle: &'c KMPNeedle<'b, T>,
-#     t: &'a [T],
-#     i: usize,
-#     j: usize,
-# }
-# 
-# impl<'a, 'b: 'a, 'c: 'b, T: PartialEq> KMPMatcher<'a, 'b, 'c, T> {
-#     fn new(needle: &'c KMPNeedle<'b, T>, t: &'a [T]) -> Self {
-#         Self {
-#             needle,
-#             t,
-#             i: 0,
-#             j: 0,
+#             x = c[x];
 #         }
 #     }
+#     c
 # }
 # 
-# impl<'a, 'b: 'a, 'c: 'b, T: PartialEq> Iterator for KMPMatcher<'a, 'b, 'c, T> {
-#     type Item = usize;
-# 
-#     fn next(&mut self) -> Option<Self::Item> {
-#         while self.i < self.t.len() {
-#             while self.j > 0 && self.t[self.i] != self.needle.p[self.j] {
-#                 self.j = self.needle.c[self.j];
-#             }
-#             if self.t[self.i] == self.needle.p[self.j] {
-#                 if self.j == self.needle.p.len() - 1 {
-#                     self.j = self.needle.c[self.j + 1];
-#                     self.i += 1;
-#                     return Some(self.i - self.needle.p.len());
-#                 } else {
-#                     self.j += 1;
-#                 }
-#             }
-#             self.i += 1;
+# /// Returns a result of KMP search.
+# /// For `n = pattern.len()`, if `result[i] == n`, then `haystack[i-n..i] == pattern`.
+# fn kmp_search<T: PartialEq>(haystack: &[T], pattern: &[T], failure: &[usize]) -> Vec<usize> {
+#     let m = haystack.len();
+#     let mut d = vec![0];
+#     let mut x;
+#     for i in 0..m {
+#         x = d[i];
+#         if x == pattern.len() {
+#             x = failure[x];
 #         }
-#         None
+#         loop {
+#             if haystack[i] == pattern[x] {
+#                 d.push(x + 1);
+#                 break;
+#             }
+#             if x == 0 {
+#                 d.push(0);
+#                 break;
+#             }
+#             x = failure[x];
+#         }
 #     }
+#     d
 # }
 ```
 
 ## Code
 
 ```rust,noplayground
-struct KMPNeedle<'n, T: PartialEq> {
-    p: &'n [T],
-    c: Vec<usize>,
-}
-
-impl<'n, T: PartialEq> KMPNeedle<'n, T> {
-    fn new(p: &'n [T]) -> Self {
-        let mut c: Vec<usize> = vec![0; p.len() + 1];
-
-        let mut l = 0;
-        for (r, v) in p.iter().enumerate().skip(1) {
-            while l > 0 && p[l] != *v {
-                l = c[l];
+/// Returns a failure function of `pattern`.
+fn failure_function<T: PartialEq>(pattern: &[T]) -> Vec<usize> {
+    let n = pattern.len();
+    let mut c = vec![0, 0];
+    let mut x;
+    for i in 1..n {
+        x = c[i];
+        loop {
+            if pattern[i] == pattern[x] {
+                c.push(x + 1);
+                break;
             }
-            if p[l] == *v {
-                c[r + 1] = l + 1;
-                l += 1;
+            if x == 0 {
+                c.push(0);
+                break;
             }
-        }
-
-        Self { p, c }
-    }
-}
-
-struct KMPMatcher<'h, 'n: 'h, 'a: 'n, T: PartialEq> {
-    needle: &'a KMPNeedle<'n, T>,
-    haystack: &'h [T],
-    hp: usize,
-    np: usize,
-}
-
-impl<'h, 'n: 'h, 'a: 'n, T: PartialEq> KMPMatcher<'h, 'n, 'a, T> {
-    fn new(needle: &'a KMPNeedle<'n, T>, haystack: &'h [T]) -> Self {
-        Self {
-            needle,
-            haystack,
-            hp: 0,
-            np: 0,
+            x = c[x];
         }
     }
+    c
 }
 
-impl<'h, 'n: 'h, 'a: 'n, T: PartialEq> Iterator for KMPMatcher<'h, 'n, 'a, T> {
-    type Item = usize;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while self.hp < self.haystack.len() {
-            while self.np > 0 && self.haystack[self.hp] != self.needle.p[self.np] {
-                self.np = self.needle.c[self.np];
-            }
-            if self.haystack[self.hp] == self.needle.p[self.np] {
-                if self.np == self.needle.p.len() - 1 {
-                    self.np = self.needle.c[self.np + 1];
-                    self.hp += 1;
-                    return Some(self.hp - self.needle.p.len());
-                } else {
-                    self.np += 1;
-                }
-            }
-            self.hp += 1;
+/// Returns a result of KMP search.
+/// For `n = pattern.len()`, if `result[i] == n`, then `haystack[i-n..i] == pattern`.
+fn kmp_search<T: PartialEq>(haystack: &[T], pattern: &[T], failure: &[usize]) -> Vec<usize> {
+    let m = haystack.len();
+    let mut d = vec![0];
+    let mut x;
+    for i in 0..m {
+        x = d[i];
+        if x == pattern.len() {
+            x = failure[x];
         }
-        None
+        loop {
+            if haystack[i] == pattern[x] {
+                d.push(x + 1);
+                break;
+            }
+            if x == 0 {
+                d.push(0);
+                break;
+            }
+            x = failure[x];
+        }
     }
+    d
 }
 ```
+
+---
+
+Last updated on 231008.
