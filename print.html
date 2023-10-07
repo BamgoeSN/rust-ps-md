@@ -266,58 +266,39 @@ where
     x / gcd(x, y) * y
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extended-euclidean-algorithm"><a class="header" href="#extended-euclidean-algorithm">Extended Euclidean Algorithm</a></h1>
-<p><code>ext_gcd(a, b)</code> returns \(g, s, t\) such that \(g = \gcd(a, b)\) and \(as+bt=g\).</p>
+<p><code>egcd(a, b)</code> returns \(g, s, t\) such that \(g = \gcd(a, b)\) and \(as+bt=g\).</p>
 <h2 id="example-1"><a class="header" href="#example-1">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
-</span>let (a, b) = (4, 11);
-let (g, s, t) = ext_gcd(a, b);
-println!(&quot;{} {} {}&quot;, g, s, t); // 1 3 -1
-println!(&quot;{} == {}&quot;, g, a * s + b * t);
+</span>for (a, b) in [(2, 5), (11, 17), (20, 35)] {
+    let (g, s, t) = egcd(a, b);
+    println!(&quot;gcd({a}, {b}) = {g}&quot;);
+    println!(&quot;{a}*({s}) + {b}*({t}) = {g}&quot;);
+}
 <span class="boring">}
 </span><span class="boring">
-</span><span class="boring">// Extended Euclidean Algorithm
-</span><span class="boring">// Reference: PyRival https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/gcd.py
-</span><span class="boring">
-</span><span class="boring">fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
-</span><span class="boring">    let (mut s, mut old_s) = (0, 1);
-</span><span class="boring">    let (mut g, mut old_g) = (b, a);
-</span><span class="boring">    while g != 0 {
-</span><span class="boring">        let q = old_g / g;
-</span><span class="boring">        let (new_r, new_s) = (old_g - q * g, old_s - q * s);
-</span><span class="boring">        old_g = g; // Not using destructuring to support low version
-</span><span class="boring">        g = new_r; // AtCoder is using 1.42.0
-</span><span class="boring">        old_s = s;
-</span><span class="boring">        s = new_s;
+</span><span class="boring">/// Returns `(g, s, t)` such that `g == gcd(a, b)` and `a*s + t*b == g`.
+</span><span class="boring">fn egcd(mut a: i64, mut b: i64) -&gt; (i64, i64, i64) {
+</span><span class="boring">    let (mut sa, mut ta, mut sb, mut tb) = (1, 0, 0, 1);
+</span><span class="boring">    while b != 0 {
+</span><span class="boring">        let (q, r) = (a / b, a % b);
+</span><span class="boring">        (sa, ta, sb, tb) = (sb, tb, sa - q * sb, ta - q * tb);
+</span><span class="boring">        (a, b) = (b, r);
 </span><span class="boring">    }
-</span><span class="boring">
-</span><span class="boring">    (
-</span><span class="boring">        old_g,
-</span><span class="boring">        old_s,
-</span><span class="boring">        if b != 0 { (old_g - old_s * a) / b } else { 0 },
-</span><span class="boring">    )
+</span><span class="boring">    (a, sa, ta)
 </span><span class="boring">}</span></code></pre></pre>
 <h2 id="code-1"><a class="header" href="#code-1">Code</a></h2>
-<pre><code class="language-rust noplayground">// Extended Euclidean Algorithm
-// Reference: PyRival https://github.com/cheran-senthil/PyRival/blob/master/pyrival/algebra/gcd.py
-
-fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
-    let (mut s, mut old_s) = (0, 1);
-    let (mut g, mut old_g) = (b, a);
-    while g != 0 {
-        let q = old_g / g;
-        let (new_r, new_s) = (old_g - q * g, old_s - q * s);
-        old_g = g; // Not using destructuring to support low version
-        g = new_r; // AtCoder is using 1.42.0
-        old_s = s;
-        s = new_s;
+<pre><code class="language-rust noplayground">/// Returns `(g, s, t)` such that `g == gcd(a, b)` and `a*s + t*b == g`.
+fn egcd(mut a: i64, mut b: i64) -&gt; (i64, i64, i64) {
+    let (mut sa, mut ta, mut sb, mut tb) = (1, 0, 0, 1);
+    while b != 0 {
+        let (q, r) = (a / b, a % b);
+        (sa, ta, sb, tb) = (sb, tb, sa - q * sb, ta - q * tb);
+        (a, b) = (b, r);
     }
-
-    (
-        old_g,
-        old_s,
-        if b != 0 { (old_g - old_s * a) / b } else { 0 },
-    )
+    (a, sa, ta)
 }</code></pre>
+<hr />
+<p>Last updated on 231008.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chinese-remainder-theorem"><a class="header" href="#chinese-remainder-theorem">Chinese Remainder Theorem</a></h1>
 <p><code>crt(r, m)</code> returns <code>Some(x)</code> such that \(x \equiv r_i \pmod {m_i}\) for all \(i\). If such \(x\) does not exist, then it returns <code>None</code>.</p>
 <h2 id="example-2"><a class="header" href="#example-2">Example</a></h2>
