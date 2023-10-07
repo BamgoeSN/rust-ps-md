@@ -157,7 +157,6 @@ let b: Vec&lt;u64&gt; = vec![3, 4, 5];
 println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 <span class="boring">}
 </span><span class="boring">
-</span><span class="boring">// Not compatible with Rust 1.42.0
 </span><span class="boring">mod ntt {
 </span><span class="boring">    // FFT_constname convention following https://algoshitpo.github.io/2020/05/20/fft-ntt/
 </span><span class="boring">    // p: prime for modulo
@@ -172,23 +171,13 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">    //   104,857,601    25     22       3
 </span><span class="boring">    // 1,092,616,193    521    21       3
 </span><span class="boring">
-</span><span class="boring">    fn ceil_pow2(n: usize) -&gt; usize {
-</span><span class="boring">        let mut x: usize = 0;
-</span><span class="boring">        while (1 &lt;&lt; x) &lt; n {
-</span><span class="boring">            x += 1;
-</span><span class="boring">        }
-</span><span class="boring">        x
+</span><span class="boring">    fn ceil_pow2(n: usize) -&gt; u32 {
+</span><span class="boring">        n.next_power_of_two().trailing_zeros()
 </span><span class="boring">    }
 </span><span class="boring">
-</span><span class="boring">    /// Reverses k trailing bits of n.
+</span><span class="boring">    /// Reverses k trailing bits of n. Assumes that the rest of usize::BITS-k bits are all zero.
 </span><span class="boring">    const fn reverse_trailing_bits(n: usize, k: u32) -&gt; usize {
-</span><span class="boring">        let mut r = 0;
-</span><span class="boring">        let mut i = 0;
-</span><span class="boring">        while i &lt; k {
-</span><span class="boring">            r |= ((n &gt;&gt; i) &amp; 1) &lt;&lt; (k - i - 1);
-</span><span class="boring">            i += 1;
-</span><span class="boring">        }
-</span><span class="boring">        r
+</span><span class="boring">        n.reverse_bits() &gt;&gt; (usize::BITS - k)
 </span><span class="boring">    }
 </span><span class="boring">
 </span><span class="boring">    #[derive(Clone, Debug)]
@@ -239,10 +228,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">
 </span><span class="boring">        // unity(n, 1) ^ (1&lt;&lt;n) == 1
 </span><span class="boring">        const fn unity(n: u32, k: u64) -&gt; u64 {
-</span><span class="boring">            Self::pow(
-</span><span class="boring">                Self::pow(Self::ntt_w(), Self::ntt_a()),
-</span><span class="boring">                k &lt;&lt; (Self::ntt_b() - n),
-</span><span class="boring">            )
+</span><span class="boring">            Self::pow(Self::pow(Self::ntt_w(), Self::ntt_a()), k &lt;&lt; (Self::ntt_b() - n))
 </span><span class="boring">        }
 </span><span class="boring">
 </span><span class="boring">        const fn recip(x: u64) -&gt; u64 {
@@ -274,8 +260,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">                        let tmp = (self.arr[i + j + s] * mult) % P;
 </span><span class="boring">                        self.arr[i + j + s] = (self.arr[i + j] + P - tmp) % P;
 </span><span class="boring">                        self.arr[i + j] = (self.arr[i + j] + tmp) % P;
-</span><span class="boring">                        mult *= base;
-</span><span class="boring">                        mult %= P;
+</span><span class="boring">                        mult = mult * base % P;
 </span><span class="boring">                    }
 </span><span class="boring">                }
 </span><span class="boring">            }
@@ -302,8 +287,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">                        let tmp = (self.arr[i + j + s] * mult) % P;
 </span><span class="boring">                        self.arr[i + j + s] = (self.arr[i + j] + P - tmp) % P;
 </span><span class="boring">                        self.arr[i + j] = (self.arr[i + j] + tmp) % P;
-</span><span class="boring">                        mult *= base;
-</span><span class="boring">                        mult %= P;
+</span><span class="boring">                        mult = mult * base % P;
 </span><span class="boring">                    }
 </span><span class="boring">                }
 </span><span class="boring">            }
@@ -317,13 +301,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">
 </span><span class="boring">        pub fn convolute(a: &amp;[u64], b: &amp;[u64]) -&gt; Self {
 </span><span class="boring">            let nlen = 1 &lt;&lt; ceil_pow2(a.len() + b.len());
-</span><span class="boring">            let pad = |a: &amp;[u64]| {
-</span><span class="boring">                a.iter()
-</span><span class="boring">                    .copied()
-</span><span class="boring">                    .chain(std::iter::repeat(0))
-</span><span class="boring">                    .take(nlen)
-</span><span class="boring">                    .collect()
-</span><span class="boring">            };
+</span><span class="boring">            let pad = |a: &amp;[u64]| a.iter().copied().chain(std::iter::repeat(0)).take(nlen).collect();
 </span><span class="boring">            let arr = pad(a);
 </span><span class="boring">            let brr = pad(b);
 </span><span class="boring">
@@ -332,12 +310,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">            arr.ntt();
 </span><span class="boring">            brr.ntt();
 </span><span class="boring">
-</span><span class="boring">            let crr: Vec&lt;_&gt; = arr
-</span><span class="boring">                .arr
-</span><span class="boring">                .iter()
-</span><span class="boring">                .zip(brr.arr.iter())
-</span><span class="boring">                .map(|(&amp;a, &amp;b)| a * b % P)
-</span><span class="boring">                .collect();
+</span><span class="boring">            let crr: Vec&lt;_&gt; = arr.arr.iter().zip(brr.arr.iter()).map(|(&amp;a, &amp;b)| a * b % P).collect();
 </span><span class="boring">            let mut crr = Self::new(crr);
 </span><span class="boring">            crr.intt();
 </span><span class="boring">            crr
@@ -350,10 +323,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">        let r: u64 = P * Q;
 </span><span class="boring">        one.iter()
 </span><span class="boring">            .zip(two.iter())
-</span><span class="boring">            .map(|(&amp;a1, &amp;a2)| {
-</span><span class="boring">                ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128)
-</span><span class="boring">                    % r as u128) as u64
-</span><span class="boring">            })
+</span><span class="boring">            .map(|(&amp;a1, &amp;a2)| ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128) % r as u128) as u64)
 </span><span class="boring">            .collect()
 </span><span class="boring">    }
 </span><span class="boring">
@@ -369,8 +339,7 @@ println!(&quot;{:?}&quot;, ntt::convolute(&amp;a, &amp;b)); // [3, 10, 13, 10, 0
 </span><span class="boring">    }
 </span><span class="boring">}</span></code></pre></pre>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
-<pre><code class="language-rust noplayground">// Not compatible with Rust 1.42.0
-mod ntt {
+<pre><code class="language-rust noplayground">mod ntt {
     // FFT_constname convention following https://algoshitpo.github.io/2020/05/20/fft-ntt/
     // p: prime for modulo
     // w: primitive root of p
@@ -441,10 +410,7 @@ mod ntt {
 
         // unity(n, 1) ^ (1&lt;&lt;n) == 1
         const fn unity(n: u32, k: u64) -&gt; u64 {
-            Self::pow(
-                Self::pow(Self::ntt_w(), Self::ntt_a()),
-                k &lt;&lt; (Self::ntt_b() - n),
-            )
+            Self::pow(Self::pow(Self::ntt_w(), Self::ntt_a()), k &lt;&lt; (Self::ntt_b() - n))
         }
 
         const fn recip(x: u64) -&gt; u64 {
@@ -517,13 +483,7 @@ mod ntt {
 
         pub fn convolute(a: &amp;[u64], b: &amp;[u64]) -&gt; Self {
             let nlen = 1 &lt;&lt; ceil_pow2(a.len() + b.len());
-            let pad = |a: &amp;[u64]| {
-                a.iter()
-                    .copied()
-                    .chain(std::iter::repeat(0))
-                    .take(nlen)
-                    .collect()
-            };
+            let pad = |a: &amp;[u64]| a.iter().copied().chain(std::iter::repeat(0)).take(nlen).collect();
             let arr = pad(a);
             let brr = pad(b);
 
@@ -532,12 +492,7 @@ mod ntt {
             arr.ntt();
             brr.ntt();
 
-            let crr: Vec&lt;_&gt; = arr
-                .arr
-                .iter()
-                .zip(brr.arr.iter())
-                .map(|(&amp;a, &amp;b)| a * b % P)
-                .collect();
+            let crr: Vec&lt;_&gt; = arr.arr.iter().zip(brr.arr.iter()).map(|(&amp;a, &amp;b)| a * b % P).collect();
             let mut crr = Self::new(crr);
             crr.intt();
             crr
@@ -550,10 +505,7 @@ mod ntt {
         let r: u64 = P * Q;
         one.iter()
             .zip(two.iter())
-            .map(|(&amp;a1, &amp;a2)| {
-                ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128)
-                    % r as u128) as u64
-            })
+            .map(|(&amp;a1, &amp;a2)| ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128) % r as u128) as u64)
             .collect()
     }
 
@@ -568,6 +520,8 @@ mod ntt {
         merge::&lt;P, Q&gt;(&amp;arr.arr, &amp;brr.arr)
     }
 }</code></pre>
+<hr />
+<p>Last updated on 231008.</p>
 
                     </main>
 
