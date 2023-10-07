@@ -12,7 +12,6 @@ let b: Vec<u64> = vec![3, 4, 5];
 println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 # }
 # 
-# // Not compatible with Rust 1.42.0
 # mod ntt {
 #     // FFT_constname convention following https://algoshitpo.github.io/2020/05/20/fft-ntt/
 #     // p: prime for modulo
@@ -27,23 +26,13 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 #     //   104,857,601    25     22       3
 #     // 1,092,616,193    521    21       3
 # 
-#     fn ceil_pow2(n: usize) -> usize {
-#         let mut x: usize = 0;
-#         while (1 << x) < n {
-#             x += 1;
-#         }
-#         x
+#     fn ceil_pow2(n: usize) -> u32 {
+#         n.next_power_of_two().trailing_zeros()
 #     }
 # 
-#     /// Reverses k trailing bits of n.
+#     /// Reverses k trailing bits of n. Assumes that the rest of usize::BITS-k bits are all zero.
 #     const fn reverse_trailing_bits(n: usize, k: u32) -> usize {
-#         let mut r = 0;
-#         let mut i = 0;
-#         while i < k {
-#             r |= ((n >> i) & 1) << (k - i - 1);
-#             i += 1;
-#         }
-#         r
+#         n.reverse_bits() >> (usize::BITS - k)
 #     }
 # 
 #     #[derive(Clone, Debug)]
@@ -94,10 +83,7 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 # 
 #         // unity(n, 1) ^ (1<<n) == 1
 #         const fn unity(n: u32, k: u64) -> u64 {
-#             Self::pow(
-#                 Self::pow(Self::ntt_w(), Self::ntt_a()),
-#                 k << (Self::ntt_b() - n),
-#             )
+#             Self::pow(Self::pow(Self::ntt_w(), Self::ntt_a()), k << (Self::ntt_b() - n))
 #         }
 # 
 #         const fn recip(x: u64) -> u64 {
@@ -129,8 +115,7 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 #                         let tmp = (self.arr[i + j + s] * mult) % P;
 #                         self.arr[i + j + s] = (self.arr[i + j] + P - tmp) % P;
 #                         self.arr[i + j] = (self.arr[i + j] + tmp) % P;
-#                         mult *= base;
-#                         mult %= P;
+#                         mult = mult * base % P;
 #                     }
 #                 }
 #             }
@@ -157,8 +142,7 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 #                         let tmp = (self.arr[i + j + s] * mult) % P;
 #                         self.arr[i + j + s] = (self.arr[i + j] + P - tmp) % P;
 #                         self.arr[i + j] = (self.arr[i + j] + tmp) % P;
-#                         mult *= base;
-#                         mult %= P;
+#                         mult = mult * base % P;
 #                     }
 #                 }
 #             }
@@ -172,13 +156,7 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 # 
 #         pub fn convolute(a: &[u64], b: &[u64]) -> Self {
 #             let nlen = 1 << ceil_pow2(a.len() + b.len());
-#             let pad = |a: &[u64]| {
-#                 a.iter()
-#                     .copied()
-#                     .chain(std::iter::repeat(0))
-#                     .take(nlen)
-#                     .collect()
-#             };
+#             let pad = |a: &[u64]| a.iter().copied().chain(std::iter::repeat(0)).take(nlen).collect();
 #             let arr = pad(a);
 #             let brr = pad(b);
 # 
@@ -187,12 +165,7 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 #             arr.ntt();
 #             brr.ntt();
 # 
-#             let crr: Vec<_> = arr
-#                 .arr
-#                 .iter()
-#                 .zip(brr.arr.iter())
-#                 .map(|(&a, &b)| a * b % P)
-#                 .collect();
+#             let crr: Vec<_> = arr.arr.iter().zip(brr.arr.iter()).map(|(&a, &b)| a * b % P).collect();
 #             let mut crr = Self::new(crr);
 #             crr.intt();
 #             crr
@@ -205,10 +178,7 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 #         let r: u64 = P * Q;
 #         one.iter()
 #             .zip(two.iter())
-#             .map(|(&a1, &a2)| {
-#                 ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128)
-#                     % r as u128) as u64
-#             })
+#             .map(|(&a1, &a2)| ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128) % r as u128) as u64)
 #             .collect()
 #     }
 # 
@@ -228,7 +198,6 @@ println!("{:?}", ntt::convolute(&a, &b)); // [3, 10, 13, 10, 0, 0, 0, 0]
 ## Code
 
 ```rust,noplayground
-// Not compatible with Rust 1.42.0
 mod ntt {
     // FFT_constname convention following https://algoshitpo.github.io/2020/05/20/fft-ntt/
     // p: prime for modulo
@@ -300,10 +269,7 @@ mod ntt {
 
         // unity(n, 1) ^ (1<<n) == 1
         const fn unity(n: u32, k: u64) -> u64 {
-            Self::pow(
-                Self::pow(Self::ntt_w(), Self::ntt_a()),
-                k << (Self::ntt_b() - n),
-            )
+            Self::pow(Self::pow(Self::ntt_w(), Self::ntt_a()), k << (Self::ntt_b() - n))
         }
 
         const fn recip(x: u64) -> u64 {
@@ -376,13 +342,7 @@ mod ntt {
 
         pub fn convolute(a: &[u64], b: &[u64]) -> Self {
             let nlen = 1 << ceil_pow2(a.len() + b.len());
-            let pad = |a: &[u64]| {
-                a.iter()
-                    .copied()
-                    .chain(std::iter::repeat(0))
-                    .take(nlen)
-                    .collect()
-            };
+            let pad = |a: &[u64]| a.iter().copied().chain(std::iter::repeat(0)).take(nlen).collect();
             let arr = pad(a);
             let brr = pad(b);
 
@@ -391,12 +351,7 @@ mod ntt {
             arr.ntt();
             brr.ntt();
 
-            let crr: Vec<_> = arr
-                .arr
-                .iter()
-                .zip(brr.arr.iter())
-                .map(|(&a, &b)| a * b % P)
-                .collect();
+            let crr: Vec<_> = arr.arr.iter().zip(brr.arr.iter()).map(|(&a, &b)| a * b % P).collect();
             let mut crr = Self::new(crr);
             crr.intt();
             crr
@@ -409,10 +364,7 @@ mod ntt {
         let r: u64 = P * Q;
         one.iter()
             .zip(two.iter())
-            .map(|(&a1, &a2)| {
-                ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128)
-                    % r as u128) as u64
-            })
+            .map(|(&a1, &a2)| ((a1 as u128 * q as u128 * Q as u128 + a2 as u128 * p as u128 * P as u128) % r as u128) as u64)
             .collect()
     }
 
@@ -428,3 +380,7 @@ mod ntt {
     }
 }
 ```
+
+---
+
+Last updated on 231008.
