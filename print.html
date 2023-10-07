@@ -9146,6 +9146,8 @@ macro_rules! print {
 macro_rules! println {
     ($($t:tt)*) =&gt; {{ use std::io::*; writeln!(unsafe{ WRITER.as_mut().unwrap_unchecked() }, $($t)*).unwrap(); }};
 }</code></pre>
+<hr />
+<p>Last modified on 231008.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iterator-tools"><a class="header" href="#iterator-tools">Iterator Tools</a></h1>
 <h2 id="grid-iteration"><a class="header" href="#grid-iteration">Grid Iteration</a></h2>
 <p><code>gen_diriter(r, c, tr, tc)</code> returns an iterator of <code>(usize, usize)</code> which iterates through right, down, left, up from <code>(r, c)</code> in a grid of <code>tr</code> rows and <code>tc</code> columns. <code>gen_torusiter(r, c, tr, tc)</code> acts similarly, but in a grid where your position wrap up when you go out of bounds.</p>

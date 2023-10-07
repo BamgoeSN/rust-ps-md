@@ -306,6 +306,8 @@ macro_rules! print {
 macro_rules! println {
     ($($t:tt)*) =&gt; {{ use std::io::*; writeln!(unsafe{ WRITER.as_mut().unwrap_unchecked() }, $($t)*).unwrap(); }};
 }</code></pre>
+<hr />
+<p>Last modified on 231008.</p>
 
                     </main>
 
