@@ -8988,455 +8988,164 @@ println!(&quot;{lf:.5} {rf:.5}&quot;);
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fast-io"><a class="header" href="#fast-io">Fast IO</a></h1>
-<ul>
-<li>
-<p><code>get_input() -&gt; &amp;'static str</code> reads every input from stdin, leaks it and returns it as <code>&amp;'static str</code>.
-The function leaks the string because it's easier to handle input in CP this way.</p>
-</li>
-<li>
-<p><code>Tokenizer</code> tokenizes a string based on a function its fed when initialized.</p>
-<ul>
-<li>
-<p>The default template initializes a tokenizer <code>sc</code> with <code>Tokenizer::new(input_str, |s| s.split_ascii_whitespace())</code>.
-This means that <code>sc</code> tokenizes the input by ascii whitespace.
-If you want to tokenize the input with non-ascii whitespace as well, then change <code>split_ascii_whitespace</code> to <code>split_whitespace</code>.
-If you want a tokenizer which splits a string by lines, then change <code>split_ascii_whitespace</code> to <code>lines</code>.</p>
-</li>
-<li>
-<p><code>Tokenizer::next(&amp;mut Self) -&gt; T</code> parses next token into <code>T</code> and returns it. If there's no tokens left or it fails to parse, the program panics.</p>
-</li>
-<li>
-<p><code>Tokenizer::next_str(&amp;mut self) -&gt; &amp;str</code> returns next token.</p>
-</li>
-<li>
-<p><code>Tokenizer::next_ok(&amp;mut self) -&gt; Result&lt;T, InputError&gt;</code> parses the next token into <code>T</code>. If there's no tokens left in the string, it returns <code>Err(InputExhaust)</code>.
-If it fails to parse, it returns <code>Err(ParseError(token))</code>. Otherwise, it returns the parsed <code>T</code> value.</p>
-</li>
-<li>
-<p><code>Tokenizer::next_str_ok(&amp;mut self) -&gt; Result&lt;T, InputError&gt;</code> returns next token if there's any. Otherwise, it returns <code>Err(InputExhaust)</code>.</p>
-</li>
-<li>
-<p><code>Tokenizer::next_iter(&amp;mut self) -&gt; impl Iterator&lt;Item = T&gt;</code> returns an iterator repeatedly consumes and parses tokens into <code>T</code>.
-If <code>Tokenizer</code> meets a token that can't be parsed into <code>T</code>, it just skips to the next token until it can parse it into <code>T</code>.
-The iterator ends only when the entire tokens are consumed. This behavior can be used for reading up to EOF, or blocked by <code>take</code> method for reading given number of tokens.</p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="example-25"><a class="header" href="#example-25">Example</a></h2>
-<pre><code class="language-rust noplayground">let n: usize = sc.next();
-let arr: Vec&lt;u64&gt; = sc.next_iter().take(m).collect();
-let (m, k): (u32, u64) = sc.next();
-let text = sc.next_str();
-outln!(&quot;{:?}&quot;, [m, k]);
-
-while let Ok(n @ ..1) = sc.next_ok::&lt;u32&gt;() {
-    println!(&quot;{}&quot;, n);
-    if sc.next_str_ok().is_none() {
-        outln!(&quot;EOF&quot;);
-    }
-}</code></pre>
 <h2 id="code-29"><a class="header" href="#code-29">Code</a></h2>
-<h3 id="for-recent-rust-versions-almost-every-ojs-except-atcoder"><a class="header" href="#for-recent-rust-versions-almost-every-ojs-except-atcoder">For Recent Rust versions (Almost every OJs except AtCoder)</a></h3>
 <pre><code class="language-rust noplayground">#![no_main]
 
-#[no_mangle]
-fn main() -&gt; i32 {
-    // FastIO
-    use fastio::*;
-    let input_str = get_input();
-    let mut sc = Tokenizer::new(input_str, |s| s.split_ascii_whitespace());
-    use std::io::{stdout, BufWriter, Write};
-    let stdout = stdout();
-    let wr = &amp;mut BufWriter::new(stdout.lock());
+#[allow(unused)]
+use std::{cmp::*, collections::*, iter, mem::*, num::*, ops::*};
 
-    // FastIO Macros
-    macro_rules! out { ($($arg:tt)*) =&gt; { write!(wr, $($arg)*).ok(); }; }
-    macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(wr, $($arg)*).ok(); }; }
-
-    // Main
-
-    wr.flush().unwrap();
-    0
-}
+fn solve&lt;'t, It: Iterator&lt;Item = &amp;'t str&gt;&gt;(sc: &amp;mut fastio::Tokenizer&lt;It&gt;) {}
 
 #[allow(unused)]
 mod fastio {
-    use std::{fmt, io, num::*, slice::*, str::*};
+	use super::ioutil::*;
 
-    #[link(name = &quot;c&quot;)]
-    extern &quot;C&quot; {}
+	pub struct Tokenizer&lt;It&gt; {
+		it: It,
+	}
 
-    pub fn get_input() -&gt; &amp;'static str {
-        let buf = io::read_to_string(io::stdin()).unwrap();
-        Box::leak(buf.into_boxed_str())
+	impl&lt;'i, 's: 'i, It&gt; Tokenizer&lt;It&gt; {
+		pub fn new(text: &amp;'s str, split: impl FnOnce(&amp;'i str) -&gt; It) -&gt; Self {
+			Self { it: split(text) }
+		}
+	}
+
+	impl&lt;'t, It: Iterator&lt;Item = &amp;'t str&gt;&gt; Tokenizer&lt;It&gt; {
+		pub fn next_ok&lt;T: IterParse&lt;'t&gt;&gt;(&amp;mut self) -&gt; PRes&lt;'t, T&gt; {
+			T::parse_from_iter(&amp;mut self.it)
+		}
+
+		pub fn next&lt;T: IterParse&lt;'t&gt;&gt;(&amp;mut self) -&gt; T {
+			self.next_ok().unwrap()
+		}
+
+		pub fn next_map&lt;T: IterParse&lt;'t&gt;, U, const N: usize&gt;(&amp;mut self, f: impl FnMut(T) -&gt; U) -&gt; [U; N] {
+			let x: [T; N] = self.next();
+			x.map(f)
+		}
+
+		pub fn next_it&lt;T: IterParse&lt;'t&gt;&gt;(&amp;mut self) -&gt; impl Iterator&lt;Item = T&gt; + '_ {
+			std::iter::repeat_with(move || self.next_ok().ok()).map_while(|x| x)
+		}
+
+		pub fn next_collect&lt;T: IterParse&lt;'t&gt;, V: FromIterator&lt;T&gt;&gt;(&amp;mut self, size: usize) -&gt; V {
+			self.next_it().take(size).collect()
+		}
+	}
+}
+
+mod ioutil {
+	use std::{fmt::*, num::*};
+
+	pub enum InputError&lt;'t&gt; {
+		InputExhaust,
+		ParseError(&amp;'t str),
+	}
+	use InputError::*;
+
+	pub type PRes&lt;'t, T&gt; = std::result::Result&lt;T, InputError&lt;'t&gt;&gt;;
+
+	impl&lt;'t&gt; Debug for InputError&lt;'t&gt; {
+		fn fmt(&amp;self, f: &amp;mut Formatter&lt;'_&gt;) -&gt; Result {
+			match self {
+				InputExhaust =&gt; f.debug_struct(&quot;InputExhaust&quot;).finish(),
+				ParseError(s) =&gt; f.debug_struct(&quot;ParseError&quot;).field(&quot;str&quot;, s).finish(),
+			}
+		}
+	}
+
+	pub trait Atom&lt;'t&gt;: Sized {
+		fn parse(text: &amp;'t str) -&gt; PRes&lt;'t, Self&gt;;
+	}
+
+	impl&lt;'t&gt; Atom&lt;'t&gt; for &amp;'t str {
+		fn parse(text: &amp;'t str) -&gt; PRes&lt;'t, Self&gt; {
+			Ok(text)
+		}
+	}
+
+	impl&lt;'t&gt; Atom&lt;'t&gt; for &amp;'t [u8] {
+		fn parse(text: &amp;'t str) -&gt; PRes&lt;'t, Self&gt; {
+			Ok(text.as_bytes())
+		}
+	}
+
+	macro_rules! impl_atom {
+        ($($t:ty) *) =&gt; { $(impl Atom&lt;'_&gt; for $t { fn parse(text: &amp;str) -&gt; PRes&lt;Self&gt; { text.parse().map_err(|_| ParseError(text)) } })* };
+    }
+	impl_atom!(u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize f32 f64 bool char String NonZeroI8 NonZeroI16 NonZeroI32 NonZeroI64 NonZeroI128 NonZeroIsize NonZeroU8 NonZeroU16 NonZeroU32 NonZeroU64 NonZeroU128 NonZeroUsize);
+
+	pub trait IterParse&lt;'t&gt;: Sized {
+		fn parse_from_iter&lt;'s, It: Iterator&lt;Item = &amp;'t str&gt;&gt;(it: &amp;'s mut It) -&gt; PRes&lt;'t, Self&gt;
+		where
+			't: 's;
+	}
+
+	impl&lt;'t, A: Atom&lt;'t&gt;&gt; IterParse&lt;'t&gt; for A {
+		fn parse_from_iter&lt;'s, It: Iterator&lt;Item = &amp;'t str&gt;&gt;(it: &amp;'s mut It) -&gt; PRes&lt;'t, Self&gt;
+		where
+			't: 's,
+		{
+			it.next().map_or(Err(InputExhaust), &lt;Self as Atom&gt;::parse)
+		}
+	}
+
+	impl&lt;'t, A: IterParse&lt;'t&gt;, const N: usize&gt; IterParse&lt;'t&gt; for [A; N] {
+		fn parse_from_iter&lt;'s, It: Iterator&lt;Item = &amp;'t str&gt;&gt;(it: &amp;'s mut It) -&gt; PRes&lt;'t, Self&gt;
+		where
+			't: 's,
+		{
+			use std::mem::*;
+			let mut x: [MaybeUninit&lt;A&gt;; N] = unsafe { MaybeUninit::uninit().assume_init() };
+			for p in x.iter_mut() {
+				*p = MaybeUninit::new(A::parse_from_iter(it)?);
+			}
+			Ok(unsafe { transmute_copy(&amp;x) })
+		}
+	}
+
+	macro_rules! impl_tuple {
+        ($u:ident) =&gt; {};
+        ($u:ident $($t:ident)+) =&gt; { impl&lt;'t, $u: IterParse&lt;'t&gt;, $($t: IterParse&lt;'t&gt;),+&gt; IterParse&lt;'t&gt; for ($u, $($t),+) { fn parse_from_iter&lt;'s, It: Iterator&lt;Item = &amp;'t str&gt;&gt;(_it: &amp;'s mut It) -&gt; PRes&lt;'t, Self&gt; where 't: 's { Ok(($u::parse_from_iter(_it)?, $($t::parse_from_iter(_it)?),+)) } } impl_tuple!($($t) +); };
     }
 
-    pub enum InputError&lt;'t&gt; {
-        InputExhaust,
-        ParseError(&amp;'t str),
-    }
-    use InputError::*;
+	impl_tuple!(Q W E R T Y U I O P A S D F G H J K L Z X C V B N M);
+}
 
-    impl&lt;'t&gt; fmt::Debug for InputError&lt;'t&gt; {
-        fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
-            match self {
-                InputExhaust =&gt; f.debug_struct(&quot;InputExhaust&quot;).finish(),
-                ParseError(s) =&gt; f.debug_struct(&quot;ParseError&quot;).field(&quot;str&quot;, s).finish(),
-            }
-        }
-    }
+#[link(name = &quot;c&quot;)]
+extern &quot;C&quot; {
+	fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -&gt; *mut u8;
+	fn fstat(fd: i32, stat: *mut usize) -&gt; i32;
+}
 
-    pub trait Atom: Sized {
-        fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt;;
-    }
-
-    pub trait IterParse: Sized {
-        fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt;
-        where
-            It: Iterator&lt;Item = &amp;'t str&gt;;
-    }
-
-    macro_rules! impl_trait_for_fromstr {
-        ($($t:ty) *) =&gt; { $(
-            impl Atom for $t { fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt; { s.parse().map_err(|_| ParseError(s)) } }
-            impl IterParse for $t {
-                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
-                    it.next().map_or( Err(InputExhaust), &lt;Self as Atom&gt;::parse_from )
-                }
-            }
-        )* };
-    }
-
-    impl_trait_for_fromstr!(bool char String);
-    impl_trait_for_fromstr!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-    impl_trait_for_fromstr!(NonZeroI8 NonZeroI16 NonZeroI32 NonZeroI64 NonZeroI128 NonZeroIsize);
-    impl_trait_for_fromstr!(NonZeroU8 NonZeroU16 NonZeroU32 NonZeroU64 NonZeroU128 NonZeroUsize);
-
-    macro_rules! impl_iterparse_for_tuple {
-        ($($t:ident) *) =&gt; {
-            impl&lt;$($t),*&gt; IterParse for ($($t),*) where $($t: IterParse),* {
-                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
-                    Ok(( $($t::parse_from(it)?),* ))
-                }
-            }
-        };
-    }
-
-    impl_iterparse_for_tuple!();
-    impl_iterparse_for_tuple!(A B);
-    impl_iterparse_for_tuple!(A B C);
-    impl_iterparse_for_tuple!(A B C D);
-    impl_iterparse_for_tuple!(A B C D E);
-    impl_iterparse_for_tuple!(A B C D E F);
-    impl_iterparse_for_tuple!(A B C D E F G);
-    impl_iterparse_for_tuple!(A B C D E F G H);
-    impl_iterparse_for_tuple!(A B C D E F G H I);
-    impl_iterparse_for_tuple!(A B C D E F G H I J);
-    impl_iterparse_for_tuple!(A B C D E F G H I J K);
-    impl_iterparse_for_tuple!(A B C D E F G H I J K L);
-    impl_iterparse_for_tuple!(A B C D E F G H I J K L M);
-
-    pub struct Tokenizer&lt;It&gt; {
-        it: It,
-    }
-
-    impl&lt;'arg, 'str: 'arg, It&gt; Tokenizer&lt;It&gt; {
-        pub fn new(s: &amp;'str str, split: impl FnOnce(&amp;'arg str) -&gt; It) -&gt; Self {
-            Self { it: split(s) }
-        }
-    }
-
-    impl&lt;'t, It&gt; Tokenizer&lt;It&gt;
-    where
-        It: Iterator&lt;Item = &amp;'t str&gt;,
-    {
-        pub fn next&lt;T: IterParse&gt;(&amp;mut self) -&gt; T {
-            T::parse_from(&amp;mut self.it).unwrap()
-        }
-        pub fn next_str(&amp;mut self) -&gt; &amp;'t str {
-            self.it.next().unwrap()
-        }
-        pub fn next_ok&lt;T: IterParse&gt;(&amp;mut self) -&gt; Result&lt;T, InputError&lt;'t&gt;&gt; {
-            T::parse_from(&amp;mut self.it)
-        }
-        pub fn next_str_ok(&amp;mut self) -&gt; Option&lt;&amp;'t str&gt; {
-            self.it.next()
-        }
-        pub fn next_iter&lt;T: IterParse&gt;(&amp;mut self) -&gt; impl Iterator&lt;Item = T&gt; + '_ {
-            std::iter::repeat_with(move || self.next_ok().ok()).map_while(|x| x)
-        }
-    }
-}</code></pre>
-<h3 id="for-older-versions-of-rust-atcoder"><a class="header" href="#for-older-versions-of-rust-atcoder">For Older Versions of Rust (AtCoder)</a></h3>
-<pre><code class="language-rust noplayground">#![no_main]
+fn get_input() -&gt; &amp;'static str {
+	let mut stat = [0; 20];
+	unsafe { fstat(0, stat.as_mut_ptr()) };
+	let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
+	unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(buffer, stat[6])) }
+}
 
 #[no_mangle]
-fn main() -&gt; i32 {
-    // FastIO
-    use fastio::*;
-    let input_str = get_input();
-    let mut sc = Tokenizer::new(input_str, |s| s.split_ascii_whitespace());
-    use std::io::{stdout, BufWriter, Write};
-    let stdout = stdout();
-    let wr = &amp;mut BufWriter::new(stdout.lock());
-
-    // FastIO Macros
-    macro_rules! out { ($($arg:tt)*) =&gt; { write!(wr, $($arg)*).ok(); }; }
-    macro_rules! outln { ($($arg:tt)*) =&gt; { writeln!(wr, $($arg)*).ok(); }; }
-
-    // Main
-
-    wr.flush().unwrap();
-    0
+unsafe fn main() -&gt; i32 {
+	use std::io::*;
+	let mut sc = fastio::Tokenizer::new(get_input(), |s| s.split_ascii_whitespace());
+	let stdout = stdout();
+	WRITER = Some(BufWriter::new(stdout.lock()));
+	solve(&amp;mut sc);
+	WRITER.as_mut().unwrap_unchecked().flush().ok();
+	0
 }
 
-#[allow(unused)]
-mod fastio {
-    use std::{fmt, io, num::*, slice::*, str::*};
-
-    #[link(name = &quot;c&quot;)]
-    extern &quot;C&quot; {}
-
-    pub fn get_input() -&gt; &amp;'static str {
-        use io::Read;
-        let mut buf = String::new();
-        io::stdin().read_to_string(&amp;mut buf);
-        Box::leak(buf.into_boxed_str())
-    }
-
-    pub enum InputError&lt;'t&gt; {
-        InputExhaust,
-        ParseError(&amp;'t str),
-    }
-    use InputError::*;
-
-    impl&lt;'t&gt; fmt::Debug for InputError&lt;'t&gt; {
-        fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
-            match self {
-                InputExhaust =&gt; f.debug_struct(&quot;InputExhaust&quot;).finish(),
-                ParseError(s) =&gt; f.debug_struct(&quot;ParseError&quot;).field(&quot;str&quot;, s).finish(),
-            }
-        }
-    }
-
-    pub trait Atom: Sized {
-        fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt;;
-    }
-
-    pub trait IterParse: Sized {
-        fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt;
-        where
-            It: Iterator&lt;Item = &amp;'t str&gt;;
-    }
-
-    macro_rules! impl_trait_for_fromstr {
-        ($($t:ty) *) =&gt; { $(
-            impl Atom for $t { fn parse_from(s: &amp;str) -&gt; Result&lt;Self, InputError&gt; { s.parse().map_err(|_| ParseError(s)) } }
-            impl IterParse for $t {
-                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
-                    it.next().map_or( Err(InputExhaust), &lt;Self as Atom&gt;::parse_from )
-                }
-            }
-        )* };
-    }
-
-    impl_trait_for_fromstr!(bool char String);
-    impl_trait_for_fromstr!(f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize);
-    impl_trait_for_fromstr!(NonZeroI8 NonZeroI16 NonZeroI32 NonZeroI64 NonZeroI128 NonZeroIsize);
-    impl_trait_for_fromstr!(NonZeroU8 NonZeroU16 NonZeroU32 NonZeroU64 NonZeroU128 NonZeroUsize);
-
-    macro_rules! impl_iterparse_for_tuple {
-        ($($t:ident) *) =&gt; {
-            impl&lt;$($t),*&gt; IterParse for ($($t),*) where $($t: IterParse),* {
-                fn parse_from&lt;'s, 't: 's, It&gt;(it: &amp;'s mut It) -&gt; Result&lt;Self, InputError&lt;'t&gt;&gt; where It: Iterator&lt;Item = &amp;'t str&gt; {
-                    Ok(( $($t::parse_from(it)?),* ))
-                }
-            }
-        };
-    }
-
-    impl_iterparse_for_tuple!();
-    impl_iterparse_for_tuple!(A B);
-    impl_iterparse_for_tuple!(A B C);
-    impl_iterparse_for_tuple!(A B C D);
-    impl_iterparse_for_tuple!(A B C D E);
-    impl_iterparse_for_tuple!(A B C D E F);
-    impl_iterparse_for_tuple!(A B C D E F G);
-    impl_iterparse_for_tuple!(A B C D E F G H);
-    impl_iterparse_for_tuple!(A B C D E F G H I);
-    impl_iterparse_for_tuple!(A B C D E F G H I J);
-    impl_iterparse_for_tuple!(A B C D E F G H I J K);
-    impl_iterparse_for_tuple!(A B C D E F G H I J K L);
-    impl_iterparse_for_tuple!(A B C D E F G H I J K L M);
-
-    pub struct Tokenizer&lt;It&gt; {
-        it: It,
-    }
-
-    impl&lt;'arg, 'str: 'arg, It&gt; Tokenizer&lt;It&gt; {
-        pub fn new(s: &amp;'str str, split: impl FnOnce(&amp;'arg str) -&gt; It) -&gt; Self {
-            Self { it: split(s) }
-        }
-    }
-
-    impl&lt;'t, It&gt; Tokenizer&lt;It&gt;
-    where
-        It: Iterator&lt;Item = &amp;'t str&gt;,
-    {
-        pub fn next&lt;T: IterParse&gt;(&amp;mut self) -&gt; T {
-            T::parse_from(&amp;mut self.it).unwrap()
-        }
-        pub fn next_str(&amp;mut self) -&gt; &amp;'t str {
-            self.it.next().unwrap()
-        }
-        pub fn next_ok&lt;T: IterParse&gt;(&amp;mut self) -&gt; Result&lt;T, InputError&lt;'t&gt;&gt; {
-            T::parse_from(&amp;mut self.it)
-        }
-        pub fn next_str_ok(&amp;mut self) -&gt; Option&lt;&amp;'t str&gt; {
-            self.it.next()
-        }
-        pub fn next_iter&lt;'s, T: IterParse&gt;(&amp;'s mut self) -&gt; impl Iterator&lt;Item = T&gt; + '_
-        where
-            't: 's,
-        {
-            std::iter::repeat_with(move || self.next_ok())
-                .take_while(|x| x.is_ok())
-                .flatten()
-        }
-    }
+use std::io::{BufWriter, StdoutLock};
+static mut WRITER: Option&lt;BufWriter&lt;StdoutLock&gt;&gt; = None;
+#[macro_export]
+macro_rules! print {
+    ($($t:tt)*) =&gt; {{ use std::io::*; write!(unsafe{ WRITER.as_mut().unwrap_unchecked() }, $($t)*).unwrap(); }};
+}
+#[macro_export]
+macro_rules! println {
+    ($($t:tt)*) =&gt; {{ use std::io::*; writeln!(unsafe{ WRITER.as_mut().unwrap_unchecked() }, $($t)*).unwrap(); }};
 }</code></pre>
-<h3 id="with-faster-print-old"><a class="header" href="#with-faster-print-old">With faster print (Old)</a></h3>
-<pre><code class="language-rust noplayground">fn main() {
-    // FastIO
-    use fastio::*;
-    let input_str = get_input();
-    let mut sc: Scanner&lt;_&gt; = Scanner::tokenize(input_str);
-    let mut out = Flusher::with_capacity(1 &lt;&lt; 18);
-
-    // FastIO Macros
-    macro_rules! next {
-        () =&gt; { sc.next() };
-        (str) =&gt; { sc.next_str() };
-        ($($t:ty) +) =&gt; { ($(sc.next::&lt;$t&gt;()),+) };
-    }
-    macro_rules! out { ($($arg:tt),*) =&gt; {$( $arg.push_num(&amp;mut out); out.buf.push(b' '); )*}; }
-    macro_rules! outln { ($($arg:tt),*) =&gt; { out!($($arg),*); out.buf.push(b'\n'); } }
-
-    // Main
-    let n: usize = next!();
-    outln!(n);
-}
-
-mod fastio {
-    use std::io::{stdout, Write};
-
-    extern &quot;C&quot; {
-        fn mmap(addr: usize, len: usize, p: i32, f: i32, fd: i32, o: i64) -&gt; *mut u8;
-        fn fstat(fd: i32, stat: *mut usize) -&gt; i32;
-    }
-
-    pub fn get_input() -&gt; &amp;'static str {
-        let mut stat = [0; 20];
-        unsafe { fstat(0, (&amp;mut stat).as_mut_ptr()) };
-        let buffer = unsafe { mmap(0, stat[6], 1, 2, 0, 0) };
-        unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(buffer, stat[6])) }
-    }
-
-    pub struct Scanner&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; {
-        it: I,
-    }
-
-    impl&lt;'a&gt; Scanner&lt;'a, std::str::SplitAsciiWhitespace&lt;'a&gt;&gt; {
-        pub fn tokenize(s: &amp;'a str) -&gt; Self {
-            Self {
-                it: s.split_ascii_whitespace(),
-            }
-        }
-    }
-
-    impl&lt;'a&gt; Scanner&lt;'a, std::str::Lines&lt;'a&gt;&gt; {
-        pub fn lines(s: &amp;'a str) -&gt; Self {
-            Self { it: s.lines() }
-        }
-    }
-
-    impl&lt;'a, I: Iterator&lt;Item = &amp;'a str&gt;&gt; Scanner&lt;'a, I&gt; {
-        #[inline(always)]
-        pub fn next&lt;T: std::str::FromStr&gt;(&amp;mut self) -&gt; T {
-            self.it.next().unwrap().parse().ok().unwrap()
-        }
-        #[inline(always)]
-        pub fn next_str(&amp;mut self) -&gt; &amp;'a str {
-            self.it.next().unwrap()
-        }
-        #[inline(always)]
-        pub fn next_option&lt;T: std::str::FromStr&gt;(&amp;mut self) -&gt; Option&lt;T&gt; {
-            self.it.next().and_then(|s| s.parse().ok())
-        }
-        #[inline(always)]
-        pub fn next_str_option(&amp;mut self) -&gt; Option&lt;&amp;'a str&gt; {
-            self.it.next()
-        }
-    }
-
-    pub struct Flusher {
-        pub buf: Vec&lt;u8&gt;,
-    }
-
-    impl Flusher {
-        pub fn with_capacity(cap: usize) -&gt; Self {
-            Self {
-                buf: Vec::with_capacity(cap),
-            }
-        }
-    }
-
-    impl Drop for Flusher {
-        fn drop(&amp;mut self) {
-            stdout().write_all(&amp;self.buf).ok();
-        }
-    }
-
-    pub trait PushPrint {
-        fn push_num(self, wr: &amp;mut Flusher);
-    }
-
-    impl PushPrint for &amp;str {
-        fn push_num(self, wr: &amp;mut Flusher) {
-            wr.buf.extend_from_slice(self.as_bytes());
-        }
-    }
-
-    macro_rules! impl_pushprint {
-        ($($i:ty;$u:ty) *) =&gt; {
-            $(
-                impl PushPrint for $i {
-                    fn push_num(self, wr: &amp;mut Flusher) {
-                        if self &lt; 0 {
-                            wr.buf.push(b'-');
-                            ((-self) as $u).push_num(wr);
-                        } else {
-                            (self as $u).push_num(wr);
-                        }
-                    }
-                }
-
-                impl PushPrint for $u {
-                    fn push_num(self, wr: &amp;mut Flusher) {
-                        if self &gt;= 10 {
-                            (self / 10).push_num(wr);
-                        }
-                        wr.buf.push((self % 10) as u8 + b'0');
-                    }
-                }
-            )*
-        };
-    }
-
-    impl_pushprint!(i8;u8 i16;u16 i32;u32 i64;u64 i128;u128 isize;usize);
-}
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iterator-tools"><a class="header" href="#iterator-tools">Iterator Tools</a></h1>
 <h2 id="grid-iteration"><a class="header" href="#grid-iteration">Grid Iteration</a></h2>
 <p><code>gen_diriter(r, c, tr, tc)</code> returns an iterator of <code>(usize, usize)</code> which iterates through right, down, left, up from <code>(r, c)</code> in a grid of <code>tr</code> rows and <code>tc</code> columns. <code>gen_torusiter(r, c, tr, tc)</code> acts similarly, but in a grid where your position wrap up when you go out of bounds.</p>
@@ -9485,7 +9194,7 @@ where I: Iterator&lt;Item = S&gt;, J: Iterator&lt;Item = T&gt; + Clone, S: Clone
 <div style="break-before: page; page-break-before: always;"></div><h1 id="macros"><a class="header" href="#macros">Macros</a></h1>
 <h2 id="conversion-between-enum-and-u32"><a class="header" href="#conversion-between-enum-and-u32">Conversion between Enum and <code>u32</code></a></h2>
 <p>Macro from <a href="https://stackoverflow.com/questions/28028854/how-do-i-match-enum-values-with-an-integer">https://stackoverflow.com/questions/28028854/how-do-i-match-enum-values-with-an-integer</a>.</p>
-<h3 id="example-26"><a class="header" href="#example-26">Example</a></h3>
+<h3 id="example-25"><a class="header" href="#example-25">Example</a></h3>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">use std::convert::{TryFrom, TryInto};
 </span><span class="boring">macro_rules! back_to_enum {
 </span><span class="boring">    {$(#[$meta:meta])* $vis:vis enum $name:ident {
