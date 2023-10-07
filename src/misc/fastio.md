@@ -160,3 +160,7 @@ macro_rules! println {
     ($($t:tt)*) => {{ use std::io::*; writeln!(unsafe{ WRITER.as_mut().unwrap_unchecked() }, $($t)*).unwrap(); }};
 }
 ```
+
+---
+
+Last modified on 231008.
