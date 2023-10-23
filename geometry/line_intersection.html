@@ -151,11 +151,10 @@
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust noplayground">type Point = [i64; 2];
 type Line = [Point; 2];
-type Frac = [i128; 2]; // [numerator, denominator]
+type Frac = [i128; 2];
 
 fn sub(a: Point, b: Point) -&gt; Point { [a[0] - b[0], a[1] - b[1]] }
 fn cross(a: Point, b: Point) -&gt; i128 { a[0] as i128 * b[1] as i128 - a[1] as i128 * b[0] as i128 }
-fn ccw(a: Point, b: Point, c: Point) -&gt; i128 { cross(sub(b, a), sub(c, b)).signum() }
 
 /// Returns `None` if `p` and `q` don't meet.
 ///
@@ -165,22 +164,20 @@ fn ccw(a: Point, b: Point, c: Point) -&gt; i128 { cross(sub(b, a), sub(c, b)).si
 /// Returns `Some(Err([x, y]))` if `p` and `q` overlaps at a line segment.
 /// Here, `x` and `y` represent both ends of the segment.
 fn intersect(p: Line, q: Line) -&gt; Option&lt;Result&lt;[Frac; 2], Line&gt;&gt; {
-	let [a, b] = sub(p[0], p[1]);
-	let [c, d] = sub(q[0], q[1]);
-	let u = cross([a, b], [c, d]);
+	let u = cross(sub(p[1], p[0]), sub(q[1], q[0]));
 	if u != 0 {
-		if ccw(p[0], q[0], q[1]) * ccw(p[1], q[0], q[1]) &lt;= 0 &amp;&amp; ccw(q[0], p[0], p[1]) * ccw(q[1], p[0], p[1]) &lt;= 0 {
-			let [a, b, c, d] = [a, b, c, d].map(|x| x as i128);
-			let [p, q] = [p, q].map(|l| l.map(|p| p.map(|x| x as i128)));
-			let xn = -b * c * p[0][0] + a * (c * p[0][1] + d * q[0][0] - c * q[0][1]);
-			let yn = b * (-d * p[0][0] + d * q[0][0] - c * q[0][1]) + a * d * p[0][1];
-			let den = u;
-			Some(Ok([[xn, den], [yn, den]]))
+		let sn = cross(sub(q[0], p[0]), sub(q[1], q[0]));
+		let tn = cross(sub(q[0], p[0]), sub(p[1], p[0]));
+		if ((0..=u).contains(&amp;sn) || (u..=0).contains(&amp;sn)) &amp;&amp; ((0..=u).contains(&amp;tn) || (u..=0).contains(&amp;tn)) {
+			let (s, t) = (sn, u - sn);
+			let [g, h] = p.map(|f| f.map(|x| x as i128));
+			let [x, y] = [0, 1].map(|i| [t * g[i] + s * h[i], u]);
+			Some(Ok([x, y]))
 		} else {
 			None
 		}
 	} else {
-		if cross([a, b], sub(q[0], p[1])) != 0 || cross([a, b], sub(q[1], p[1])) != 0 {
+		if cross(sub(p[0], p[1]), sub(q[0], p[1])) != 0 || cross(sub(p[1], p[0]), sub(q[1], p[1])) != 0 {
 			return None;
 		}
 		let (a0, a1) = (p[0].min(p[1]), p[0].max(p[1]));
@@ -188,7 +185,7 @@ fn intersect(p: Line, q: Line) -&gt; Option&lt;Result&lt;[Frac; 2], Line&gt;&gt;
 		let (l, r) = (a0.max(b0), a1.min(b1));
 		match l.cmp(&amp;r) {
 			Ordering::Less =&gt; Some(Err([l, r])),
-			Ordering::Equal =&gt; Some(Ok(l.map(|x| [x as i128, 1]))),
+			Ordering::Equal =&gt; Some(Ok([[l[0] as i128, 1], [l[1] as i128, 1]])),
 			Ordering::Greater =&gt; None,
 		}
 	}
