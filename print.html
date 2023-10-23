@@ -7184,7 +7184,7 @@ It's implemented based on monotone chain algorithm, a much intuitive and straigh
 <p>The result is sorted in clockwise direction.</p>
 <p>If the input includes duplicates and those happen to be on the convex hull, then only one of them is included in the result.</p>
 <h2 id="code-24"><a class="header" href="#code-24">Code</a></h2>
-<pre><code class="language-rust noplayground">type Point = (i64, i64);
+<pre><code class="language-rust noplayground">type Point = [i64; 2];
 
 /// Returns a convex hull of `arr`.
 /// If `COLINEAR` is set to `false`, then every point which lies on a vertex of a convex hull, but not at the endpoints of it, is excluded.
@@ -7193,147 +7193,91 @@ It's implemented based on monotone chain algorithm, a much intuitive and straigh
 ///
 /// The implementation utilizes monotone-chain convex hull algorithm.
 fn convex_hull&lt;const COLINEAR: bool&gt;(arr: &amp;[Point]) -&gt; Vec&lt;Point&gt; {
-    let mut arr = arr.to_owned();
-    arr.sort_unstable();
-    arr.dedup();
-    if arr.len() &lt;= 1 {
-        return arr.to_vec();
-    }
-    let mut ret = vec![];
+	let mut arr = arr.to_owned();
+	arr.sort_unstable();
+	arr.dedup();
+	if arr.len() &lt;= 1 {
+		return arr.to_vec();
+	}
+	let mut ret = vec![];
 
-    fn monotone&lt;const COLINEAR: bool&gt;(it: impl Iterator&lt;Item = Point&gt;) -&gt; Vec&lt;Point&gt; {
-        let sub = |(a, b): Point, (c, d): Point| (a - c, b - d);
-        let cross = |(a, b): Point, (c, d): Point| a as i128 * d as i128 - b as i128 * c as i128;
-        let ccw = |a: Point, b: Point, c: Point| cross(sub(b, a), sub(c, b));
-        let mut dl = vec![];
-        for p in it {
-            while dl.len() &gt;= 2 {
-                let n = dl.len();
-                let v = ccw(dl[n - 2], dl[n - 1], p);
-                if v &gt; 0 || (!COLINEAR &amp;&amp; v == 0) {
-                    dl.pop();
-                } else {
-                    break;
-                }
-            }
-            dl.push(p);
-        }
-        dl
-    }
+	fn monotone&lt;const COLINEAR: bool&gt;(it: impl Iterator&lt;Item = Point&gt;) -&gt; Vec&lt;Point&gt; {
+		let sub = |[a, b]: Point, [c, d]: Point| [a - c, b - d];
+		let cross = |[a, b]: Point, [c, d]: Point| a as i128 * d as i128 - b as i128 * c as i128;
+		let ccw = |a: Point, b: Point, c: Point| cross(sub(b, a), sub(c, b));
+		let mut dl = vec![];
+		for p in it {
+			while dl.len() &gt;= 2 {
+				let n = dl.len();
+				let v = ccw(dl[n - 2], dl[n - 1], p);
+				if v &gt; 0 || (!COLINEAR &amp;&amp; v == 0) {
+					dl.pop();
+				} else {
+					break;
+				}
+			}
+			dl.push(p);
+		}
+		dl
+	}
 
-    ret.extend(monotone::&lt;COLINEAR&gt;(arr.iter().copied()));
-    ret.pop();
-    ret.extend(monotone::&lt;COLINEAR&gt;(arr.iter().copied().rev()));
-    ret.pop();
+	ret.extend(monotone::&lt;COLINEAR&gt;(arr.iter().copied()));
+	ret.pop();
+	ret.extend(monotone::&lt;COLINEAR&gt;(arr.iter().copied().rev()));
+	ret.pop();
 
-    ret
+	ret
 }</code></pre>
 <hr />
-<p>Last modified on 231008.</p>
+<p>Last modified on 231024.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="line-intersection"><a class="header" href="#line-intersection">Line Intersection</a></h1>
-<p>Requires <a href="geometry/../unclass/fraction.html">fraction</a> snippet.</p>
 <h2 id="code-25"><a class="header" href="#code-25">Code</a></h2>
-<pre><code class="language-rust noplayground">use frac::*;
-type Point = (Frac, Frac);
-type Line = (Point, Point);
+<pre><code class="language-rust noplayground">type Point = [i64; 2];
+type Line = [Point; 2];
+type Frac = [i128; 2]; // [numerator, denominator]
 
-fn cross(a: Point, b: Point) -&gt; Frac {
-    a.0 * b.1 - a.1 * b.0
-}
+fn sub(a: Point, b: Point) -&gt; Point { [a[0] - b[0], a[1] - b[1]] }
+fn cross(a: Point, b: Point) -&gt; i128 { a[0] as i128 * b[1] as i128 - a[1] as i128 * b[0] as i128 }
+fn ccw(a: Point, b: Point, c: Point) -&gt; i128 { cross(sub(b, a), sub(c, b)).signum() }
 
-fn sub(a: Point, b: Point) -&gt; Point {
-    (a.0 - b.0, a.1 - b.1)
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum IntersectType {
-    Separate,
-    Meet(Point),
-    Overlap(Line),
-}
-use IntersectType::*;
-
-fn intersect(l1: Line, l2: Line) -&gt; IntersectType {
-    let (p, q) = l1;
-    let (r, s) = l2;
-
-    if p == q &amp;&amp; r == s {
-        return if p == r { Meet(p) } else { Separate };
-    } else if p == q || r == s {
-        let (p, q, r) = if p == q { (r, s, p) } else { (p, q, r) };
-        let (px, py) = p;
-        let u = sub(q, p);
-        let w = sub(r, p);
-        let ((ux, uy), (wx, wy)) = (u, w);
-        return if cross(u, w) == 0 {
-            let s = (wx * wx + wy + wy).simplify() / (ux * ux + uy * uy).simplify();
-            if s &gt;= 0 &amp;&amp; s &lt;= 1 {
-                Meet((ux * s + px, uy * s + py))
-            } else {
-                Separate
-            }
-        } else {
-            Separate
-        };
-    }
-
-    let ((px, py), (rx, ry)) = (p, r);
-    let u = sub(q, p);
-    let v = sub(s, r);
-    let w = sub(r, p);
-    let ((ux, uy), (vx, vy), (wx, wy)) = (u, v, w);
-
-    let uxv = cross(u, v);
-    if uxv != 0 {
-        let wxv = cross(w, v);
-        let wxu = cross(w, u);
-        let (a, b) = (wxv / uxv, wxu / uxv);
-        return if a &gt;= 0 &amp;&amp; a &lt;= 1 &amp;&amp; b &gt;= 0 &amp;&amp; b &lt;= 1 {
-            let x = px + ux * a;
-            let y = py + uy * a;
-            Meet((x, y))
-        } else {
-            Separate
-        };
-    }
-
-    if cross(u, w) != 0 {
-        return Separate;
-    }
-
-    let gamma = if ux != 0 { vx / ux } else { vy / uy };
-    let delta = if ux != 0 { wx / ux } else { wy / uy };
-    let (l, r) = {
-        let l = (-delta / gamma).simplify();
-        let r = ((1 - delta) / gamma).simplify();
-        (l.min(r), l.max(r))
-    };
-
-    if l == r {
-        // Will not happen due to the debug_assertion at the beginning
-        unreachable!()
-    } else {
-        if l &gt; 1 || r &lt; 0 {
-            Separate
-        } else {
-            let lb = Frac::from(0).max(l);
-            let ub = Frac::from(1).min(r);
-            if lb == ub {
-                let lx = rx + vx * lb;
-                let ly = ry + vy * lb;
-                Meet((lx, ly))
-            } else {
-                let lx = rx + vx * lb;
-                let ly = ry + vy * lb;
-                let ux = rx + vx * ub;
-                let uy = ry + vy * ub;
-                Overlap(((lx, ly), (ux, uy)))
-            }
-        }
-    }
+/// Returns `None` if `p` and `q` don't meet.
+///
+/// Returns `Some(Ok([x, y]))` if `p` and `q` meet in a single point `(x, y)`.
+/// Here, `x` and `y` have a type of `[i128; 2]`, where its first element is a numerator and the second element is a denominator.
+///
+/// Returns `Some(Err([x, y]))` if `p` and `q` overlaps at a line segment.
+/// Here, `x` and `y` represent both ends of the segment.
+fn intersect(p: Line, q: Line) -&gt; Option&lt;Result&lt;[Frac; 2], Line&gt;&gt; {
+	let [a, b] = sub(p[0], p[1]);
+	let [c, d] = sub(q[0], q[1]);
+	let u = cross([a, b], [c, d]);
+	if u != 0 {
+		if ccw(p[0], q[0], q[1]) * ccw(p[1], q[0], q[1]) &lt;= 0 &amp;&amp; ccw(q[0], p[0], p[1]) * ccw(q[1], p[0], p[1]) &lt;= 0 {
+			let [a, b, c, d] = [a, b, c, d].map(|x| x as i128);
+			let [p, q] = [p, q].map(|l| l.map(|p| p.map(|x| x as i128)));
+			let xn = -b * c * p[0][0] + a * (c * p[0][1] + d * q[0][0] - c * q[0][1]);
+			let yn = b * (-d * p[0][0] + d * q[0][0] - c * q[0][1]) + a * d * p[0][1];
+			let den = u;
+			Some(Ok([[xn, den], [yn, den]]))
+		} else {
+			None
+		}
+	} else {
+		if cross([a, b], sub(q[0], p[1])) != 0 || cross([a, b], sub(q[1], p[1])) != 0 {
+			return None;
+		}
+		let (a0, a1) = (p[0].min(p[1]), p[0].max(p[1]));
+		let (b0, b1) = (q[0].min(q[1]), q[0].max(q[1]));
+		let (l, r) = (a0.max(b0), a1.min(b1));
+		match l.cmp(&amp;r) {
+			Ordering::Less =&gt; Some(Err([l, r])),
+			Ordering::Equal =&gt; Some(Ok(l.map(|x| [x as i128, 1]))),
+			Ordering::Greater =&gt; None,
+		}
+	}
 }</code></pre>
 <hr />
-<p>Last modified on 231008.</p>
+<p>Last modified on 231024.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
 <h2 id="example-22"><a class="header" href="#example-22">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
