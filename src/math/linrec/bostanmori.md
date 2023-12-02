@@ -117,3 +117,7 @@ fn poly_mul<const P: u64>(a: &[u64], b: &[u64]) -> Vec<u64> {
 	ret
 }
 ```
+
+---
+
+Last modified on 231203.
