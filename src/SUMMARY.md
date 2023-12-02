@@ -48,6 +48,7 @@
 
 - [Convex Hull](./geometry/convexhull.md)
 - [Line Intersection](./geometry/line_intersection.md)
+- [Point in a Polygon](./geometry/inside_polygon.md)
 
 # Unclassified
 
