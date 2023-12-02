@@ -1,32 +1,36 @@
 # Sieve
 
-Linear sieve can find primes below \\(N\\) in \\(O(N)\\) time. With searching for primes, it can also calculate values of multiplicative functions for values below \\(N\\) in linear time.
+Sieve algorithms find all prime numbers below a specified integer. Additionally, they are efficient in computing values of multiplicative functions for all integers up to that specified limit.
 
 ## Finding primes
+`sieve` returns a vector containing all prime numbers that are less than or equal to `max_val`.
+
+It runs with a time complexity of \\(O(N)\\) where \\(N\\) is the value of `max_val`. This efficiency is achieved by using linear sieve.
+This function is further optimized by excluding multiples of \\(2\\) and \\(3\\) in advance.
+
 ```rust,noplayground
-fn sieve(max_val: usize) -> (Vec<bool>, Vec<usize>) {
-    let mut primes = vec![];
-    let mut is_prime = vec![true; max_val + 1];
-    is_prime[0] = false;
-    is_prime[1] = false;
+fn sieve(max_val: usize) -> Vec<usize> {
+	let mut primes = vec![2, 3];
+	let mut is_prime = vec![true; max_val / 3 + 1];
 
-    for i in 2..=max_val {
-        if is_prime[i] {
-            primes.push(i);
-        }
-        for &p in primes.iter() {
-            let v = i * p;
-            if v > max_val {
-                break;
-            }
-            is_prime[v] = false;
-            if i % p == 0 {
-                break;
-            }
-        }
-    }
+	for i in 0..is_prime.len() {
+		let j = 6 * (i >> 1) + 5 + ((i & 1) << 1);
+		if is_prime[i] {
+			primes.push(j);
+		}
+		for &p in primes[2..].iter() {
+			let v = j * p;
+			if v > max_val {
+				break;
+			}
+			is_prime[v / 3 - 1] = false;
+			if j % p == 0 {
+				break;
+			}
+		}
+	}
 
-    (is_prime, primes)
+	primes
 }
 ```
 
