@@ -52,28 +52,22 @@ fn lcm(x: u64, y: u64) -> u64 {
 The function below works for any primitive unsigned integer types.
 
 ```rust,noplayground
-pub fn gcd<T>(x: T, y: T) -> T
-where
-    T: Copy + PartialEq + PartialOrd + std::ops::Rem<Output = T> + From<u8>,
-{
-    if y == 0.into() {
-        x
-    } else {
-        let v = x % y;
-        gcd(y, v)
-    }
+fn gcd<T>(x: T, y: T) -> T
+where T: Copy + PartialEq + PartialOrd + Rem<Output = T> + From<u8> {
+	if y == 0.into() {
+		x
+	} else {
+		let v = x % y;
+		gcd(y, v)
+	}
 }
 
-pub fn lcm<T>(x: T, y: T) -> T
-where
-    T: Copy
-        + PartialEq
-        + PartialOrd
-        + std::ops::Rem<Output = T>
-        + std::ops::Div<Output = T>
-        + std::ops::Mul<Output = T>
-        + From<u8>,
-{
-    x / gcd(x, y) * y
+fn lcm<T>(x: T, y: T) -> T
+where T: Copy + PartialEq + PartialOrd + Rem<Output = T> + Div<Output = T> + Mul<Output = T> + From<u8> {
+	x / gcd(x, y) * y
 }
 ```
+
+---
+
+Last modified on 231203.
