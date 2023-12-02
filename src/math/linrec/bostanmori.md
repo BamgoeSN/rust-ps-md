@@ -6,8 +6,8 @@ Given \\(k\\) initial values \\(c_0,\ c_1,\ \cdots,\ c_{k-1}\\) and a linear rec
 `bostan_mori::<P>(c, f, n)` calculates \\(f_n \bmod P\\). Here, \\(P\\) can be any integer larger than \\(1\\).
 
 The time complexity of this algorithm is \\(O(\mathrm{M}(k) \log n)\\) where \\(\mathrm{M}(k)\\) represents the time complexity for polynomial multiplication.
-This depends on the implementation of `poly_mul`. In the provided snippet, naive polynomial multiplication is used, resulting in a time complexity of \\(O(k^2 \log n)\\).
-However, by replacing it with an implementation using FFT, the time complexity can be improved to \\(O(k \log k \log n)\\).
+This depends on the implementation of `poly_mul`. In this snippet, naive polynomial multiplication is used, resulting in a time complexity of \\(O(k^2 \log n)\\).
+By replacing it with an implementation using FFT, the time complexity can be improved to \\(O(k \log k \log n)\\).
 
 ## Example
 This example calculates terms of \\(\{f_n\}\\) for \\(0 \le n \le 10\\) where \\(f_0 = 0\\), \\(f_1 = 1\\), and \\(f_{n+2} = 2f_n + f_{n+1}\\).

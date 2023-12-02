@@ -1,11 +1,11 @@
 # Sieve
 
-Sieve algorithms find all prime numbers below a specified integer. Additionally, they are efficient in computing values of multiplicative functions for all integers up to that specified limit.
+Sieve algorithms find all prime numbers below a specified integer. Additionally, they efficiently compute values of multiplicative functions for all integers up to that specified limit.
 
 ## Finding primes
 `sieve` returns a vector containing all prime numbers that are less than or equal to `max_val`.
 
-It runs with a time complexity of \\(O(N)\\) where \\(N\\) is the value of `max_val`. This efficiency is achieved by using linear sieve.
+This function runs with a time complexity of \\(O(N)\\) where \\(N\\) is the value of `max_val`. This efficiency is achieved with linear sieve.
 This function is further optimized by excluding multiples of \\(2\\) and \\(3\\) in advance.
 
 ```rust,noplayground
