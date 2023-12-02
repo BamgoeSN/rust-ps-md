@@ -34,24 +34,6 @@ println!("{}", l); // 50
 ## Code
 
 ```rust,noplayground
-fn gcd(x: u64, y: u64) -> u64 {
-    if y == 0 {
-        x
-    } else {
-        gcd(y, x % y)
-    }
-}
-
-fn lcm(x: u64, y: u64) -> u64 {
-    x / gcd(x, y) * y
-}
-```
-
-## Generic Version
-
-The function below works for any primitive unsigned integer types.
-
-```rust,noplayground
 fn gcd<T>(x: T, y: T) -> T
 where T: Copy + PartialEq + PartialOrd + Rem<Output = T> + From<u8> {
 	if y == 0.into() {
