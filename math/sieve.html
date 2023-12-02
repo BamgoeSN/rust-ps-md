@@ -148,10 +148,10 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="sieve"><a class="header" href="#sieve">Sieve</a></h1>
-<p>Sieve algorithms find all prime numbers below a specified integer. Additionally, they are efficient in computing values of multiplicative functions for all integers up to that specified limit.</p>
+<p>Sieve algorithms find all prime numbers below a specified integer. Additionally, they efficiently compute values of multiplicative functions for all integers up to that specified limit.</p>
 <h2 id="finding-primes"><a class="header" href="#finding-primes">Finding primes</a></h2>
 <p><code>sieve</code> returns a vector containing all prime numbers that are less than or equal to <code>max_val</code>.</p>
-<p>It runs with a time complexity of \(O(N)\) where \(N\) is the value of <code>max_val</code>. This efficiency is achieved by using linear sieve.
+<p>This function runs with a time complexity of \(O(N)\) where \(N\) is the value of <code>max_val</code>. This efficiency is achieved with linear sieve.
 This function is further optimized by excluding multiples of \(2\) and \(3\) in advance.</p>
 <pre><code class="language-rust noplayground">fn sieve(max_val: usize) -&gt; Vec&lt;usize&gt; {
 	let mut primes = vec![2, 3];

@@ -153,8 +153,8 @@
 \[ f_{n+k} = c_0f_n + c_1f_{n+1} + \cdots + c_{k-1}f_{n+k-1} \]
 <code>bostan_mori::&lt;P&gt;(c, f, n)</code> calculates \(f_n \bmod P\). Here, \(P\) can be any integer larger than \(1\).</p>
 <p>The time complexity of this algorithm is \(O(\mathrm{M}(k) \log n)\) where \(\mathrm{M}(k)\) represents the time complexity for polynomial multiplication.
-This depends on the implementation of <code>poly_mul</code>. In the provided snippet, naive polynomial multiplication is used, resulting in a time complexity of \(O(k^2 \log n)\).
-However, by replacing it with an implementation using FFT, the time complexity can be improved to \(O(k \log k \log n)\).</p>
+This depends on the implementation of <code>poly_mul</code>. In this snippet, naive polynomial multiplication is used, resulting in a time complexity of \(O(k^2 \log n)\).
+By replacing it with an implementation using FFT, the time complexity can be improved to \(O(k \log k \log n)\).</p>
 <h2 id="example"><a class="header" href="#example">Example</a></h2>
 <p>This example calculates terms of \({f_n}\) for \(0 \le n \le 10\) where \(f_0 = 0\), \(f_1 = 1\), and \(f_{n+2} = 2f_n + f_{n+1}\).</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
