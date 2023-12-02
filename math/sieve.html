@@ -148,31 +148,33 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="sieve"><a class="header" href="#sieve">Sieve</a></h1>
-<p>Linear sieve can find primes below \(N\) in \(O(N)\) time. With searching for primes, it can also calculate values of multiplicative functions for values below \(N\) in linear time.</p>
+<p>Sieve algorithms find all prime numbers below a specified integer. Additionally, they are efficient in computing values of multiplicative functions for all integers up to that specified limit.</p>
 <h2 id="finding-primes"><a class="header" href="#finding-primes">Finding primes</a></h2>
-<pre><code class="language-rust noplayground">fn sieve(max_val: usize) -&gt; (Vec&lt;bool&gt;, Vec&lt;usize&gt;) {
-    let mut primes = vec![];
-    let mut is_prime = vec![true; max_val + 1];
-    is_prime[0] = false;
-    is_prime[1] = false;
+<p><code>sieve</code> returns a vector containing all prime numbers that are less than or equal to <code>max_val</code>.</p>
+<p>It runs with a time complexity of \(O(N)\) where \(N\) is the value of <code>max_val</code>. This efficiency is achieved by using linear sieve.
+This function is further optimized by excluding multiples of \(2\) and \(3\) in advance.</p>
+<pre><code class="language-rust noplayground">fn sieve(max_val: usize) -&gt; Vec&lt;usize&gt; {
+	let mut primes = vec![2, 3];
+	let mut is_prime = vec![true; max_val / 3 + 1];
 
-    for i in 2..=max_val {
-        if is_prime[i] {
-            primes.push(i);
-        }
-        for &amp;p in primes.iter() {
-            let v = i * p;
-            if v &gt; max_val {
-                break;
-            }
-            is_prime[v] = false;
-            if i % p == 0 {
-                break;
-            }
-        }
-    }
+	for i in 0..is_prime.len() {
+		let j = 6 * (i &gt;&gt; 1) + 5 + ((i &amp; 1) &lt;&lt; 1);
+		if is_prime[i] {
+			primes.push(j);
+		}
+		for &amp;p in primes[2..].iter() {
+			let v = j * p;
+			if v &gt; max_val {
+				break;
+			}
+			is_prime[v / 3 - 1] = false;
+			if j % p == 0 {
+				break;
+			}
+		}
+	}
 
-    (is_prime, primes)
+	primes
 }</code></pre>
 <h2 id="with-euler-phi-function"><a class="header" href="#with-euler-phi-function">With Euler Phi Function</a></h2>
 <pre><code class="language-rust noplayground">fn phi_sieve(max_val: usize) -&gt; (Vec&lt;bool&gt;, Vec&lt;usize&gt;, Vec&lt;usize&gt;) {

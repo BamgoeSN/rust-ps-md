@@ -202,31 +202,33 @@ OTHER DEALINGS IN THE SOFTWARE.</p>
 <p>For more information, please refer to <a href="http://unlicense.org/">http://unlicense.org/</a></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sieve"><a class="header" href="#sieve">Sieve</a></h1>
-<p>Linear sieve can find primes below \(N\) in \(O(N)\) time. With searching for primes, it can also calculate values of multiplicative functions for values below \(N\) in linear time.</p>
+<p>Sieve algorithms find all prime numbers below a specified integer. Additionally, they are efficient in computing values of multiplicative functions for all integers up to that specified limit.</p>
 <h2 id="finding-primes"><a class="header" href="#finding-primes">Finding primes</a></h2>
-<pre><code class="language-rust noplayground">fn sieve(max_val: usize) -&gt; (Vec&lt;bool&gt;, Vec&lt;usize&gt;) {
-    let mut primes = vec![];
-    let mut is_prime = vec![true; max_val + 1];
-    is_prime[0] = false;
-    is_prime[1] = false;
+<p><code>sieve</code> returns a vector containing all prime numbers that are less than or equal to <code>max_val</code>.</p>
+<p>It runs with a time complexity of \(O(N)\) where \(N\) is the value of <code>max_val</code>. This efficiency is achieved by using linear sieve.
+This function is further optimized by excluding multiples of \(2\) and \(3\) in advance.</p>
+<pre><code class="language-rust noplayground">fn sieve(max_val: usize) -&gt; Vec&lt;usize&gt; {
+	let mut primes = vec![2, 3];
+	let mut is_prime = vec![true; max_val / 3 + 1];
 
-    for i in 2..=max_val {
-        if is_prime[i] {
-            primes.push(i);
-        }
-        for &amp;p in primes.iter() {
-            let v = i * p;
-            if v &gt; max_val {
-                break;
-            }
-            is_prime[v] = false;
-            if i % p == 0 {
-                break;
-            }
-        }
-    }
+	for i in 0..is_prime.len() {
+		let j = 6 * (i &gt;&gt; 1) + 5 + ((i &amp; 1) &lt;&lt; 1);
+		if is_prime[i] {
+			primes.push(j);
+		}
+		for &amp;p in primes[2..].iter() {
+			let v = j * p;
+			if v &gt; max_val {
+				break;
+			}
+			is_prime[v / 3 - 1] = false;
+			if j % p == 0 {
+				break;
+			}
+		}
+	}
 
-    (is_prime, primes)
+	primes
 }</code></pre>
 <h2 id="with-euler-phi-function"><a class="header" href="#with-euler-phi-function">With Euler Phi Function</a></h2>
 <pre><code class="language-rust noplayground">fn phi_sieve(max_val: usize) -&gt; (Vec&lt;bool&gt;, Vec&lt;usize&gt;, Vec&lt;usize&gt;) {
@@ -1621,152 +1623,117 @@ fn kitamasa(rec: &amp;[u64], vals: &amp;[u64], mut n: u64, m: u64) -&gt; u64 {
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bostan-mori"><a class="header" href="#bostan-mori">Bostan-Mori</a></h1>
 <p>Reference - <a href="https://hal.inria.fr/hal-02917827v2/document">Alin Bostan, Ryuhei Mori. A Simple and Fast Algorithm for Computing the N-th Term of a Linearly Recurrent Sequence. SOSA’21 (SIAM Symposium on Simplicity in Algorithms), Jan 2021, Alexandria, United States. ffhal-02917827v2f</a></p>
-<h2 id="calculating-one-value-of-the-sequence"><a class="header" href="#calculating-one-value-of-the-sequence">Calculating one value of the sequence</a></h2>
-<h3 id="naive-multiplication-under-prime-modulo"><a class="header" href="#naive-multiplication-under-prime-modulo">Naive multiplication, under prime modulo</a></h3>
-<pre><code class="language-rust noplayground">/// Returns g, s, t s.t. g=gcd(a,b) and as+bt=r
-#[inline(always)]
-fn ext_gcd(a: i64, b: i64) -&gt; (i64, i64, i64) {
-    let (mut s, mut old_s) = (0, 1);
-    let (mut r, mut old_r) = (b, a);
-    while r != 0 {
-        let q = old_r / r;
-
-        let new_r = old_r - q * r;
-        old_r = r;
-        r = new_r;
-
-        let new_s = old_s - q * s;
-        old_s = s;
-        s = new_s;
-    }
-
-    (
-        old_r,
-        old_s,
-        if b != 0 { (old_r - old_s * a) / b } else { 0 },
-    )
+<p>Given \(k\) initial values \(c_0,\ c_1,\ \cdots,\ c_{k-1}\) and a linear recurrence of length \(k\):
+\[ f_{n+k} = c_0f_n + c_1f_{n+1} + \cdots + c_{k-1}f_{n+k-1} \]
+<code>bostan_mori::&lt;P&gt;(c, f, n)</code> calculates \(f_n \bmod P\). Here, \(P\) can be any integer larger than \(1\).</p>
+<p>The time complexity of this algorithm is \(O(\mathrm{M}(k) \log n)\) where \(\mathrm{M}(k)\) represents the time complexity for polynomial multiplication.
+This depends on the implementation of <code>poly_mul</code>. In the provided snippet, naive polynomial multiplication is used, resulting in a time complexity of \(O(k^2 \log n)\).
+However, by replacing it with an implementation using FFT, the time complexity can be improved to \(O(k \log k \log n)\).</p>
+<h2 id="example-8"><a class="header" href="#example-8">Example</a></h2>
+<p>This example calculates terms of \({f_n}\) for \(0 \le n \le 10\) where \(f_0 = 0\), \(f_1 = 1\), and \(f_{n+2} = 2f_n + f_{n+1}\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
+</span>for i in 0..=10 {
+    println!(&quot;{}&quot;, bostan_mori::&lt;12345&gt;(&amp;[2, 1], &amp;[0, 1], i));
 }
-
-fn mod_inv(a: u64, m: u64) -&gt; u64 {
-    let (_, mut x, _) = ext_gcd((a % m) as i64, m as i64);
-    if x &lt; 0 {
-        x += m as i64;
-    }
-    x as u64 % m
-}
-
-/// f = f[0] + f[1]x + f[2]x2 + ...
-#[inline(always)]
-fn poly_mul(f: &amp;[u64], g: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
-    let mut h: Vec&lt;u64&gt; = vec![0; f.len() + g.len() - 1];
-    for (i, &amp;u) in f.iter().enumerate() {
-        // u*x**i
-        for (j, &amp;v) in g.iter().enumerate() {
-            // v*x**j
-            h[i + j] += u * v;
-            h[i + j] %= m;
-        }
-    }
-    while let Some(&amp;v) = h.last() {
-        if v != 0 {
-            break;
-        }
-        h.pop();
-    }
-    h
-}
-
-#[inline(always)]
-fn poly_mul_even_order(f: &amp;[u64], g: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
-    let mut h: Vec&lt;u64&gt; = vec![0; (f.len() + g.len()) / 2 + 2];
-    for (i, &amp;u) in f.iter().enumerate() {
-        if i &amp; 1 == 0 {
-            for (j, &amp;v) in g.iter().enumerate().step_by(2) {
-                h[(i + j) &gt;&gt; 1] += u * v;
-                h[(i + j) &gt;&gt; 1] %= m;
-            }
-        } else {
-            for (j, &amp;v) in g.iter().enumerate().skip(1).step_by(2) {
-                h[(i + j) &gt;&gt; 1] += u * v;
-                h[(i + j) &gt;&gt; 1] %= m;
-            }
-        }
-    }
-    while let Some(&amp;v) = h.last() {
-        if v != 0 {
-            break;
-        }
-        h.pop();
-    }
-    h
-}
-
-#[inline(always)]
-fn poly_mul_odd_order(f: &amp;[u64], g: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
-    let mut h: Vec&lt;u64&gt; = vec![0; (f.len() + g.len()) / 2 + 2];
-    for (i, &amp;u) in f.iter().enumerate() {
-        if i &amp; 1 != 0 {
-            for (j, &amp;v) in g.iter().enumerate().step_by(2) {
-                h[(i + j) &gt;&gt; 1] += u * v;
-                h[(i + j) &gt;&gt; 1] %= m;
-            }
-        } else {
-            for (j, &amp;v) in g.iter().enumerate().skip(1).step_by(2) {
-                h[(i + j) &gt;&gt; 1] += u * v;
-                h[(i + j) &gt;&gt; 1] %= m;
-            }
-        }
-    }
-    while let Some(&amp;v) = h.last() {
-        if v != 0 {
-            break;
-        }
-        h.pop();
-    }
-    h
-}
-
-/// f(x) -&gt; f(-x)
-#[inline(always)]
-fn get_neg_x(f: &amp;[u64], m: u64) -&gt; Vec&lt;u64&gt; {
-    f.iter()
-        .enumerate()
-        .map(|(i, &amp;v)| if i &amp; 1 == 0 { v } else { m - v })
-        .collect()
-}
-
-/// Finds arr[n] where
+<span class="boring">}
+</span><span class="boring">
+</span><span class="boring">/// Finds arr[n] where
+</span><span class="boring">/// arr[n+d] = rec[0]arr[n] + rec[1]arr[n+1] + rec[2]arr[n+2] + rec[3]arr[n+3] + ... + rec[d-1]arr[n+d-1]
+</span><span class="boring">/// under mod P where d=rec.len()=arr.len()
+</span><span class="boring">fn bostan_mori&lt;const P: u64&gt;(rec: &amp;[u64], vals: &amp;[u64], mut n: u64) -&gt; u64 {
+</span><span class="boring">    if vals.len() as u64 &gt; n {
+</span><span class="boring">        return vals[n as usize];
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    let x = (0..rec.len()).find(|&amp;i| rec[i] != 0).unwrap_or(rec.len());
+</span><span class="boring">    if x == rec.len() {
+</span><span class="boring">        return 0;
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    let vals: Vec&lt;u64&gt; = vals.iter().map(|&amp;v| v % P).collect();
+</span><span class="boring">    let rec: Vec&lt;u64&gt; = rec.iter().map(|&amp;v| v % P).collect();
+</span><span class="boring">    let mut q = vec![1];
+</span><span class="boring">    q.extend(rec.iter().rev().map(|&amp;v| (P - v) % P));
+</span><span class="boring">    let mut p = poly_mul::&lt;P&gt;(&amp;vals, &amp;q);
+</span><span class="boring">    p.truncate(rec.len());
+</span><span class="boring">
+</span><span class="boring">    while n &gt;= 1 {
+</span><span class="boring">        let mq: Vec&lt;_&gt; = q
+</span><span class="boring">            .iter()
+</span><span class="boring">            .enumerate()
+</span><span class="boring">            .map(|(i, &amp;v)| if i % 2 == 0 { v } else { (P - v) % P })
+</span><span class="boring">            .collect();
+</span><span class="boring">        let u = poly_mul::&lt;P&gt;(&amp;p, &amp;mq);
+</span><span class="boring">        p = u
+</span><span class="boring">            .iter()
+</span><span class="boring">            .copied()
+</span><span class="boring">            .skip((n % 2) as usize)
+</span><span class="boring">            .step_by(2)
+</span><span class="boring">            .collect();
+</span><span class="boring">        let a = poly_mul::&lt;P&gt;(&amp;q, &amp;mq);
+</span><span class="boring">        q = a.iter().copied().step_by(2).collect();
+</span><span class="boring">        n /= 2;
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    p[0] % P
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn poly_mul&lt;const P: u64&gt;(a: &amp;[u64], b: &amp;[u64]) -&gt; Vec&lt;u64&gt; {
+</span><span class="boring">    let mut ret = vec![0; a.len() + b.len() - 1];
+</span><span class="boring">    for (i, &amp;av) in a.iter().enumerate() {
+</span><span class="boring">        for (j, &amp;bv) in b.iter().enumerate() {
+</span><span class="boring">            ret[i + j] = (ret[i + j] + av * bv) % P;
+</span><span class="boring">        }
+</span><span class="boring">    }
+</span><span class="boring">    ret
+</span><span class="boring">}
+</span><span class="boring"></span></code></pre></pre>
+<h2 id="snippet"><a class="header" href="#snippet">Snippet</a></h2>
+<pre><code class="language-rust noplayground">/// Finds arr[n] where
 /// arr[n+d] = rec[0]arr[n] + rec[1]arr[n+1] + rec[2]arr[n+2] + rec[3]arr[n+3] + ... + rec[d-1]arr[n+d-1]
-/// under modulo m where d=rec.len()=arr.len()
-fn bostan_mori(rec: &amp;[u64], vals: &amp;[u64], n: u64, m: u64) -&gt; u64 {
-    if vals.len() as u64 &gt; n {
-        return vals[n as usize];
-    }
-    let d = rec.len();
+/// under mod P where d=rec.len()=arr.len()
+fn bostan_mori&lt;const P: u64&gt;(rec: &amp;[u64], vals: &amp;[u64], mut n: u64) -&gt; u64 {
+	if vals.len() as u64 &gt; n {
+		return vals[n as usize];
+	}
 
-    let mut q: Vec&lt;u64&gt; = Vec::with_capacity(d + 1);
-    q.push(1);
-    q.extend(rec.iter().map(|&amp;v| m - v).rev());
+	let x = (0..rec.len()).find(|&amp;i| rec[i] != 0).unwrap_or(rec.len());
+	if x == rec.len() {
+		return 0;
+	}
 
-    let mut p = poly_mul(vals, &amp;q, m);
-    p.truncate(d);
+	let vals: Vec&lt;u64&gt; = vals.iter().map(|&amp;v| v % P).collect();
+	let rec: Vec&lt;u64&gt; = rec.iter().map(|&amp;v| v % P).collect();
+	let mut q = vec![1];
+	q.extend(rec.iter().rev().map(|&amp;v| (P - v) % P));
+	let mut p = poly_mul::&lt;P&gt;(&amp;vals, &amp;q);
+	p.truncate(rec.len());
 
-    let mut n = n;
-    while n &gt;= 1 {
-        let mq = get_neg_x(&amp;q, m);
-        if n &amp; 1 == 0 {
-            p = poly_mul_even_order(&amp;p, &amp;mq, m);
-        } else {
-            p = poly_mul_odd_order(&amp;p, &amp;mq, m);
-        }
-        q = poly_mul_even_order(&amp;q, &amp;mq, m);
-        n &gt;&gt;= 1;
-    }
-    p[0] * mod_inv(q[0], m) // Requires GCD(q[0], m) = 1, it's safe to have m as a prime
+	while n &gt;= 1 {
+		let mq: Vec&lt;_&gt; = q.iter().enumerate().map(|(i, &amp;v)| if i % 2 == 0 { v } else { (P - v) % P }).collect();
+		let u = poly_mul::&lt;P&gt;(&amp;p, &amp;mq);
+		p = u.iter().copied().skip((n % 2) as usize).step_by(2).collect();
+		let a = poly_mul::&lt;P&gt;(&amp;q, &amp;mq);
+		q = a.iter().copied().step_by(2).collect();
+		n /= 2;
+	}
+
+	p[0] % P
+}
+
+/// Naive O(k^2) multiplication
+fn poly_mul&lt;const P: u64&gt;(a: &amp;[u64], b: &amp;[u64]) -&gt; Vec&lt;u64&gt; {
+	let mut ret = vec![0; a.len() + b.len() - 1];
+	for (i, &amp;av) in a.iter().enumerate() {
+		for (j, &amp;bv) in b.iter().enumerate() {
+			ret[i + j] = (ret[i + j] + av * bv) % P;
+		}
+	}
+	ret
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="integer-square-root"><a class="header" href="#integer-square-root">Integer Square Root</a></h1>
 <p><code>isqrt(s)</code> returns \( \left\lfloor \sqrt{s} \right\rfloor \). It runs much faster than the typical binary search method, but slower than casting the result from <code>std::f64::sqrt</code>. If the value can be perfectly represented with <code>f64</code> and the memory limit isn't too short, it's better to use the <code>f64</code> square root function from <code>std</code>.</p>
-<h2 id="example-8"><a class="header" href="#example-8">Example</a></h2>
+<h2 id="example-9"><a class="header" href="#example-9">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let x: u64 = 10002;
 let sq = isqrt(x);
@@ -1825,7 +1792,7 @@ where
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="disjoint-set-union"><a class="header" href="#disjoint-set-union">Disjoint Set Union</a></h1>
 <p>Disjoint set union data structure.</p>
-<h2 id="example-9"><a class="header" href="#example-9">Example</a></h2>
+<h2 id="example-10"><a class="header" href="#example-10">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let mut uf = UnionFind::new(10);
 println!(&quot;{}&quot;, uf.find_root(2) == uf.find_root(6)); // false
@@ -2022,7 +1989,7 @@ impl WeightDSU {
 <li>Calculate the product of the elements of an interval</li>
 </ul>
 <p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
-<h2 id="example-10"><a class="header" href="#example-10">Example</a></h2>
+<h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust">use segtree::*;
 
 <span class="boring">fn main() {
@@ -2567,7 +2534,7 @@ println!(&quot;{}&quot;, st.partition_point(1, |x| x &lt; 5)); // 5
 </ul>
 <p>A Fenwick tree uses half the memory of a segment tree, but the performance in terms of time is just about the same.</p>
 <p>A type of elements of \(A\) must be a primitive signed integer type, such as <code>i32</code> and <code>i64</code>, and floats such as <code>f64</code>. Unsigned integer types like <code>u64</code> do not work. Specifically, the type should implement <code>From&lt;i8&gt;</code>.</p>
-<h2 id="example-11"><a class="header" href="#example-11">Example</a></h2>
+<h2 id="example-12"><a class="header" href="#example-12">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let mut fw: Fenwick&lt;i32&gt; = Fenwick::new(10);
 for i in 0..10 {
@@ -2694,7 +2661,7 @@ impl&lt;T: Copy + From&lt;i8&gt; + std::ops::AddAssign + std::ops::Sub&lt;Output
 <li>Calculate the product of the elements of an interval</li>
 </ul>
 <p>assuming that calculating the product of two elements takes \(O(1)\) time.</p>
-<h2 id="example-12"><a class="header" href="#example-12">Example</a></h2>
+<h2 id="example-13"><a class="header" href="#example-13">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust">use lazyseg::*;
 
 <span class="boring">fn main() {
@@ -3494,7 +3461,7 @@ println!(&quot;{}&quot;, ls.left_partition_point(7, |(x, _)| x &lt; 25)); // 4
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rope"><a class="header" href="#rope">Rope</a></h1>
 <p>Rope acts as if it is a list, but inserting a value at an arbitrary position takes time complexity of amortized \( O(\log{N}) \). However, accessing values also takes amortized \( O(\log{N}) \) time. Building a rope from an iterator takes \( O(N) \).</p>
 <p>When accessing to elements, if you use immutable borrow; that is, borrowing through <code>rope.get(idx)</code> or immutably indexing a value like <code>let v = rope[3];</code>, then <strong>splaying doesn't happen</strong> and in the worst case the accessing could take \(O(N)\). Make sure to use <code>get_mut()</code> for performance.</p>
-<h2 id="example-13"><a class="header" href="#example-13">Example</a></h2>
+<h2 id="example-14"><a class="header" href="#example-14">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>use rope::Rope;
 
@@ -4884,7 +4851,7 @@ For any other purpose, I highly recommend the <a href="https://docs.rs/bitset-co
 <h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
 <p>An array of <code>[u64; 4]</code> implements <code>BitSetOps</code> trait, therefore is recognized as a bitset. The number of booleans packed into the bitset can be found with <code>fn bit_len(&amp;self) -&gt; usize</code>.</p>
 <p>Refer to the <a href="datastructure/bitarray.html#apis">APIs</a> for further information.</p>
-<h2 id="example-14"><a class="header" href="#example-14">Example</a></h2>
+<h2 id="example-15"><a class="header" href="#example-15">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust">use bitset::*;
 <span class="boring">
 </span><span class="boring">fn main() {
@@ -5739,7 +5706,7 @@ The empty bits are filled with <code>0</code>, and the overflowed bits disappear
 Casper <a href="mailto:datastructure/CasualX@users.noreply.github.com">CasualX@users.noreply.github.com</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dijkstra"><a class="header" href="#dijkstra">Dijkstra</a></h1>
 <p><code>dijkstra(graph: &amp;Graph&lt;T&gt;, src: usize)</code> where <code>Graph&lt;T&gt;</code> is a <a href="graphs/./adjlist.html">graph representation</a>, <code>T</code> is a numeric data type, and <code>src</code> is an id of a source node. It returns a <code>dist = Vec&lt;Option&lt;T&gt;&gt;</code>, where <code>dist[dst]</code> is the length of a shortest path from <code>src</code> to <code>dst</code> if it exists, or <code>None</code> if <code>dst</code> is unreachable from <code>src</code>.</p>
-<h2 id="example-15"><a class="header" href="#example-15">Example</a></h2>
+<h2 id="example-16"><a class="header" href="#example-16">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust">#[allow(unused)]
 <span class="boring">use std::{cmp::*, collections::*, iter, mem::*, num::*, ops::*};
 </span><span class="boring">
@@ -5943,7 +5910,7 @@ where
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="strongly-connected-components"><a class="header" href="#strongly-connected-components">Strongly Connected Components</a></h1>
 <p>Finding SCCs of a directed graph. Tarjan's algorithm is used for the algorithm.</p>
-<h2 id="example-16"><a class="header" href="#example-16">Example</a></h2>
+<h2 id="example-17"><a class="header" href="#example-17">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust">use scc::*;
 
 <span class="boring">fn main() {
@@ -6199,7 +6166,7 @@ println!(&quot;{:?}&quot;, scc_graph); // [[1], [2], []]
 <p>Last modified on 231008.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="2-sat"><a class="header" href="#2-sat">2-SAT</a></h1>
 <p>2-SAT with \(N\) clauses can be solved with time complexity of \(O(N)\). <a href="graphs/./scc.html">SCC</a> should be with this snippet in the code.</p>
-<h2 id="example-17"><a class="header" href="#example-17">Example</a></h2>
+<h2 id="example-18"><a class="header" href="#example-18">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust">use twosat::*;
 
 <span class="boring">fn main() {
@@ -6424,7 +6391,7 @@ println!(&quot;{:?}&quot;, ts.solve()); // None
 and add edges with <code>Dinic::add_edges(&amp;mut self, src, dst, cap)</code> method where <code>cap</code> is the capacity of the edge being added.</p>
 <p>Calling <code>Dinic::max_flow(&amp;mut self, src, dst)</code> calculates the maximum flow from <code>src</code> to <code>dst</code>.
 After the calculation, remaining capacity of any edges can be found by directly inspecting into <code>cap</code> field of a wanted edge.</p>
-<h2 id="example-18"><a class="header" href="#example-18">Example</a></h2>
+<h2 id="example-19"><a class="header" href="#example-19">Example</a></h2>
 <p>The example below calculates maximum flow of a flow network shown on page 5 of <a href="https://github.com/justiceHui/SSU-SCCC-Study/blob/master/2022-winter-adv/slide/02.pdf">https://github.com/justiceHui/SSU-SCCC-Study/blob/master/2022-winter-adv/slide/02.pdf</a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">use dinic::Dinic;
 </span><span class="boring">fn main() {
@@ -6766,7 +6733,7 @@ println!(&quot;{}&quot;, edge.cap); // 0
 <p>Given an array <code>pattern</code>, <code>failure_function(pattern)</code> returns a failure function <code>failure</code> of <code>pattern</code>.</p>
 <p>Given an array <code>haystack</code>, <code>kmp_search(haystack, pattern, failure)</code> returns a result of searching <code>pattern</code> in <code>haystack</code>, given that <code>failure</code> is a proper failure function of <code>pattern</code>. Denoting the returned array as <code>result</code> and the length of <code>pattern</code> as <code>n</code>, if <code>result[i + n] == n</code>, then <code>result[i..n] == pattern</code>.</p>
 <p>The API looks like this, as the failure function itself is needed in many algorithm problems, rather than directly using KMP for a string searching.</p>
-<h2 id="example-19"><a class="header" href="#example-19">Example</a></h2>
+<h2 id="example-20"><a class="header" href="#example-20">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let pattern = b&quot;ABCDABC&quot;;
 let targets = [&quot;ABDABCDABCE&quot;, &quot;ABCDABCDABCD&quot;, &quot;ABBCCABCDABDABCDABC&quot;].map(|b| b.as_bytes());
@@ -6884,7 +6851,7 @@ fn kmp_search&lt;T: PartialEq&gt;(haystack: &amp;[T], pattern: &amp;[T], failure
 <div style="break-before: page; page-break-before: always;"></div><h1 id="manacher"><a class="header" href="#manacher">Manacher</a></h1>
 <p>For an array \(A\) of length \(n\), <code>manacher(A)</code> returns a vector \(M\) where, for every \(i \in \left[0, n\right)\), \(A_{i-j} = A_{i+j}\) holds for every \(j \in \left[0, M_i \right)\).</p>
 <p>Additional modification should be added by a user to use this function for finding every palindromes among subsequences of a string.</p>
-<h2 id="example-20"><a class="header" href="#example-20">Example</a></h2>
+<h2 id="example-21"><a class="header" href="#example-21">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;abracadacabra&quot;.as_bytes();
 let man = manacher(s);
@@ -6968,7 +6935,7 @@ for i in 0..s.len() {
 </ul>
 <p>\(SA\) and \(LCP\) are called &quot;suffix array&quot; and &quot;LCP array&quot; of \(A\) respectively.</p>
 <p>For finding SA, Manber-Myers algorithm combined with counting sort is used, hence the time complexity is \(O(n\log{n})\). For LCP array, Kasai's algorithm is used, hence the time complexity is \(O(n)\). The total time complexity is \(O(n\log{n})\).</p>
-<h2 id="example-21"><a class="header" href="#example-21">Example</a></h2>
+<h2 id="example-22"><a class="header" href="#example-22">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let s = &quot;asdsdasd&quot;;
 let (sa, lcp) = sa_lcp(s.as_bytes());
@@ -7277,7 +7244,7 @@ fn intersect(p: Line, q: Line) -&gt; Option&lt;Result&lt;[Frac; 2], Line&gt;&gt;
 <hr />
 <p>Last modified on 231024.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
-<h2 id="example-22"><a class="header" href="#example-22">Example</a></h2>
+<h2 id="example-23"><a class="header" href="#example-23">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>let arr: Vec&lt;i32&gt; = vec![1, 2, 4, 7, 9, 7, 4, 2, 1];
 
@@ -7450,7 +7417,7 @@ fn isqrt(s: u32) -&gt; u32 {
     }
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="arbitrary-precision-integer"><a class="header" href="#arbitrary-precision-integer">Arbitrary-Precision Integer</a></h1>
-<h2 id="example-23"><a class="header" href="#example-23">Example</a></h2>
+<h2 id="example-24"><a class="header" href="#example-24">Example</a></h2>
 <pre><code class="language-rust noplayground">use bigint::*;
 
 let _a = Int::from(0i8);
@@ -8101,7 +8068,7 @@ println!(&quot;{}&quot;, y);</code></pre>
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fraction"><a class="header" href="#fraction">Fraction</a></h1>
 <p>TODO: description</p>
-<h2 id="example-24"><a class="header" href="#example-24">Example</a></h2>
+<h2 id="example-25"><a class="header" href="#example-25">Example</a></h2>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">fn main() {
 </span>use frac::*;
 let mut a = Frac::new(8374927, 2983178).simplify();
@@ -9138,7 +9105,7 @@ where I: Iterator&lt;Item = S&gt;, J: Iterator&lt;Item = T&gt; + Clone, S: Clone
 <div style="break-before: page; page-break-before: always;"></div><h1 id="macros"><a class="header" href="#macros">Macros</a></h1>
 <h2 id="conversion-between-enum-and-u32"><a class="header" href="#conversion-between-enum-and-u32">Conversion between Enum and <code>u32</code></a></h2>
 <p>Macro from <a href="https://stackoverflow.com/questions/28028854/how-do-i-match-enum-values-with-an-integer">https://stackoverflow.com/questions/28028854/how-do-i-match-enum-values-with-an-integer</a>.</p>
-<h3 id="example-25"><a class="header" href="#example-25">Example</a></h3>
+<h3 id="example-26"><a class="header" href="#example-26">Example</a></h3>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">use std::convert::{TryFrom, TryInto};
 </span><span class="boring">macro_rules! back_to_enum {
 </span><span class="boring">    {$(#[$meta:meta])* $vis:vis enum $name:ident {
