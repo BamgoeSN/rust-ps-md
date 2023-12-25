@@ -1,7 +1,7 @@
 # Mincowski Sum of Convex Polygons
 
 ## Code
-```rust,noplaygroud
+```rust,noplayground
 /// Returns the Minkowski sum of two convex polygons `p` and `q`.
 /// Both `p` and `q` must be oriented in CCW and should not contain two equal points.
 /// The returned polygon is also oriented in CCW.
