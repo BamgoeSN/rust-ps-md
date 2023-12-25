@@ -46,9 +46,15 @@
 
 # Geometry
 
+- [2D Geometry Base](./geometry/2dgeometrybase.md)
+- [Angle Comparator](./geometry/anglesort.md)
 - [Convex Hull](./geometry/convexhull.md)
 - [Line Intersection](./geometry/line_intersection.md)
+- [Closest Points](./geometry/closest_points.md)
+- [Farthest Points](./geometry/farthest_points.md)
 - [Point in a Polygon](./geometry/inside_polygon.md)
+- [Point in a Convex Polygon](./geometry/inside_convex_polygon.md)
+- [Mincowski Sum of Convex Polygons](./geometry/convexmincowski.md)
 
 # Unclassified
 

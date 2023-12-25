@@ -12,25 +12,14 @@ If the input includes duplicates and those happen to be on the convex hull, then
 ## Code
 
 ```rust,noplayground
-type I = i64;
-type P = [I; 2];
-
-fn sub(a: P, b: P) -> P { [a[0] - b[0], a[1] - b[1]] }
-fn cross(a: P, b: P) -> I { a[0] * b[1] - a[1] * b[0] }
-fn ccw(a: P, b: P, c: P) -> I { cross(sub(b, a), sub(c, b)) }
-
-/// Returns a convex hull of `arr`.
-/// If `COLLINEAR` is set to `false`, then every point which lies on a vertex of a convex hull, but not at the endpoints of it, is excluded.
-/// If `COLLINEAR` is set to `true`, then such points are all included.
-/// The result is sorted in CCW direction.
-///
-/// The implementation utilizes monotone-chain convex hull algorithm.
+/// Returns a convex hull of a set of 2D points `arr` in CCW order.
+/// Set `COLLINEAR` to `true` to include, or `false` to exclude, collinear edge points.
 fn convex_hull<const COLLINEAR: bool>(arr: &[P]) -> Vec<P> {
-	let mut arr = arr.to_owned();
+	let mut arr = arr.to_vec();
 	arr.sort_unstable();
 	arr.dedup();
 	if arr.len() <= 1 {
-		return arr;
+		return arr.clone();
 	}
 	let mut ret = vec![];
 
@@ -62,4 +51,4 @@ fn convex_hull<const COLLINEAR: bool>(arr: &[P]) -> Vec<P> {
 
 ---
 
-Last modified on 231203.
+Last modified on 231225.
