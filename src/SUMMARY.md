@@ -34,6 +34,7 @@
   - [Dial](./graphs/dial.md)
 - [Strongly Connected Components](./graphs/scc.md)
 - [2-SAT](./graphs/2sat.md)
+- [Heavy-Light Decomposition](./graphs/hld.md)
 - [Flow](./graphs/flow/intro.md)
   - [Dinic's Algorithm](./graphs/flow/dinic.md)
   - [MCMF](./graphs/flow/mcmf.md)
