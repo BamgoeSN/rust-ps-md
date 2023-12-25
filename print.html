@@ -7514,9 +7514,7 @@ fn is_inside_convex(p: P, poly: &amp;[P]) -&gt; Option&lt;bool&gt; {
 <p>Last modified on 231225.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="mincowski-sum-of-convex-polygons"><a class="header" href="#mincowski-sum-of-convex-polygons">Mincowski Sum of Convex Polygons</a></h1>
 <h2 id="code-33"><a class="header" href="#code-33">Code</a></h2>
-<pre><pre class="playground"><code class="language-rust noplaygroud"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>/// Returns the Minkowski sum of two convex polygons `p` and `q`.
+<pre><code class="language-rust noplayground">/// Returns the Minkowski sum of two convex polygons `p` and `q`.
 /// Both `p` and `q` must be oriented in CCW and should not contain two equal points.
 /// The returned polygon is also oriented in CCW.
 fn minkowski_convex(p: &amp;[P], q: &amp;[P]) -&gt; Vec&lt;P&gt; {
@@ -7549,8 +7547,7 @@ fn minkowski_convex(p: &amp;[P], q: &amp;[P]) -&gt; Vec&lt;P&gt; {
 		}
 	}
 	ret
-}
-<span class="boring">}</span></code></pre></pre>
+}</code></pre>
 <hr />
 <p>Last modified on 231225.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="value-compression"><a class="header" href="#value-compression">Value Compression</a></h1>
