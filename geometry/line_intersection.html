@@ -185,49 +185,28 @@ fn intersect(p: L, q: L) -&gt; Option&lt;Result&lt;[Frac; 2], L&gt;&gt; {
 		}
 	}
 }</code></pre>
-<p>The code below only checks if two lines meet, without calculating where they meet.</p>
-<pre><code class="language-rust noplayground">/// Returns the two farthest points from `p`, or `None` if `p` is empty.
-fn farthest_points(p: &amp;[P]) -&gt; Option&lt;[P; 2]&gt; {
-	let dist = |a: P, b: P| dot(sub(a, b), sub(a, b));
-
-	let cvh = convex_hull::&lt;false&gt;(p);
-	if cvh.len() == 1 {
-		return Some([cvh[0], cvh[0]]);
-	} else if cvh.len() == 2 {
-		return Some([cvh[0], cvh[1]]);
-	}
-
-	fn line_iterator(poly: &amp;[P]) -&gt; impl Iterator&lt;Item = [P; 2]&gt; + '_ {
-		let mut it = poly.iter().copied().cycle().peekable();
-		iter::from_fn(move || {
-			let u = it.next().unwrap();
-			let v = *it.peek().unwrap();
-			Some([u, v])
-		})
-	}
-
-	let mut r = line_iterator(&amp;cvh).skip(1).peekable();
-	let mut rec = None;
-	for [la, lb] in line_iterator(&amp;cvh).take(cvh.len()) {
-		let lv = sub(lb, la);
-		while {
-			let &amp;[ra, rb] = r.peek().unwrap();
-			cross(lv, sub(rb, ra)) &gt; 0
-		} {
-			r.next();
+<p>The code below only checks if two lines meet, without calculating where they do.</p>
+<pre><code class="language-rust noplayground">/// Checks if line segments `p` and `q` intersect.
+/// Returns `true` if they intersect at any point, `false` otherwise.
+fn meets(p: L, q: L) -&gt; bool {
+	let u = cross(sub(p[1], p[0]), sub(q[1], q[0]));
+	let sn = cross(sub(q[0], p[0]), sub(q[1], q[0]));
+	let tn = cross(sub(q[0], p[0]), sub(p[1], p[0]));
+	if u != 0 {
+		let int = if u &gt;= 0 { 0..=u } else { u..=0 };
+		int.contains(&amp;sn) &amp;&amp; int.contains(&amp;tn)
+	} else {
+		if sn != 0 || tn != 0 {
+			return false;
 		}
-		let &amp;[ra, _] = r.peek().unwrap();
-		let ch = [la, ra];
-		let d = dist(ch[0], ch[1]);
-		if rec.map_or(true, |(x, _)| x &lt; d) {
-			rec = Some((d, ch));
-		}
+		let (a0, a1) = (p[0].min(p[1]), p[0].max(p[1]));
+		let (b0, b1) = (q[0].min(q[1]), q[0].max(q[1]));
+		let (l, r) = (a0.max(b0), a1.min(b1));
+		l &lt;= r
 	}
-
-	rec.map(|x| x.1)
 }</code></pre>
 <hr />
-<p>Last modified on 231225.</p>
+<p>Last modified on 240119.</p>
 
                     </main>
 
