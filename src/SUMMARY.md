@@ -19,6 +19,7 @@
 
 # Data Structures
 
+- [2D Matrix](./datastructure/2dmatrix.md)
 - [Disjoint Set Union](./datastructure/dsu.md)
   - [Weighted DSU](./datastructure/wdsu.md)
 - [Segment Trees](./datastructure/segtree/intro.md)
